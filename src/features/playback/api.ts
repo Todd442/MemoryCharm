@@ -1,19 +1,38 @@
-import type { EntryResponse, PlaybackUrlResponse } from "./types";
-import { httpGet, httpPost } from "../../lib/http";
+import type { EntryResponse } from "./types";
 
-export async function entryByToken(token: string): Promise<EntryResponse> {
-  // Prefer POST so token doesn't end up in server logs/query strings everywhere.
-  return httpPost<EntryResponse>("/api/entry/by-token", { token });
+async function postJson<T>(url: string, body: any): Promise<T> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
-export async function entryByCode(code: string): Promise<EntryResponse> {
-  return httpGet<EntryResponse>(`/api/entry/by-code/${encodeURIComponent(code)}`);
+async function getJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
-export async function verifyGlyph(code: string, glyph: string): Promise<{ ok: boolean; attemptsLeft: number }> {
-  return httpPost(`/api/c/${encodeURIComponent(code)}/auth/verify-glyph`, { glyph });
+export function entryByToken(token: string): Promise<EntryResponse> {
+  return postJson("/api/entry/by-token", { token });
 }
 
-export async function getPlaybackUrl(code: string): Promise<PlaybackUrlResponse> {
-  return httpGet<PlaybackUrlResponse>(`/api/c/${encodeURIComponent(code)}/playback-url`);
+export function entryByCode(code: string): Promise<EntryResponse> {
+  return getJson(`/api/entry/by-code/${encodeURIComponent(code)}`);
+}
+
+export type PlaybackResponse = {
+  memoryType: "video" | "image" | "audio";
+  playbackUrl: string;
+};
+
+export function getPlaybackUrl(code: string): Promise<PlaybackResponse> {
+  return fetch(`/api/c/${encodeURIComponent(code)}/playback-url`)
+    .then(r => {
+      if (!r.ok) throw new Error("Playback fetch failed");
+      return r.json();
+    });
 }

@@ -1,21 +1,43 @@
-import { createBrowserRouter } from "react-router-dom";
+import React from "react";
+import { createBrowserRouter, Link } from "react-router-dom";
 import { AppShell } from "./shell/AppShell";
 import { CharmEntryPage } from "../features/playback/pages/CharmEntryPage";
-import { ClaimCharmPage } from "../features/claim/pages/ClaimCharmPage";
+
+
+function Home() {
+  return (
+    <div>
+      <div style={{ fontSize: 24 }}>Home</div>
+      <p><Link to="/c?token=abc123">Go to /c?token=abc123</Link></p>
+      <p><Link to="/c/OPEN">Go to /c/OPEN</Link></p>
+    </div>
+  );
+}
+
+import { useLocation, useParams } from "react-router-dom";
+
+function CPage() {
+  const { code } = useParams<{ code?: string }>();
+  const { search } = useLocation();
+  const qs = new URLSearchParams(search);
+  const token = qs.get("token");
+
+  return (
+    <div style={{ fontSize: 18 }}>
+      <div style={{ fontSize: 24, marginBottom: 10 }}>C Page</div>
+      <div><strong>code:</strong> {code ?? "(none)"}</div>
+      <div><strong>token:</strong> {token ?? "(none)"}</div>
+    </div>
+  );
+}
 
 export const router = createBrowserRouter([
   {
     element: <AppShell />,
     children: [
-      // NFC bootstrap: /c?token=...
-      // Clean URL:     /c/:code
+      { path: "/", element: <Home /> },
       { path: "/c", element: <CharmEntryPage /> },
       { path: "/c/:code", element: <CharmEntryPage /> },
-
-      { path: "/claim/:code", element: <ClaimCharmPage /> },
-
-      // Optional: home
-      { path: "/", element: <div style={{ padding: 24 }}>Home</div> },
     ],
   },
 ]);

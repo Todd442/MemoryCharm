@@ -1,18 +1,18 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
-import { StatusBar } from "./StatusBar";
-import { FrameLayers } from "./FrameLayers";
+import { Outlet, Link } from "react-router-dom";
 
 export function AppShell() {
   return (
-    <div className="te-root">
-      <FrameLayers />
+    <div style={{ padding: 24 }}>
+      <div style={{ marginBottom: 12 }}>
+        <strong>Shell:</strong>{" "}
+        <Link to="/">Home</Link>{" "}
+        | <Link to="/c?token=abc123">C (token)</Link>{" "}
+        | <Link to="/c/OPEN">C (code)</Link>
+      </div>
 
-      <div className="te-content">
-        <StatusBar />
-        <main className="te-panel">
-          <Outlet />
-        </main>
+      <div style={{ border: "1px solid #ccc", padding: 16 }}>
+        <Outlet />
       </div>
     </div>
   );

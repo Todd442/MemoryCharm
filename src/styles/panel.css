@@ -64,3 +64,36 @@
   width:100%;
   border-radius: 14px;
 }
+
+/* =========================
+   Glyph Auth Panel
+   ========================= */
+
+.te-glyph-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(64px, 1fr));
+  gap: 10px;
+  max-width: 320px;
+  margin-top: 12px;
+}
+
+.te-glyph {
+  height: 64px;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 20, 11, 0.25);
+  background: rgba(203, 177, 138, 0.35);
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.te-glyph:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+}
+
+.te-glyph-selected {
+  outline: 3px solid rgba(74, 51, 33, 0.55);
+  background: rgba(203, 177, 138, 0.6);
+}
+
