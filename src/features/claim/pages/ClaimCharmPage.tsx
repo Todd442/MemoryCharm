@@ -1,33 +1,37 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { claimCharm, configureCharm, mockLogin, uploadCharm } from "../api";
+import { useMsal } from "@azure/msal-react";
+import { InteractionStatus } from "@azure/msal-browser";
 
-type Step = "signin" | "configure" | "upload" | "done";
+import { claimCharm, configureCharm, uploadCharm } from "../api";
+import { loginRequest } from "../../../app/auth/msalConfig";
+
+type Step = "configure" | "upload" | "done";
 
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
-
-const LS_USER_KEY = "mock.user";
 
 export function ClaimCharmPage() {
   const nav = useNavigate();
   const { code } = useParams<{ code: string }>();
 
-  const existingUser = useMemo(() => {
-    try {
-      const raw = localStorage.getItem(LS_USER_KEY);
-      return raw ? JSON.parse(raw) as { id: string; name: string; email: string } : null;
-    } catch {
-      return null;
-    }
-  }, []);
+  const { instance, accounts, inProgress } = useMsal();
 
-  const [step, setStep] = useState<Step>(existingUser ? "configure" : "signin");
+  const isAuthed = accounts.length > 0;
+  const me = accounts[0] ?? null;
+
+  const displayName = useMemo(() => {
+    return me?.name ?? "Keeper";
+  }, [me]);
+
+  const emailish = useMemo(() => {
+    // In MSAL, username is often email-like
+    return me?.username ?? "";
+  }, [me]);
+
+  const [step, setStep] = useState<Step>("configure");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-
-  const [userName, setUserName] = useState(existingUser?.name ?? "Keeper");
-  const [userEmail, setUserEmail] = useState(existingUser?.email ?? "keeper@example.com");
 
   const [claimed, setClaimed] = useState<{ charmId: string } | null>(null);
 
@@ -36,27 +40,57 @@ export function ClaimCharmPage() {
 
   const [fileName, setFileName] = useState<string>("");
 
+  // If you are not wrapping /claim in RequireAuth, this keeps the page usable:
+  useEffect(() => {
+    if (!isAuthed && inProgress === InteractionStatus.None) {
+      // Leave it unauthenticated and show the Sign In button UI.
+      // (We do not auto-redirect here; user has a clear action.)
+    }
+  }, [isAuthed, inProgress]);
+
   if (!code) {
     return (
       <div style={{ padding: 24 }}>
         <div style={{ fontSize: 26, marginBottom: 8 }}>Claim this Charm</div>
         <div style={{ color: "crimson" }}>Missing charm code.</div>
-        <div style={{ marginTop: 14 }}><Link to="/">Home</Link></div>
+        <div style={{ marginTop: 14 }}>
+          <Link to="/">Home</Link>
+        </div>
       </div>
     );
   }
 
   async function doSignIn() {
     setErr(null);
-    setBusy(true);
     try {
-      const res = await mockLogin(userName.trim() || "Keeper", userEmail.trim() || "keeper@example.com");
-      localStorage.setItem(LS_USER_KEY, JSON.stringify(res.user));
-      setStep("configure");
+      await instance.loginRedirect(loginRequest);
     } catch (e: any) {
       setErr(e?.message ?? "Sign-in failed.");
-    } finally {
-      setBusy(false);
+    }
+  }
+
+  async function doSignOut() {
+    setErr(null);
+    try {
+      // Redirect sign-out is most reliable in SPAs.
+      await instance.logoutRedirect();
+    } catch (e: any) {
+      setErr(e?.message ?? "Sign-out failed.");
+    }
+  }
+
+  async function doEditProfile() {
+    setErr(null);
+
+    // External ID supports profile editing via a separate user flow (recommended),
+    // or you can do it via Microsoft Graph later.
+    //
+    // For now, we trigger a loginRedirect again; once you create an "Edit profile"
+    // user flow, we will swap authority/policy here.
+    try {
+      await instance.loginRedirect(loginRequest);
+    } catch (e: any) {
+      setErr(e?.message ?? "Unable to open profile editor.");
     }
   }
 
@@ -64,11 +98,9 @@ export function ClaimCharmPage() {
     setErr(null);
     setBusy(true);
     try {
-      // Claim
       const c = await claimCharm(code);
       setClaimed({ charmId: c.charmId });
 
-      // Configure
       await configureCharm(code, memoryType, authMode);
 
       setStep("upload");
@@ -98,81 +130,102 @@ export function ClaimCharmPage() {
     }
   }
 
-  function signOut() {
-    localStorage.removeItem(LS_USER_KEY);
-    nav(`/claim/${encodeURIComponent(code)}`, { replace: true });
-    window.location.reload();
-  }
-
   return (
     <div style={{ padding: 24, maxWidth: 720 }}>
       <div style={{ fontSize: 26, marginBottom: 6 }}>Claim this Charm</div>
-      <div style={{ opacity: 0.85, marginBottom: 14 }}>
+      <div style={{ opacity: 0.85, marginBottom: 10 }}>
         Charm code: <strong>{code}</strong>
       </div>
 
+      {/* Auth banner */}
+      <div
+        style={{
+          marginBottom: 14,
+          padding: 12,
+          borderRadius: 12,
+          border: "1px solid rgba(255,255,255,0.12)",
+          background: "rgba(0,0,0,0.25)",
+        }}
+      >
+        {isAuthed ? (
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: 14, opacity: 0.85 }}>Signed in</div>
+              <div style={{ fontSize: 16 }}>
+                <strong>{displayName}</strong>
+              </div>
+              {emailish && (
+                <div style={{ fontSize: 12, opacity: 0.75 }}>{emailish}</div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <button
+                onClick={doEditProfile}
+                disabled={inProgress !== InteractionStatus.None}
+                style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.2)" }}
+              >
+                Edit profile
+              </button>
+              <button
+                onClick={doSignOut}
+                disabled={inProgress !== InteractionStatus.None}
+                style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.2)" }}
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: 14, opacity: 0.85 }}>You’ll need an account to claim this charm.</div>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>Sign up or sign in with Entra External ID.</div>
+            </div>
+
+            <button
+              onClick={doSignIn}
+              disabled={inProgress !== InteractionStatus.None}
+              style={{
+                padding: "10px 14px",
+                borderRadius: 12,
+                border: "1px solid rgba(255,255,255,0.25)",
+                background: "rgba(60,60,60,0.85)",
+                color: "white",
+                cursor: inProgress !== InteractionStatus.None ? "default" : "pointer",
+                width: 140,
+              }}
+            >
+              {inProgress !== InteractionStatus.None ? "Working…" : "Sign in"}
+            </button>
+          </div>
+        )}
+      </div>
+
       {err && (
-        <div style={{ marginBottom: 12, padding: 12, borderRadius: 10, background: "rgba(220,0,0,0.08)", color: "crimson" }}>
+        <div
+          style={{
+            marginBottom: 12,
+            padding: 12,
+            borderRadius: 10,
+            background: "rgba(220,0,0,0.08)",
+            color: "crimson",
+          }}
+        >
           {err}
         </div>
       )}
 
-      {step === "signin" && (
-        <div style={{ padding: 14, border: "1px solid #ddd", borderRadius: 12 }}>
-          <div style={{ fontSize: 18, marginBottom: 10 }}>1) Sign in (mock)</div>
-
-          <div style={{ display: "grid", gap: 10 }}>
-            <label>
-              <div style={{ fontSize: 12, opacity: 0.7 }}>Name</div>
-              <input
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                disabled={busy}
-                style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ccc" }}
-              />
-            </label>
-
-            <label>
-              <div style={{ fontSize: 12, opacity: 0.7 }}>Email</div>
-              <input
-                value={userEmail}
-                onChange={(e) => setUserEmail(e.target.value)}
-                disabled={busy}
-                style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ccc" }}
-              />
-            </label>
-
-            <button
-              onClick={doSignIn}
-              disabled={busy}
-              style={{
-                padding: "10px 14px",
-                borderRadius: 12,
-                border: "1px solid rgba(0,0,0,0.25)",
-                background: busy ? "rgba(120,120,120,0.25)" : "rgba(60,60,60,0.85)",
-                color: "white",
-                cursor: busy ? "default" : "pointer",
-                width: 180,
-              }}
-            >
-              {busy ? "Signing in…" : "Sign in"}
-            </button>
-          </div>
-
-          <div style={{ marginTop: 12, fontSize: 12, opacity: 0.7 }}>
-            This is just for dev flow. We’ll replace with real auth later.
-          </div>
+      {/* If not authed, stop here */}
+      {!isAuthed && (
+        <div style={{ opacity: 0.8, fontSize: 13 }}>
+          <Link to="/">Home</Link>
         </div>
       )}
 
-      {step === "configure" && (
-        <div style={{ padding: 14, border: "1px solid #ddd", borderRadius: 12 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-            <div style={{ fontSize: 18 }}>2) Configure charm</div>
-            <button onClick={signOut} disabled={busy} style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid #ccc" }}>
-              Sign out
-            </button>
-          </div>
+      {isAuthed && step === "configure" && (
+        <div style={{ padding: 14, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}>
+          <div style={{ fontSize: 18 }}>1) Configure charm</div>
 
           <div style={{ marginTop: 12, display: "grid", gap: 12 }}>
             <div>
@@ -186,8 +239,9 @@ export function ClaimCharmPage() {
                     style={{
                       padding: "10px 12px",
                       borderRadius: 12,
-                      border: "1px solid #ccc",
-                      background: memoryType === t ? "rgba(0,0,0,0.08)" : "white",
+                      border: "1px solid rgba(255,255,255,0.18)",
+                      background: memoryType === t ? "rgba(255,255,255,0.08)" : "transparent",
+                      color: "inherit",
                       cursor: busy ? "default" : "pointer",
                     }}
                   >
@@ -206,8 +260,9 @@ export function ClaimCharmPage() {
                   style={{
                     padding: "10px 12px",
                     borderRadius: 12,
-                    border: "1px solid #ccc",
-                    background: authMode === "none" ? "rgba(0,0,0,0.08)" : "white",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    background: authMode === "none" ? "rgba(255,255,255,0.08)" : "transparent",
+                    color: "inherit",
                   }}
                 >
                   OPEN
@@ -218,8 +273,9 @@ export function ClaimCharmPage() {
                   style={{
                     padding: "10px 12px",
                     borderRadius: 12,
-                    border: "1px solid #ccc",
-                    background: authMode === "glyph" ? "rgba(0,0,0,0.08)" : "white",
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    background: authMode === "glyph" ? "rgba(255,255,255,0.08)" : "transparent",
+                    color: "inherit",
                   }}
                 >
                   GLYPH LOCK
@@ -227,17 +283,17 @@ export function ClaimCharmPage() {
               </div>
 
               <div style={{ marginTop: 8, fontSize: 12, opacity: 0.7 }}>
-                Mock glyph success is “7”. We’ll make this configurable later.
+                (Dev) Mock glyph success is “7”. We’ll make this configurable later.
               </div>
             </div>
 
             <button
               onClick={doClaimAndConfigure}
-              disabled={busy}
+              disabled={busy || inProgress !== InteractionStatus.None}
               style={{
                 padding: "10px 14px",
                 borderRadius: 12,
-                border: "1px solid rgba(0,0,0,0.25)",
+                border: "1px solid rgba(255,255,255,0.25)",
                 background: busy ? "rgba(120,120,120,0.25)" : "rgba(60,60,60,0.85)",
                 color: "white",
                 cursor: busy ? "default" : "pointer",
@@ -256,9 +312,9 @@ export function ClaimCharmPage() {
         </div>
       )}
 
-      {step === "upload" && (
-        <div style={{ padding: 14, border: "1px solid #ddd", borderRadius: 12 }}>
-          <div style={{ fontSize: 18, marginBottom: 10 }}>3) Upload (mock)</div>
+      {isAuthed && step === "upload" && (
+        <div style={{ padding: 14, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}>
+          <div style={{ fontSize: 18, marginBottom: 10 }}>2) Upload (mock)</div>
 
           <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 10 }}>
             We’re not doing real file transfer yet. Pick a filename; the server will attach a sample media URL.
@@ -270,19 +326,32 @@ export function ClaimCharmPage() {
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}
               disabled={busy}
-              placeholder={memoryType === "video" ? "my_video.mov" : memoryType === "image" ? "my_photo.jpg" : "my_audio.m4a"}
-              style={{ width: "100%", padding: 10, borderRadius: 10, border: "1px solid #ccc" }}
+              placeholder={
+                memoryType === "video"
+                  ? "my_video.mov"
+                  : memoryType === "image"
+                  ? "my_photo.jpg"
+                  : "my_audio.m4a"
+              }
+              style={{
+                width: "100%",
+                padding: 10,
+                borderRadius: 10,
+                border: "1px solid rgba(255,255,255,0.18)",
+                background: "rgba(0,0,0,0.15)",
+                color: "inherit",
+              }}
             />
           </label>
 
           <div style={{ marginTop: 12 }}>
             <button
               onClick={doUpload}
-              disabled={busy}
+              disabled={busy || inProgress !== InteractionStatus.None}
               style={{
                 padding: "10px 14px",
                 borderRadius: 12,
-                border: "1px solid rgba(0,0,0,0.25)",
+                border: "1px solid rgba(255,255,255,0.25)",
                 background: busy ? "rgba(120,120,120,0.25)" : "rgba(60,60,60,0.85)",
                 color: "white",
                 cursor: busy ? "default" : "pointer",
@@ -295,8 +364,8 @@ export function ClaimCharmPage() {
         </div>
       )}
 
-      {step === "done" && (
-        <div style={{ padding: 14, border: "1px solid #ddd", borderRadius: 12 }}>
+      {isAuthed && step === "done" && (
+        <div style={{ padding: 14, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}>
           <div style={{ fontSize: 18, marginBottom: 8 }}>Done</div>
           <div style={{ opacity: 0.85, marginBottom: 14 }}>
             Your charm is claimed, configured, and has a memory attached.
@@ -305,16 +374,16 @@ export function ClaimCharmPage() {
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button
               onClick={() => nav(`/c/${encodeURIComponent(code)}`)}
-              style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #ccc" }}
+              style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.18)", color: "inherit", background: "transparent" }}
             >
               View Landing (/c/{code})
             </button>
 
             <button
-              onClick={() => nav(`/c?token=t:${encodeURIComponent(code)}`)}
-              style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid #ccc" }}
+              onClick={() => nav(`/c?Token=t:${encodeURIComponent(code)}`)}
+              style={{ padding: "10px 14px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.18)", color: "inherit", background: "transparent" }}
             >
-              Simulate NFC (/c?token=…)
+              Simulate NFC (/c?Token=…)
             </button>
           </div>
         </div>

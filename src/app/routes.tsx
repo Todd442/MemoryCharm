@@ -3,6 +3,7 @@ import { createBrowserRouter, Link } from "react-router-dom";
 import { AppShell } from "./shell/AppShell";
 import { CharmEntryPage } from "../features/playback/pages/CharmEntryPage";
 import { ClaimCharmPage } from "../features/claim/pages/ClaimCharmPage";
+import { RequireAuth } from "../app/auth/RequireAuth";
 
 function Home() {
   return (
@@ -51,7 +52,13 @@ export const router = createBrowserRouter([
       { path: "/c/:code", element: <CharmEntryPage /> },
 
       // Claim flow
-      { path: "/claim/:code", element: <ClaimCharmPage /> },
+      {  path: "/claim/:code",
+        element: (
+          <RequireAuth>
+            <ClaimCharmPage />
+          </RequireAuth>
+        ), 
+      },
 
       { path: "*", element: <NotFound /> },
     ],
