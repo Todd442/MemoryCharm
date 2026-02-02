@@ -1,7 +1,35 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Minimal mock API to test charm entry flows
+/**
+ * In-memory "database" for the dev server lifetime.
+ * Restarting the dev server clears this.
+ */
+type CharmRecord = {
+  claimed: boolean;
+  configured: boolean;
+  authMode: "none" | "glyph";
+  attemptsLeft: number;
+  memoryType?: "video" | "image" | "audio";
+  playbackUrl?: string;
+};
+
+const charms = new Map<string, CharmRecord>();
+
+function getOrCreateCharm(code: string): CharmRecord {
+  const existing = charms.get(code);
+  if (existing) return existing;
+
+  const rec: CharmRecord = {
+    claimed: false,
+    configured: false,
+    authMode: "none",
+    attemptsLeft: 3,
+  };
+  charms.set(code, rec);
+  return rec;
+}
+
 function mockApi() {
   return {
     name: "mock-api",
@@ -28,11 +56,26 @@ function mockApi() {
             });
           });
 
-        // Token -> code mapping for testing
-        // Use tokens like: t:OPEN, t:GLYPH, t:UNCLAIMED, t:EXPIRED, t:MISSING
         const mapTokenToCode = (token: string) =>
           token.startsWith("t:") ? token.slice(2) : "OPEN";
 
+        // ----------------------------
+        // AUTH (mock)
+        // ----------------------------
+        // POST /api/auth/mock-login  { email?, name? }
+        if (req.method === "POST" && req.url === "/api/auth/mock-login") {
+          const body = await readBody();
+          const name = String(body?.name ?? "Keeper");
+          const email = String(body?.email ?? "keeper@example.com");
+          return sendJson({
+            ok: true,
+            user: { id: "u_1", name, email },
+          });
+        }
+
+        // ----------------------------
+        // ENTRY
+        // ----------------------------
         // POST /api/entry/by-token  { token }
         if (req.method === "POST" && req.url === "/api/entry/by-token") {
           const body = await readBody();
@@ -42,23 +85,25 @@ function mockApi() {
           if (code === "MISSING") return sendJson({ kind: "not_found" });
           if (code === "EXPIRED") return sendJson({ kind: "expired" });
 
-          if (code === "UNCLAIMED") return sendJson({ kind: "unclaimed", code });
+          const rec = getOrCreateCharm(code);
 
-          // Claimed examples
-          if (code === "GLYPH")
-            return sendJson({
-              kind: "claimed",
-              code,
-              configured: true,
-              authMode: "glyph",
-              attemptsLeft: 3,
-            });
+          // Default behavior: UNCLAIMED starts unclaimed until the claim flow flips it.
+          if (code === "UNCLAIMED" && !rec.claimed) return sendJson({ kind: "unclaimed", code });
+
+          if (!rec.claimed) {
+            // For any other code, treat as claimed by default to make demos easy
+            rec.claimed = true;
+            rec.configured = true;
+            rec.authMode = code === "GLYPH" ? "glyph" : "none";
+            rec.attemptsLeft = 3;
+          }
 
           return sendJson({
             kind: "claimed",
             code,
-            configured: true,
-            authMode: "none",
+            configured: rec.configured,
+            authMode: rec.authMode,
+            attemptsLeft: rec.attemptsLeft,
           });
         }
 
@@ -69,41 +114,143 @@ function mockApi() {
           if (code === "MISSING") return sendJson({ kind: "not_found" });
           if (code === "EXPIRED") return sendJson({ kind: "expired" });
 
-          if (code === "UNCLAIMED") return sendJson({ kind: "unclaimed", code });
+          const rec = getOrCreateCharm(code);
 
-          if (code === "GLYPH")
-            return sendJson({
-              kind: "claimed",
-              code,
-              configured: true,
-              authMode: "glyph",
-              attemptsLeft: 3,
-            });
+          if (code === "UNCLAIMED" && !rec.claimed) return sendJson({ kind: "unclaimed", code });
+
+          if (!rec.claimed) {
+            rec.claimed = true;
+            rec.configured = true;
+            rec.authMode = code === "GLYPH" ? "glyph" : "none";
+            rec.attemptsLeft = 3;
+          }
 
           return sendJson({
             kind: "claimed",
             code,
-            configured: true,
-            authMode: "none",
+            configured: rec.configured,
+            authMode: rec.authMode,
+            attemptsLeft: rec.attemptsLeft,
           });
         }
 
+        // ----------------------------
+        // CLAIM / CONFIGURE / UPLOAD
+        // ----------------------------
+        // POST /api/charm/claim  { code }
+        if (req.method === "POST" && req.url === "/api/charm/claim") {
+          const body = await readBody();
+          const code = String(body?.code ?? "").trim();
+          if (!code) return sendJson({ ok: false, message: "Missing code" }, 400);
+
+          const rec = getOrCreateCharm(code);
+          rec.claimed = true;
+          rec.configured = false; // not configured until configure call
+          rec.authMode = "none";
+          rec.attemptsLeft = 3;
+
+          return sendJson({
+            ok: true,
+            charmId: `ch_${code}`,
+            code,
+          });
+        }
+
+        // POST /api/charm/configure  { code, memoryType, authMode }
+        if (req.method === "POST" && req.url === "/api/charm/configure") {
+          const body = await readBody();
+          const code = String(body?.code ?? "").trim();
+          const memoryType = body?.memoryType as "video" | "image" | "audio";
+          const authMode = body?.authMode as "none" | "glyph";
+
+          if (!code) return sendJson({ ok: false, message: "Missing code" }, 400);
+          if (!memoryType) return sendJson({ ok: false, message: "Missing memoryType" }, 400);
+          if (authMode !== "none" && authMode !== "glyph")
+            return sendJson({ ok: false, message: "Invalid authMode" }, 400);
+
+          const rec = getOrCreateCharm(code);
+          if (!rec.claimed) return sendJson({ ok: false, message: "Not claimed" }, 400);
+
+          rec.memoryType = memoryType;
+          rec.authMode = authMode;
+          rec.attemptsLeft = 3;
+          rec.configured = true;
+
+          return sendJson({ ok: true, code });
+        }
+
+        // POST /api/charm/upload  { code, memoryType, filename }
+        // (Simulated upload: store a canned playback URL.)
+        if (req.method === "POST" && req.url === "/api/charm/upload") {
+          const body = await readBody();
+          const code = String(body?.code ?? "").trim();
+          const memoryType = body?.memoryType as "video" | "image" | "audio";
+
+          if (!code) return sendJson({ ok: false, message: "Missing code" }, 400);
+          if (!memoryType) return sendJson({ ok: false, message: "Missing memoryType" }, 400);
+
+          const rec = getOrCreateCharm(code);
+          if (!rec.claimed) return sendJson({ ok: false, message: "Not claimed" }, 400);
+          if (!rec.configured) return sendJson({ ok: false, message: "Not configured" }, 400);
+
+          // Pick a sample URL per type
+          if (memoryType === "video") {
+            rec.playbackUrl =
+              "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+          } else if (memoryType === "image") {
+            rec.playbackUrl =
+              "https://interactive-examples.mdn.mozilla.net/media/examples/flower.jpg";
+          } else {
+            rec.playbackUrl =
+              "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
+          }
+
+          return sendJson({
+            ok: true,
+            code,
+            memoryType,
+            playbackUrl: rec.playbackUrl,
+          });
+        }
+
+        // ----------------------------
+        // GLYPH VERIFY + PLAYBACK
+        // ----------------------------
         // POST /api/c/:code/auth/verify-glyph  { glyph }
-        // Accept glyph "7" for GLYPH code; otherwise fail with attemptsLeft=2 for demo.
+        // (Mock success glyph is "7")
         if (req.method === "POST" && /\/api\/c\/.+\/auth\/verify-glyph$/.test(req.url)) {
           const body = await readBody();
           const glyph = String(body?.glyph ?? "");
-
-          // code is 3rd segment: /api/c/{code}/auth/verify-glyph
           const parts = req.url.split("/");
           const code = decodeURIComponent(parts[3] || "");
 
-          if (code === "GLYPH" && glyph === "7") return sendJson({ ok: true, attemptsLeft: 3 });
-          return sendJson({ ok: false, attemptsLeft: 2 });
+          const rec = getOrCreateCharm(code);
+          if (!rec.claimed) return sendJson({ ok: false, attemptsLeft: 0 }, 403);
+
+          if (glyph === "7") {
+            rec.attemptsLeft = 3;
+            return sendJson({ ok: true, attemptsLeft: rec.attemptsLeft });
+          }
+
+          rec.attemptsLeft = Math.max(0, (rec.attemptsLeft ?? 3) - 1);
+          return sendJson({ ok: false, attemptsLeft: rec.attemptsLeft });
         }
 
         // GET /api/c/:code/playback-url
         if (req.method === "GET" && /\/api\/c\/.+\/playback-url$/.test(req.url)) {
+          const parts = req.url.split("/");
+          const code = decodeURIComponent(parts[3] || "");
+          const rec = getOrCreateCharm(code);
+
+          // If we have a stored playbackUrl from "upload", use it.
+          if (rec.playbackUrl && rec.memoryType) {
+            return sendJson({
+              memoryType: rec.memoryType,
+              playbackUrl: rec.playbackUrl,
+            });
+          }
+
+          // Otherwise default video sample
           return sendJson({
             memoryType: "video",
             playbackUrl:
