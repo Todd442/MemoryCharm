@@ -46,21 +46,24 @@ function mockApi() {
 
           // Claimed examples
           if (code === "GLYPH")
-            return sendJson({ kind: "claimed", code, configured: true, authMode: "glyph", attemptsLeft: 3 });
+            return sendJson({
+              kind: "claimed",
+              code,
+              configured: true,
+              authMode: "glyph",
+              attemptsLeft: 3,
+            });
 
-          return sendJson({ kind: "claimed", code, configured: true, authMode: "none" });
-        }
-        // GET /api/c/:code/playback-url
-        if (req.method === "GET" && /\/api\/c\/.+\/playback-url$/.test(req.url)) {
           return sendJson({
-            memoryType: "video",
-            playbackUrl:
-              "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+            kind: "claimed",
+            code,
+            configured: true,
+            authMode: "none",
           });
         }
 
         // GET /api/entry/by-code/:code
-        if (req.method === "GET" && req.url.startsWith("/api/entry/by-code/")) {  
+        if (req.method === "GET" && req.url.startsWith("/api/entry/by-code/")) {
           const code = decodeURIComponent(req.url.split("/").pop() || "");
 
           if (code === "MISSING") return sendJson({ kind: "not_found" });
@@ -69,9 +72,43 @@ function mockApi() {
           if (code === "UNCLAIMED") return sendJson({ kind: "unclaimed", code });
 
           if (code === "GLYPH")
-            return sendJson({ kind: "claimed", code, configured: true, authMode: "glyph", attemptsLeft: 3 });
+            return sendJson({
+              kind: "claimed",
+              code,
+              configured: true,
+              authMode: "glyph",
+              attemptsLeft: 3,
+            });
 
-          return sendJson({ kind: "claimed", code, configured: true, authMode: "none" });
+          return sendJson({
+            kind: "claimed",
+            code,
+            configured: true,
+            authMode: "none",
+          });
+        }
+
+        // POST /api/c/:code/auth/verify-glyph  { glyph }
+        // Accept glyph "7" for GLYPH code; otherwise fail with attemptsLeft=2 for demo.
+        if (req.method === "POST" && /\/api\/c\/.+\/auth\/verify-glyph$/.test(req.url)) {
+          const body = await readBody();
+          const glyph = String(body?.glyph ?? "");
+
+          // code is 3rd segment: /api/c/{code}/auth/verify-glyph
+          const parts = req.url.split("/");
+          const code = decodeURIComponent(parts[3] || "");
+
+          if (code === "GLYPH" && glyph === "7") return sendJson({ ok: true, attemptsLeft: 3 });
+          return sendJson({ ok: false, attemptsLeft: 2 });
+        }
+
+        // GET /api/c/:code/playback-url
+        if (req.method === "GET" && /\/api\/c\/.+\/playback-url$/.test(req.url)) {
+          return sendJson({
+            memoryType: "video",
+            playbackUrl:
+              "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+          });
         }
 
         return sendJson({ error: "mock: unknown endpoint", url: req.url }, 404);

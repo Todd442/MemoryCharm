@@ -1,8 +1,8 @@
-// src/features/playback/pages/CharmEntryPage.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { entryByCode, entryByToken, getPlaybackUrl } from "../api";
+import { entryByCode, entryByToken, getPlaybackUrl, verifyGlyph } from "../api";
 import type { EntryResponse } from "../types";
+import { GlyphAuthPanel } from "../../../components/GlyphAuthPanel";
 
 type UiState =
   | { s: "loading"; detail: string }
@@ -24,6 +24,11 @@ export function CharmEntryPage() {
   const [ui, setUi] = useState<UiState>({ s: "loading", detail: "Starting…" });
   const [playback, setPlayback] = useState<PlaybackState>(null);
 
+  // Glyph UI state
+  const [glyphBusy, setGlyphBusy] = useState(false);
+  const [attemptsLeft, setAttemptsLeft] = useState<number>(3);
+  const [blocked, setBlocked] = useState(false);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -31,6 +36,10 @@ export function CharmEntryPage() {
       try {
         // Reset per navigation/load
         setPlayback(null);
+        setBlocked(false);
+        setGlyphBusy(false);
+        setAttemptsLeft(3);
+
         setUi({ s: "loading", detail: token ? "Validating token…" : "Looking up charm…" });
 
         const entry = token
@@ -79,6 +88,11 @@ export function CharmEntryPage() {
             type: media.memoryType,
           });
         }
+
+        // If glyph auth required, capture attemptsLeft if provided
+        if (entry.authMode === "glyph") {
+          setAttemptsLeft(entry.attemptsLeft ?? 3);
+        }
       } catch (err: any) {
         setUi({ s: "error", message: err?.message ?? "Request failed." });
       }
@@ -90,6 +104,32 @@ export function CharmEntryPage() {
     };
   }, [token, code, nav]);
 
+  async function handleGlyphSubmit(glyph: string) {
+    if (ui.s !== "ready") return;
+    if (ui.entry.kind !== "claimed") return;
+    if (ui.entry.authMode !== "glyph") return;
+    if (blocked) return;
+
+    setGlyphBusy(true);
+    try {
+      const res = await verifyGlyph(ui.entry.code, glyph);
+
+      if (res.ok) {
+        // Fetch playback on success
+        const media = await getPlaybackUrl(ui.entry.code);
+        setPlayback({ url: media.playbackUrl, type: media.memoryType });
+      } else {
+        setAttemptsLeft(res.attemptsLeft);
+        if (res.attemptsLeft <= 0) setBlocked(true);
+      }
+    } catch (err: any) {
+      setUi({ s: "error", message: err?.message ?? "Glyph verification failed." });
+    } finally {
+      setGlyphBusy(false);
+    }
+  }
+
+  // ===== Render =====
   if (ui.s === "loading") {
     return (
       <div style={{ padding: 24 }}>
@@ -139,6 +179,20 @@ export function CharmEntryPage() {
         )}
       </div>
 
+      {/* Glyph gate */}
+      {entry.kind === "claimed" && entry.authMode === "glyph" && !playback && (
+        <div style={{ marginTop: 18 }}>
+          {blocked ? (
+            <div style={{ padding: 12, borderRadius: 8, background: "rgba(220,0,0,0.08)" }}>
+              The charm rejects this attempt.
+            </div>
+          ) : (
+            <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} />
+          )}
+        </div>
+      )}
+
+      {/* Playback */}
       {playback && (
         <div style={{ marginTop: 24 }}>
           <div style={{ fontSize: 18, marginBottom: 8 }}>Playback</div>

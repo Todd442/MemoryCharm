@@ -1,29 +1,27 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 export function ClaimCharmPage() {
   const { code } = useParams<{ code: string }>();
 
   return (
-    <div>
-      <h2 className="te-title">Claim this Charm</h2>
-      <p className="te-body">
-        This charm hasn’t been bound to a keeper yet.
+    <div style={{ padding: 24 }}>
+      <div style={{ fontSize: 24 }}>Claim this Charm</div>
+      <p style={{ marginTop: 12 }}>
+        This charm hasn’t been registered yet.
       </p>
 
-      <div className="te-card">
-        <div className="te-body">
-          <div><strong>Charm Code:</strong> {code}</div>
-        </div>
+      <div style={{ marginTop: 12 }}>
+        <strong>Charm Code:</strong> {code}
       </div>
 
-      <div className="te-actions">
-        <button className="te-btn">Log in</button>
-        <button className="te-btn te-btn-primary">Create account</button>
+      <div style={{ marginTop: 18 }}>
+        <button style={{ padding: "10px 14px", marginRight: 10 }}>Log in</button>
+        <button style={{ padding: "10px 14px" }}>Create account</button>
       </div>
 
-      <p className="te-footnote">
-        After signing in, you’ll choose your memory type and upload your media.
+      <p style={{ marginTop: 18 }}>
+        <Link to="/">Back to Home</Link>
       </p>
     </div>
   );

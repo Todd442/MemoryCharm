@@ -30,9 +30,9 @@ export type PlaybackResponse = {
 };
 
 export function getPlaybackUrl(code: string): Promise<PlaybackResponse> {
-  return fetch(`/api/c/${encodeURIComponent(code)}/playback-url`)
-    .then(r => {
-      if (!r.ok) throw new Error("Playback fetch failed");
-      return r.json();
-    });
+  return getJson(`/api/c/${encodeURIComponent(code)}/playback-url`);
+}
+
+export function verifyGlyph(code: string, glyph: string): Promise<{ ok: boolean; attemptsLeft: number }> {
+  return postJson(`/api/c/${encodeURIComponent(code)}/auth/verify-glyph`, { glyph });
 }
