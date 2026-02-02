@@ -1,0 +1,42 @@
+/* Global baseline for the whole app (prevents browser defaults leaking in) */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #0b0a08; /* near-black warm */
+  color: #e7d8b6;      /* parchment-ish */
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Make links look like the product, not the browser */
+a {
+  color: #e7d8b6;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:visited {
+  color: #e0cfa7; /* prevent purple visited links */
+}
+
+a:hover {
+  opacity: 0.9;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+/* Optional: smoother text rendering */
+body {
+  text-rendering: geometricPrecision;
+}
+
+.te-root {
+  font-size: 18px; /* try 18 or 20 for your 900x1600 stage */
+  line-height: 1.25;
+}
+
