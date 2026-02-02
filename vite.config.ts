@@ -56,13 +56,14 @@ function mockApi() {
             });
           });
 
+        // Token -> code mapping for testing
+        // Tokens like t:OPEN, t:GLYPH, etc.
         const mapTokenToCode = (token: string) =>
           token.startsWith("t:") ? token.slice(2) : "OPEN";
 
         // ----------------------------
         // AUTH (mock)
         // ----------------------------
-        // POST /api/auth/mock-login  { email?, name? }
         if (req.method === "POST" && req.url === "/api/auth/mock-login") {
           const body = await readBody();
           const name = String(body?.name ?? "Keeper");
@@ -76,7 +77,6 @@ function mockApi() {
         // ----------------------------
         // ENTRY
         // ----------------------------
-        // POST /api/entry/by-token  { token }
         if (req.method === "POST" && req.url === "/api/entry/by-token") {
           const body = await readBody();
           const token = String(body?.token ?? "");
@@ -87,11 +87,9 @@ function mockApi() {
 
           const rec = getOrCreateCharm(code);
 
-          // Default behavior: UNCLAIMED starts unclaimed until the claim flow flips it.
           if (code === "UNCLAIMED" && !rec.claimed) return sendJson({ kind: "unclaimed", code });
 
           if (!rec.claimed) {
-            // For any other code, treat as claimed by default to make demos easy
             rec.claimed = true;
             rec.configured = true;
             rec.authMode = code === "GLYPH" ? "glyph" : "none";
@@ -107,7 +105,6 @@ function mockApi() {
           });
         }
 
-        // GET /api/entry/by-code/:code
         if (req.method === "GET" && req.url.startsWith("/api/entry/by-code/")) {
           const code = decodeURIComponent(req.url.split("/").pop() || "");
 
@@ -135,9 +132,8 @@ function mockApi() {
         }
 
         // ----------------------------
-        // CLAIM / CONFIGURE / UPLOAD
+        // CLAIM / CONFIGURE / UPLOAD (mock)
         // ----------------------------
-        // POST /api/charm/claim  { code }
         if (req.method === "POST" && req.url === "/api/charm/claim") {
           const body = await readBody();
           const code = String(body?.code ?? "").trim();
@@ -145,18 +141,13 @@ function mockApi() {
 
           const rec = getOrCreateCharm(code);
           rec.claimed = true;
-          rec.configured = false; // not configured until configure call
+          rec.configured = false;
           rec.authMode = "none";
           rec.attemptsLeft = 3;
 
-          return sendJson({
-            ok: true,
-            charmId: `ch_${code}`,
-            code,
-          });
+          return sendJson({ ok: true, charmId: `ch_${code}`, code });
         }
 
-        // POST /api/charm/configure  { code, memoryType, authMode }
         if (req.method === "POST" && req.url === "/api/charm/configure") {
           const body = await readBody();
           const code = String(body?.code ?? "").trim();
@@ -179,8 +170,6 @@ function mockApi() {
           return sendJson({ ok: true, code });
         }
 
-        // POST /api/charm/upload  { code, memoryType, filename }
-        // (Simulated upload: store a canned playback URL.)
         if (req.method === "POST" && req.url === "/api/charm/upload") {
           const body = await readBody();
           const code = String(body?.code ?? "").trim();
@@ -193,7 +182,6 @@ function mockApi() {
           if (!rec.claimed) return sendJson({ ok: false, message: "Not claimed" }, 400);
           if (!rec.configured) return sendJson({ ok: false, message: "Not configured" }, 400);
 
-          // Pick a sample URL per type
           if (memoryType === "video") {
             rec.playbackUrl =
               "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
@@ -204,6 +192,8 @@ function mockApi() {
             rec.playbackUrl =
               "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
           }
+
+          rec.memoryType = memoryType;
 
           return sendJson({
             ok: true,
@@ -216,8 +206,6 @@ function mockApi() {
         // ----------------------------
         // GLYPH VERIFY + PLAYBACK
         // ----------------------------
-        // POST /api/c/:code/auth/verify-glyph  { glyph }
-        // (Mock success glyph is "7")
         if (req.method === "POST" && /\/api\/c\/.+\/auth\/verify-glyph$/.test(req.url)) {
           const body = await readBody();
           const glyph = String(body?.glyph ?? "");
@@ -236,21 +224,15 @@ function mockApi() {
           return sendJson({ ok: false, attemptsLeft: rec.attemptsLeft });
         }
 
-        // GET /api/c/:code/playback-url
         if (req.method === "GET" && /\/api\/c\/.+\/playback-url$/.test(req.url)) {
           const parts = req.url.split("/");
           const code = decodeURIComponent(parts[3] || "");
           const rec = getOrCreateCharm(code);
 
-          // If we have a stored playbackUrl from "upload", use it.
           if (rec.playbackUrl && rec.memoryType) {
-            return sendJson({
-              memoryType: rec.memoryType,
-              playbackUrl: rec.playbackUrl,
-            });
+            return sendJson({ memoryType: rec.memoryType, playbackUrl: rec.playbackUrl });
           }
 
-          // Otherwise default video sample
           return sendJson({
             memoryType: "video",
             playbackUrl:

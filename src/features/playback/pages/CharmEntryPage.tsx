@@ -1,4 +1,3 @@
-// src/features/playback/pages/CharmEntryPage.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrl, verifyGlyph } from "../api";
@@ -15,12 +14,26 @@ type PlaybackState = null | {
   type: "video" | "image" | "audio";
 };
 
+const tokenKey = (code: string) => `charm.token.${code}`;
+
+function getTokenCaseInsensitive(search: string): string | null {
+  const qs = new URLSearchParams(search);
+
+  const direct = qs.get("token") || qs.get("Token") || qs.get("TOKEN");
+  if (direct) return direct;
+
+  for (const [k, v] of qs.entries()) {
+    if (k.toLowerCase() === "token" && v) return v;
+  }
+  return null;
+}
+
 export function CharmEntryPage() {
   const nav = useNavigate();
-  const { code } = useParams<{ code?: string }>();
   const { search } = useLocation();
-  const qs = new URLSearchParams(search);
-  const token = qs.get("token");
+  const { code } = useParams<{ code?: string }>();
+
+  const token = getTokenCaseInsensitive(search);
 
   const [ui, setUi] = useState<UiState>({ s: "loading", detail: "Starting…" });
   const [playback, setPlayback] = useState<PlaybackState>(null);
@@ -35,7 +48,6 @@ export function CharmEntryPage() {
 
     async function run() {
       try {
-        // Reset per navigation/load
         setPlayback(null);
         setBlocked(false);
         setGlyphBusy(false);
@@ -43,16 +55,32 @@ export function CharmEntryPage() {
 
         setUi({ s: "loading", detail: "Checking charm…" });
 
-        const entry = token
-          ? await entryByToken(token)
-          : code
-          ? await entryByCode(code)
-          : null;
+        let entry: EntryResponse | null = null;
 
-        if (cancelled) return;
+        // 1) NFC bootstrap: /c?Token=...
+        if (token) {
+          entry = await entryByToken(token);
+          if (cancelled) return;
+
+          if (entry.kind === "claimed" || entry.kind === "unclaimed") {
+            // Store token for this session under resolved code
+            sessionStorage.setItem(tokenKey(entry.code), token);
+
+            // Replace URL with clean route
+            nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true });
+          }
+        }
+        // 2) Clean URL: /c/:code
+        else if (code) {
+          entry = await entryByCode(code);
+          if (cancelled) return;
+        } else {
+          setUi({ s: "error", message: "Missing token or charm code." });
+          return;
+        }
 
         if (!entry) {
-          setUi({ s: "error", message: "This link is missing its charm token." });
+          setUi({ s: "error", message: "Unable to resolve charm." });
           return;
         }
 
@@ -66,11 +94,6 @@ export function CharmEntryPage() {
           return;
         }
 
-        // Normalize token URL to /c/:code
-        if (token && entry.kind !== "not_found" && entry.kind !== "expired") {
-          nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true });
-        }
-
         if (entry.kind === "unclaimed") {
           nav(`/claim/${encodeURIComponent(entry.code)}`, { replace: true });
           return;
@@ -79,23 +102,21 @@ export function CharmEntryPage() {
         // claimed
         setUi({ s: "ready", entry });
 
-        // If glyph auth required, capture attemptsLeft if provided
         if (entry.authMode === "glyph") {
           setAttemptsLeft(entry.attemptsLeft ?? 3);
         }
 
-        // If no glyph auth required, immediately fetch playback
+        // If glyph-locked and we got here via clean URL without a session token, ask to tap again.
+        const hasSessionToken = sessionStorage.getItem(tokenKey(entry.code));
+        if (entry.authMode === "glyph" && !hasSessionToken) return;
+
+        // Auto-play only for OPEN charms
         if (entry.configured && entry.authMode === "none") {
           setUi({ s: "loading", detail: "Awakening memory…" });
           const media = await getPlaybackUrl(entry.code);
           if (cancelled) return;
 
-          setPlayback({
-            url: media.playbackUrl,
-            type: media.memoryType,
-          });
-
-          // Back to ready state for display
+          setPlayback({ url: media.playbackUrl, type: media.memoryType });
           setUi({ s: "ready", entry });
         }
       } catch (err: any) {
@@ -115,17 +136,17 @@ export function CharmEntryPage() {
     if (ui.entry.authMode !== "glyph") return;
     if (blocked) return;
 
+    const hasSessionToken = sessionStorage.getItem(tokenKey(ui.entry.code));
+    if (!hasSessionToken) return;
+
     setGlyphBusy(true);
     try {
       const res = await verifyGlyph(ui.entry.code, glyph);
 
       if (res.ok) {
         setUi({ s: "loading", detail: "Awakening memory…" });
-
         const media = await getPlaybackUrl(ui.entry.code);
         setPlayback({ url: media.playbackUrl, type: media.memoryType });
-
-        // Return to ready view (player shows)
         setUi({ s: "ready", entry: ui.entry });
       } else {
         setAttemptsLeft(res.attemptsLeft);
@@ -162,14 +183,11 @@ export function CharmEntryPage() {
 
   const entry = ui.entry;
 
-  // Not found / expired states (product-like copy)
   if (entry.kind === "not_found") {
     return (
       <div style={{ padding: 24 }}>
         <div style={{ fontSize: 26, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 16, opacity: 0.9 }}>
-          This charm can’t be found.
-        </div>
+        <div style={{ fontSize: 16, opacity: 0.9 }}>This charm can’t be found.</div>
         <div style={{ marginTop: 14 }}>
           <Link to="/">Return home</Link>
         </div>
@@ -181,9 +199,7 @@ export function CharmEntryPage() {
     return (
       <div style={{ padding: 24 }}>
         <div style={{ fontSize: 26, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 16, opacity: 0.9 }}>
-          This charm’s memory has faded.
-        </div>
+        <div style={{ fontSize: 16, opacity: 0.9 }}>This charm’s memory has faded.</div>
         <div style={{ marginTop: 14 }}>
           <Link to="/">Return home</Link>
         </div>
@@ -191,48 +207,32 @@ export function CharmEntryPage() {
     );
   }
 
-  // From here: claimed (unclaimed is redirected earlier)
-  if (entry.kind !== "claimed") {
-    // Defensive fallback; should never hit
-    return (
-      <div style={{ padding: 24 }}>
-        <div style={{ fontSize: 26, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 16, opacity: 0.9 }}>
-          This charm is in an unknown state.
-        </div>
-      </div>
-    );
-  }
-
-  // Main claimed view
+  // claimed
   return (
     <div style={{ padding: 24 }}>
       <div style={{ fontSize: 26, marginBottom: 8 }}>Memory Charm</div>
 
-      {/* If glyph gate required and we haven't unlocked yet */}
+      {!entry.configured && (
+        <div style={{ marginTop: 12, opacity: 0.9 }}>
+          This charm has not yet been awakened by its keeper.
+        </div>
+      )}
+
+      {/* Glyph gate */}
       {entry.authMode === "glyph" && !playback && (
         <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 16, opacity: 0.9 }}>
-            This charm is locked.
-          </div>
+          <div style={{ fontSize: 16, opacity: 0.9 }}>This charm is locked.</div>
 
-          {blocked ? (
-            <div
-              style={{
-                marginTop: 14,
-                padding: 12,
-                borderRadius: 10,
-                background: "rgba(220,0,0,0.08)",
-              }}
-            >
+          {!sessionStorage.getItem(tokenKey(entry.code)) ? (
+            <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(0,0,0,0.06)" }}>
+              Please tap the charm again to awaken this memory.
+            </div>
+          ) : blocked ? (
+            <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(220,0,0,0.08)" }}>
               The charm rejects this attempt.
             </div>
           ) : (
-            <GlyphAuthPanel
-              attemptsLeft={attemptsLeft}
-              busy={glyphBusy}
-              onSubmit={handleGlyphSubmit}
-            />
+            <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} />
           )}
         </div>
       )}
@@ -241,36 +241,17 @@ export function CharmEntryPage() {
       {playback && (
         <div style={{ marginTop: 16 }}>
           {playback.type === "video" && (
-            <video
-              src={playback.url}
-              controls
-              playsInline
-              style={{ width: "100%", maxWidth: 980, borderRadius: 12 }}
-            />
+            <video src={playback.url} controls playsInline style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
           )}
-
           {playback.type === "image" && (
-            <img
-              src={playback.url}
-              alt="Memory"
-              style={{ width: "100%", maxWidth: 980, borderRadius: 12 }}
-            />
+            <img src={playback.url} alt="Memory" style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
           )}
-
           {playback.type === "audio" && (
             <audio src={playback.url} controls style={{ width: "100%", maxWidth: 980 }} />
           )}
         </div>
       )}
 
-      {/* If claimed but not configured (future-proof copy) */}
-      {!entry.configured && (
-        <div style={{ marginTop: 16, opacity: 0.9 }}>
-          This charm has not yet been awakened by its keeper.
-        </div>
-      )}
-
-      {/* Small footer link (handy during dev) */}
       <div style={{ marginTop: 18, fontSize: 13, opacity: 0.7 }}>
         <Link to="/">Home</Link>
       </div>
