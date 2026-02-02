@@ -1,0 +1,25 @@
+.te-root{
+  min-height:100vh;
+  background: var(--engrave-dark);
+  color: var(--engrave-dark);
+}
+
+.te-frame{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+}
+
+.te-frame-bg{
+  position:absolute;
+  inset:0;
+  background: radial-gradient(circle at 30% 20%, #2b1c10, #140c06);
+  opacity: 1;
+}
+
+.te-frame-overlay{
+  position:absolute;
+  inset:0;
+  /* Later: background-image: url(/assets/frame.png); */
+  opacity: 0.35;
+}

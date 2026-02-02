@@ -1,0 +1,66 @@
+.te-content{
+  position:relative;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.te-status{
+  margin: 12px 0;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(230, 211, 163, 0.25);
+  border: 1px solid rgba(203, 177, 138, 0.35);
+}
+
+.te-status-inner{
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(230, 211, 163, 0.35);
+}
+
+.te-panel{
+  border-radius: 18px;
+  padding: 18px;
+  background: var(--panel);
+  border: 1px solid rgba(31, 20, 11, 0.2);
+}
+
+.te-title{ margin:0 0 8px; }
+.te-body{ margin:0 0 14px; }
+
+.te-center{
+  padding: 18px;
+  font-size: 18px;
+}
+
+.te-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.te-input{
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(31, 20, 11, 0.25);
+  min-width: 220px;
+}
+
+.te-btn{
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(31, 20, 11, 0.25);
+  background: rgba(203, 177, 138, 0.5);
+}
+
+.te-btn-primary{
+  background: rgba(74, 51, 33, 0.85);
+  color: var(--parchment);
+}
+
+.te-video, .te-image, .te-audio{
+  width:100%;
+  border-radius: 14px;
+}
