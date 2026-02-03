@@ -1,0 +1,68 @@
+
+.te-stage { outline: 8px solid hotpink !important; }
+
+/* Root 900x1600 stage */
+.te-stage {
+  width: 900px;
+  height: 1600px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background image */
+.te-bg {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/Empty Background2.png") center/cover no-repeat;
+  pointer-events: none;
+}
+
+/* Top / middle / bottom layout */
+.te-layout {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 170px 1fr 190px;
+}
+
+/* Top status plaque */
+.te-status {
+  padding: 34px 80px 0 80px;
+}
+
+/* THIS is the scrollable area */
+.te-scroll {
+  padding: 28px 80px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Bottom command plate */
+.te-commands {
+  padding: 22px 80px 34px 80px;
+}
+/* Base typography inside the frame */
+.te-stage {
+  color: #f3e7cf;
+  font-family: "Cinzel", serif;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+/* Kill default link colors */
+.te-stage a,
+.te-stage a:visited {
+  color: #f3e7cf;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Make scrolling feel right on mobile */
+.te-scroll {
+  overscroll-behavior: contain;
+}
+
+.te-bg {
+  background: url("../../assets/frame-empty.png") center/cover no-repeat;
+}

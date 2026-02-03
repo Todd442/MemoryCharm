@@ -20,7 +20,6 @@ export function FixedStage(props: {
 
   useEffect(() => {
     const onResize = () => {
-      // Use visualViewport when available (better on mobile with address bar)
       const vv = window.visualViewport;
       if (vv) {
         setVw(vv.width);
@@ -32,18 +31,22 @@ export function FixedStage(props: {
     };
 
     onResize();
+
     window.addEventListener("resize", onResize);
     window.visualViewport?.addEventListener("resize", onResize);
+    window.visualViewport?.addEventListener("scroll", onResize); // iOS can shift viewport when keyboard appears
 
     return () => {
       window.removeEventListener("resize", onResize);
       window.visualViewport?.removeEventListener("resize", onResize);
+      window.visualViewport?.removeEventListener("scroll", onResize);
     };
   }, []);
 
   const { scale, offsetX, offsetY } = useMemo(() => {
     const sx = vw / props.width;
     const sy = vh / props.height;
+
     let s = fit === "cover" ? Math.max(sx, sy) : Math.min(sx, sy);
     s = Math.max(minScale, Math.min(maxScale, s));
 
@@ -64,7 +67,13 @@ export function FixedStage(props: {
         inset: 0,
         overflow: "hidden",
         background: props.background ?? "black",
-        touchAction: "manipulation", // avoids some 300ms delays / odd gestures
+
+        // IMPORTANT: allow natural scrolling gestures to reach inner scroll containers
+        touchAction: "auto",
+
+        // Avoid accidental selection / bounce artifacts on mobile
+        WebkitUserSelect: "none",
+        userSelect: "none",
       }}
     >
       <div
@@ -76,6 +85,9 @@ export function FixedStage(props: {
           height: props.height,
           transformOrigin: "top left",
           transform: `scale(${scale})`,
+
+          // Allow text selection inside inputs etc. (we’ll re-enable per page)
+          pointerEvents: "auto",
         }}
       >
         {props.children}
