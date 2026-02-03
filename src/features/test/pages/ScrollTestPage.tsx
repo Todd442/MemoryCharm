@@ -1,47 +1,75 @@
 import React from "react";
 
 export function ScrollTestPage() {
+  const sections = Array.from({ length: 8 }).map((_, i) => i + 1);
+
   return (
     <div>
-      <h1 style={{ margin: "0 0 12px 0", fontSize: 40 }}>Scroll Test</h1>
-      <p style={{ margin: "0 0 18px 0", opacity: 0.9 }}>
-        Goal: only the middle panel scrolls. Top plaque and bottom plate should stay fixed.
-      </p>
+      <div className="te-h1">Scroll Test</div>
 
-      <img src="/assets/divider.png" alt="" style={{ width: "100%", margin: "18px 0" }} />
+      <div className="te-card" style={{ marginBottom: 18 }}>
+        <div className="te-muted">
+          Goal: only the <strong>middle panel</strong> scrolls. The top plaque and bottom plate should stay fixed.
+          <br />
+          Also test: smooth touch scrolling, scroll chaining, and keyboard focus behavior.
+        </div>
+      </div>
 
-      {/* Big blocks */}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 28, marginBottom: 8 }}>Section {i + 1}</div>
-          <div style={{ opacity: 0.9 }}>
-            {Array.from({ length: 6 }).map((__, j) => (
-              <p key={j} style={{ margin: "0 0 10px 0" }}>
-                This is paragraph {j + 1} inside section {i + 1}. Scroll should feel smooth on mobile.
+      <Divider />
+
+      {sections.map((n) => (
+        <div key={n} style={{ marginBottom: 22 }}>
+          <div className="te-h2">Section {n}</div>
+
+          <div className="te-card">
+            {Array.from({ length: 6 }).map((_, j) => (
+              <p key={j} style={{ margin: "0 0 12px 0" }}>
+                This is paragraph <strong>{j + 1}</strong> inside section <strong>{n}</strong>. Scroll should feel smooth
+                on mobile and never move the frame.
               </p>
             ))}
+
+            <label style={{ display: "block", marginTop: 14 }}>
+              <div className="te-muted" style={{ marginBottom: 8 }}>
+                Test input (keyboard + focus scroll)
+              </div>
+              <input
+                className="te-input"
+                placeholder="Tap me near the bottom"
+                inputMode="text"
+                autoComplete="off"
+              />
+            </label>
           </div>
 
-          {/* Inputs to test keyboard + focus scroll */}
-          <label style={{ display: "block", marginTop: 10 }}>
-            <div style={{ fontSize: 16, opacity: 0.75, marginBottom: 6 }}>Test input (keyboard)</div>
-            <input
-              placeholder="Tap me near the bottom"
-              style={{
-                width: "100%",
-                padding: "12px 14px",
-                borderRadius: 14,
-                border: "1px solid rgba(255,255,255,0.2)",
-                background: "rgba(0,0,0,0.35)",
-                color: "inherit",
-              }}
-            />
-          </label>
+          {n !== sections[sections.length - 1] && <Divider />}
         </div>
       ))}
 
-      <div style={{ height: 80 }} />
-      <div style={{ opacity: 0.8 }}>End of content.</div>
+      <div className="te-card" style={{ marginTop: 14 }}>
+        <div className="te-h3">End of content</div>
+        <div className="te-muted">
+          If you can reach this, your scroll container is working. Now test “hard scrolling” at the top/bottom for bounce
+          and scroll chaining.
+        </div>
+      </div>
+
+      {/* little spacer so the last card isn't jammed against the bottom plate */}
+      <div style={{ height: 28 }} />
+    </div>
+  );
+}
+
+function Divider() {
+  return (
+    <div style={{ margin: "18px 0" }}>
+      {/* If you don't have the divider in /assets yet, comment this out */}
+      <img
+        src="/assets/divider.png"
+        alt=""
+        style={{ width: "100%", display: "block", opacity: 0.9 }}
+        draggable={false}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
-
-.te-stage { outline: 8px solid hotpink !important; }
+/* (TEMP) Debug outline — remove when done */
+/* .te-stage { outline: 8px solid hotpink !important; } */
 
 /* Root 900x1600 stage */
 .te-stage {
@@ -7,13 +7,22 @@
   height: 1600px;
   position: relative;
   overflow: hidden;
+
+  /* Base typography inside the frame */
+  color: #f3e7cf;
+  font-family: "Cinzel", serif;
+  font-size: 28px;
+  line-height: 1.35;
 }
 
 /* Background image */
 .te-bg {
   position: absolute;
   inset: 0;
-  background: url("/assets/Empty Background2.png") center/cover no-repeat;
+
+  background: url("../../assets/frame-empty.png") center/cover no-repeat;
+
+
   pointer-events: none;
 }
 
@@ -22,48 +31,76 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: 320px 1fr 320px;
+  grid-template-rows: 320px 1fr 320px; /* tune these */
 }
 
 /* Top status plaque */
 .te-status {
-  padding: 34px 80px 0 80px;
+  width: 500px;
+  height: 150px;
+
+  justify-self: center;   /* 👈 THIS is the missing piece */
+  align-self: center;     /* vertical centering in grid row */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
 }
 
-/* THIS is the scrollable area */
+/* Chiseled / engraved status text (actual rendered element) */
+.te-status .te-statusText {
+  font-family: "Cinzel", serif;
+  font-size: 28px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #0b0b0b !important;
+
+  text-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.35),
+    -1px -1px 0 rgba(255, 255, 255, 0.15),
+     1px  1px 0 rgba(0, 0, 0, 0.65),
+     0 2px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+
+/* Scrollable middle */
 .te-scroll {
-  padding: 320px 300px;
+  padding: 32px 100px 32px 100px; /* top right bottom left */
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* Bottom command plate */
 .te-commands {
   padding: 22px 80px 34px 80px;
 }
-/* Base typography inside the frame */
-.te-stage {
-  color: #f3e7cf;
-  font-family: "Cinzel", serif;
-  font-size: 22px;
-  line-height: 1.35;
-}
 
-/* Kill default link colors */
+/* Link styling */
 .te-stage a,
 .te-stage a:visited {
   color: #f3e7cf;
   text-decoration: underline;
   text-underline-offset: 4px;
+  font-size: inherit; /* inherit from te-stage */
 }
 
-/* Make scrolling feel right on mobile */
-.te-scroll {
-   padding: 32px 100px 32px 100px; /* top right bottom left */
-  overscroll-behavior: contain;
+/* Ensure list items & common controls inherit (BUT NOT te-stage itself) */
+.te-stage li,
+.te-stage button,
+.te-stage input,
+.te-stage select,
+.te-stage textarea {
+  font-size: inherit;
+  font-family: inherit;
 }
 
-.te-bg {
-  background: url("../../assets/frame-empty.png") center/cover no-repeat;
-}
+/* Optional type scale helpers */
+.te-h1 { font-size: 44px; margin: 0 0 16px 0; }
+.te-h2 { font-size: 34px; margin: 0 0 12px 0; }
+.te-h3 { font-size: 28px; margin: 0 0 10px 0; }
+.te-muted { font-size: 20px; opacity: 0.8; }
