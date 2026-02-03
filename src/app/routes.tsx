@@ -4,6 +4,8 @@ import { AppShell } from "./shell/AppShell";
 import { CharmEntryPage } from "../features/playback/pages/CharmEntryPage";
 import { ClaimCharmPage } from "../features/claim/pages/ClaimCharmPage";
 import { RequireAuth } from "../app/auth/RequireAuth";
+import { ScrollTestPage } from "../features/test/pages/ScrollTestPage.tsx";
+
 
 function Home() {
   return (
@@ -59,8 +61,11 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ), 
       },
-
+      { path: "/test/scroll", element: <ScrollTestPage /> },
       { path: "*", element: <NotFound /> },
+    
+
+
     ],
   },
 ]);
