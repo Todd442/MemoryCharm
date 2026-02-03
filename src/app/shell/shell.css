@@ -22,7 +22,7 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: 170px 1fr 190px;
+  grid-template-rows: 320px 1fr 320px;
 }
 
 /* Top status plaque */
@@ -32,7 +32,7 @@
 
 /* THIS is the scrollable area */
 .te-scroll {
-  padding: 28px 80px;
+  padding: 320px 300px;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -60,6 +60,7 @@
 
 /* Make scrolling feel right on mobile */
 .te-scroll {
+   padding: 32px 100px 32px 100px; /* top right bottom left */
   overscroll-behavior: contain;
 }
 
