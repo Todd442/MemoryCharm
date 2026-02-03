@@ -54,20 +54,28 @@
 }
 
 /* Chiseled / engraved status text (actual rendered element) */
+/* Multi-line centered engraved status text */
 .te-status .te-statusText {
+  max-width: 90%;
+  white-space: normal;
+  line-height: 1.25;
+
   font-family: "Cinzel", serif;
   font-size: 28px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 
-  color: #0b0b0b !important;
+  color: #0b0b0b;
 
   text-shadow:
     0 -1px 0 rgba(255, 255, 255, 0.35),
     -1px -1px 0 rgba(255, 255, 255, 0.15),
      1px  1px 0 rgba(0, 0, 0, 0.65),
-     0 2px 3px rgba(0, 0, 0, 0.9) !important;
+     0 2px 3px rgba(0, 0, 0, 0.9);
+
+  transform: translateY(-1px); /* optional */
 }
+
 
 
 /* Scrollable middle */
