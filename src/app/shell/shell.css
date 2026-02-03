@@ -47,6 +47,10 @@
   justify-content: center;
 
   text-align: center;
+   background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
 }
 
 /* Chiseled / engraved status text (actual rendered element) */
