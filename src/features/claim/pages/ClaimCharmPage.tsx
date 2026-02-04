@@ -3,12 +3,13 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
-import { claimCharm, configureCharm, uploadCharm } from "../api";
+import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
+import type { UserProfile } from "../api";
 import { loginRequest } from "../../../app/auth/msalConfig";
 
 import "./ClaimCharmPage.css";
 
-type Step = "configure" | "upload" | "done";
+type Step = "loading" | "profile" | "configure" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
 
@@ -24,7 +25,7 @@ export function ClaimCharmPage() {
   const displayName = useMemo(() => me?.name ?? "Keeper", [me]);
   const emailish = useMemo(() => me?.username ?? "", [me]);
 
-  const [step, setStep] = useState<Step>("configure");
+  const [step, setStep] = useState<Step>("loading");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [claimed, setClaimed] = useState<{ charmId: string } | null>(null);
@@ -34,11 +35,35 @@ export function ClaimCharmPage() {
 
   const [fileName, setFileName] = useState<string>("");
 
+  const [profileData, setProfileData] = useState<UserProfile>({
+    firstName: "",
+    lastName: "",
+    address: "",
+    email: "",
+    cellNumber: "",
+  });
+
+  // Once authed, check whether this account already has a profile.
+  // New accounts land on the profile step; existing accounts skip straight to configure.
   useEffect(() => {
-    if (!isAuthed && inProgress === InteractionStatus.None) {
-      // keep page usable; user can click Sign In
-    }
-  }, [isAuthed, inProgress]);
+    if (!isAuthed) return;
+
+    // Pre-fill email from the MSAL account
+    setProfileData((prev) => ({ ...prev, email: emailish }));
+
+    getUserMe()
+      .then((res) => {
+        if (res.hasProfile) {
+          setStep("configure");
+        } else {
+          setStep("profile");
+        }
+      })
+      .catch((e: any) => {
+        setErr(e?.message ?? "Failed to check profile.");
+        setStep("configure"); // fall back so the page isn't stuck
+      });
+  }, [isAuthed, emailish]);
 
   if (!code) {
     return (
@@ -85,6 +110,19 @@ export function ClaimCharmPage() {
       await instance.loginRedirect(loginRequest);
     } catch (e: any) {
       setErr(e?.message ?? "Unable to open profile editor.");
+    }
+  }
+
+  async function doSaveProfile() {
+    setErr(null);
+    setBusy(true);
+    try {
+      await saveProfile(profileData);
+      setStep("configure");
+    } catch (e: any) {
+      setErr(e?.message ?? "Failed to save profile.");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -196,7 +234,7 @@ export function ClaimCharmPage() {
             <div className="teCardHeader">
               <div className="teCardHeaderLine" />
               <div className="teCardHeaderTitle">
-                {step === "configure" ? "REGISTRATION" : step === "upload" ? "UPLOAD" : "SEALED"}
+                {step === "loading" ? "…" : step === "profile" ? "KEEPER" : step === "configure" ? "REGISTRATION" : step === "upload" ? "UPLOAD" : "SEALED"}
               </div>
               <div className="teCardHeaderLine" />
 
@@ -207,6 +245,55 @@ export function ClaimCharmPage() {
                 </span>
               </div>
             </div>
+
+            {/* STEP: LOADING */}
+            {step === "loading" && (
+              <div className="teCardBody">
+                <div className="teHint">Checking account…</div>
+              </div>
+            )}
+
+            {/* STEP: PROFILE */}
+            {step === "profile" && (
+              <div className="teCardBody">
+                <div className="teStepTitle">Set up your Keeper profile</div>
+
+                <div className="teGrid">
+                  {([
+                    { key: "firstName" as const, label: "First name", icon: "✦", placeholder: "Aria" },
+                    { key: "lastName" as const, label: "Last name", icon: "✦", placeholder: "Venn" },
+                    { key: "address" as const, label: "Address", icon: "◎", placeholder: "12 Hollow Lane" },
+                    { key: "email" as const, label: "Email", icon: "✉", placeholder: "keeper@example.com" },
+                    { key: "cellNumber" as const, label: "Cell number", icon: "☎", placeholder: "+1 555 012 3456" },
+                  ] as const).map(({ key, label, icon, placeholder }) => (
+                    <label key={key} className="teField">
+                      <div className="teFieldLabel">{label}</div>
+                      <div className="teRail">
+                        <div className="teRailIcon" aria-hidden="true">{icon}</div>
+                        <input
+                          className="teRailInput"
+                          value={profileData[key]}
+                          onChange={(e) => setProfileData((prev) => ({ ...prev, [key]: e.target.value }))}
+                          disabled={busy}
+                          placeholder={placeholder}
+                        />
+                      </div>
+                    </label>
+                  ))}
+
+                  <div className="teActionsRow">
+                    <button
+                      className="teBtn teBtnPrimary teBtnWide"
+                      onClick={doSaveProfile}
+                      disabled={busy || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
+                      type="button"
+                    >
+                      {busy ? "Saving…" : "Save & Continue"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* STEP: CONFIGURE */}
             {step === "configure" && (

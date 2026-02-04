@@ -16,6 +16,16 @@ type CharmRecord = {
 
 const charms = new Map<string, CharmRecord>();
 
+type UserProfile = {
+  firstName: string;
+  lastName: string;
+  address: string;
+  email: string;
+  cellNumber: string;
+};
+
+let userProfile: UserProfile | null = null;
+
 function getOrCreateCharm(code: string): CharmRecord {
   const existing = charms.get(code);
   if (existing) return existing;
@@ -238,6 +248,35 @@ function mockApi() {
             playbackUrl:
               "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
           });
+        }
+
+        // ----------------------------
+        // USER PROFILE
+        // ----------------------------
+        if (req.method === "GET" && req.url === "/api/user/me") {
+          return sendJson({
+            hasProfile: userProfile !== null,
+            profile: userProfile,
+          });
+        }
+
+        if (req.method === "POST" && req.url === "/api/user/profile") {
+          const body = await readBody();
+          const { firstName, lastName, address, email, cellNumber } = body;
+
+          if (!firstName || !lastName || !email) {
+            return sendJson({ ok: false, message: "firstName, lastName, and email are required" }, 400);
+          }
+
+          userProfile = {
+            firstName: String(firstName),
+            lastName: String(lastName),
+            address: String(address ?? ""),
+            email: String(email),
+            cellNumber: String(cellNumber ?? ""),
+          };
+
+          return sendJson({ ok: true, profile: userProfile });
         }
 
         return sendJson({ error: "mock: unknown endpoint", url: req.url }, 404);

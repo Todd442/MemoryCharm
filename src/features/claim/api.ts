@@ -26,6 +26,28 @@ async function getBearerToken(): Promise<string> {
   return result.accessToken;
 }
 
+export type UserProfile = {
+  firstName: string;
+  lastName: string;
+  address: string;
+  email: string;
+  cellNumber: string;
+};
+
+async function authGetJson<T>(url: string): Promise<T> {
+  const token = await getBearerToken();
+
+  const res = await fetch(url, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 async function authPostJson<T>(url: string, body: any): Promise<T> {
   const token = await getBearerToken();
 
@@ -61,4 +83,12 @@ export async function uploadCharm(
   filename: string
 ): Promise<{ ok: true; code: string; memoryType: MemoryType; playbackUrl: string }> {
   return authPostJson("/api/charm/upload", { code, memoryType, filename });
+}
+
+export async function getUserMe(): Promise<{ hasProfile: boolean; profile?: UserProfile }> {
+  return authGetJson("/api/user/me");
+}
+
+export async function saveProfile(profile: UserProfile): Promise<{ ok: boolean; profile: UserProfile }> {
+  return authPostJson("/api/user/profile", profile);
 }
