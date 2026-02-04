@@ -3,10 +3,10 @@ import { LogLevel, type Configuration } from "@azure/msal-browser";
 export const msalConfig: Configuration = {
   auth: {
     clientId: "ba1dc3e7-4c7b-49c3-b526-dd06fa667a5b",
-    authority: "https://MemoryCharms.ciamlogin.com/",
-    redirectUri: window.location.origin, // http://localhost:5173
+    authority: "https://MemoryCharms.ciamlogin.com/98a6abae-6060-40da-a43f-f7187cd56710/",
+    redirectUri: window.location.origin,
     navigateToLoginRequestUrl: true,
-    knownAuthorities: ["MemoryCharms.ciamlogin.com"], // helps prevent authority validation issues for custom domains
+    knownAuthorities: ["MemoryCharms.ciamlogin.com"],
   },
   cache: {
     cacheLocation: "sessionStorage", // safer; switch to localStorage if you want SSO across tabs
