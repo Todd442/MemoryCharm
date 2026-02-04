@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 
-type Status = { text: string; tone?: "neutral" | "warn" | "error" };
+type Status = { text: string; subtitle?: string; tone?: "neutral" | "warn" | "error" };
 
 type Ctx = {
   status: Status;

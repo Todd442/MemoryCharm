@@ -6,6 +6,7 @@ import { InteractionStatus } from "@azure/msal-browser";
 import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
 import type { UserProfile } from "../api";
 import { loginRequest } from "../../../app/auth/msalConfig";
+import { useStatus } from "../../../app/providers/StatusProvider";
 
 import "./ClaimCharmPage.css";
 
@@ -18,6 +19,7 @@ export function ClaimCharmPage() {
   const { code } = useParams<{ code: string }>();
 
   const { instance, accounts, inProgress } = useMsal();
+  const { setStatus } = useStatus();
 
   const isAuthed = accounts.length > 0;
   const me = accounts[0] ?? null;
@@ -64,6 +66,18 @@ export function ClaimCharmPage() {
         setStep("configure"); // fall back so the page isn't stuck
       });
   }, [isAuthed, emailish]);
+
+  // Keep the top status bar in sync with the current step
+  useEffect(() => {
+    const titles: Record<Step, { text: string; subtitle: string }> = {
+      loading:   { text: "Bind the Charm",      subtitle: "Bind thy name to the ledger, and the Mechanism shall remember." },
+      profile:   { text: "Keeper Registration", subtitle: "Inscribe your details upon the ledger." },
+      configure: { text: "Bind the Charm",      subtitle: "Bind thy name to the ledger, and the Mechanism shall remember." },
+      upload:    { text: "Bind the Charm",      subtitle: "Attach a memory to seal the charm." },
+      done:      { text: "Charm Sealed",        subtitle: "The Mechanism shall remember." },
+    };
+    setStatus(titles[step]);
+  }, [step, setStatus]);
 
   if (!code) {
     return (
@@ -166,11 +180,6 @@ export function ClaimCharmPage() {
   return (
     <div className="teClaimWrap">
       <div className="teClaimPanel">
-        <header className="teClaimHero">
-          <h1>Bind the Charm</h1>
-          <p>Bind thy name to the ledger, and the Mechanism shall remember.</p>
-        </header>
-
         <div className="teClaimMeta">
           <span className="teClaimMetaLabel">Charm code</span>
           <span className="teClaimMetaValue">{code}</span>
@@ -234,7 +243,7 @@ export function ClaimCharmPage() {
             <div className="teCardHeader">
               <div className="teCardHeaderLine" />
               <div className="teCardHeaderTitle">
-                {step === "loading" ? "…" : step === "profile" ? "KEEPER" : step === "configure" ? "REGISTRATION" : step === "upload" ? "UPLOAD" : "SEALED"}
+                {step === "loading" ? "…" : step === "profile" ? "PROFILE SETUP" : step === "configure" ? "CHARM CONFIGURATION" : step === "upload" ? "MEMORY UPLOAD" : "SEALED"}
               </div>
               <div className="teCardHeaderLine" />
 
@@ -256,8 +265,6 @@ export function ClaimCharmPage() {
             {/* STEP: PROFILE */}
             {step === "profile" && (
               <div className="teCardBody">
-                <div className="teStepTitle">Set up your Keeper profile</div>
-
                 <div className="teGrid">
                   {([
                     { key: "firstName" as const, label: "First name", icon: "✦", placeholder: "Aria" },
@@ -298,8 +305,6 @@ export function ClaimCharmPage() {
             {/* STEP: CONFIGURE */}
             {step === "configure" && (
               <div className="teCardBody">
-                <div className="teStepTitle">1) Configure charm</div>
-
                 <div className="teGrid">
                   <div>
                     <div className="teFieldLabel">Memory type</div>
@@ -367,7 +372,6 @@ export function ClaimCharmPage() {
             {/* STEP: UPLOAD */}
             {step === "upload" && (
               <div className="teCardBody">
-                <div className="teStepTitle">2) Upload (mock)</div>
                 <div className="teHint">
                   We’re not doing real file transfer yet. Pick a filename; the server will attach a sample media URL.
                 </div>
@@ -409,7 +413,6 @@ export function ClaimCharmPage() {
             {/* STEP: DONE */}
             {step === "done" && (
               <div className="teCardBody">
-                <div className="teStepTitle">Done</div>
                 <div className="teHint">
                   Your charm is claimed, configured, and has a memory attached.
                 </div>

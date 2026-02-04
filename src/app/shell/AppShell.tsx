@@ -1,6 +1,8 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { FixedStage } from "./FixedStage";
+import { StatusProvider } from "../providers/StatusProvider";
+import { StatusBar } from "./StatusBar";
 import "./shell.css";
 
 export function AppShell() {
@@ -11,25 +13,20 @@ export function AppShell() {
         <div className="te-bg" />
 
         {/* Top / middle / bottom layout */}
-        <div className="te-layout">
-          <header className="te-status">
-            {/* Temporary status text until we wire StatusProvider */}
-            <div className="te-statusText">Status: Ready</div>
-          </header>
+        <StatusProvider>
+          <div className="te-layout">
+            <StatusBar />
 
-          {/* This is the only scrolling area */}
-          <main className="te-scroll">
-            <Outlet />
-          </main>
+            {/* This is the only scrolling area */}
+            <main className="te-scroll">
+              <Outlet />
+            </main>
 
-          {/* Global bottom commands (optional).
-              For now leave empty; individual pages can render their own command bars
-              OR you can keep a global footer here later. */}
-          <footer className="te-commands">
-            {/* Placeholder: you can remove this once pages supply their own command rows */}
-            <div className="te-commandHint"> </div>
-          </footer>
-        </div>
+            <footer className="te-commands">
+              <div className="te-commandHint"> </div>
+            </footer>
+          </div>
+        </StatusProvider>
       </div>
     </FixedStage>
   );
