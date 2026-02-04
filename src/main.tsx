@@ -5,51 +5,38 @@ import { MsalProvider } from "@azure/msal-react";
 
 import { router } from "./app/routes";
 import { msalInstance } from "./app/auth/msalInstance";
+import { debugLog } from "./app/auth/debugLog";
 
 import "./styles/base.css";
 import "./styles/tokens.css";
 import "./styles/frame.css";
 import "./styles/panel.css";
 
-const RETURN_TO_KEY = "mc.returnTo";
-
 async function bootstrap() {
-  // IMPORTANT: Initialize MSAL and process the redirect response *before* rendering routes.
+  // IMPORTANT: Initialize MSAL and process the redirect response *before* rendering.
+  debugLog("bootstrap", `Starting. URL: ${window.location.href}`);
+  debugLog("bootstrap", `Search: ${window.location.search}, Hash: ${window.location.hash}`);
+  
   await msalInstance.initialize();
-
-  const result = await msalInstance.handleRedirectPromise();
-
-  // If we came back from login, MSAL gives us the account here.
-  if (result?.account) {
-    msalInstance.setActiveAccount(result.account);
-
-    // ✅ Restore the page that required auth (e.g. /claim/UNCLAIMED)
-    const returnTo = sessionStorage.getItem(RETURN_TO_KEY) || localStorage.getItem(RETURN_TO_KEY);
-    if (returnTo) {
-      sessionStorage.removeItem(RETURN_TO_KEY);
-      localStorage.removeItem(RETURN_TO_KEY);
-      window.history.replaceState(null, "", returnTo);
-    }
-  } else {
-    // Otherwise, restore an existing cached account if present.
+  debugLog("bootstrap", "MSAL initialized");
+  
+  const redirectResult = await msalInstance.handleRedirectPromise();
+  debugLog("bootstrap", `handleRedirectPromise result: ${redirectResult ? "SUCCESS" : "null"}`);
+  if (redirectResult) {
+    debugLog("bootstrap", `Auth result: accessToken=${redirectResult.accessToken ? "yes" : "no"}, uniqueId=${redirectResult.uniqueId}`);
+    // Persist the account so getActiveAccount() works for the session lifetime.
+    // handleRedirectPromise stores tokens but does NOT set an active account.
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length > 0) {
       msalInstance.setActiveAccount(accounts[0]);
+      debugLog("bootstrap", `Active account set: ${accounts[0].username}`);
     }
-    
-    // FALLBACK: If MSAL didn't complete the redirect but we have a stored returnTo and the URL has auth markers,
-    // restore the returnTo path anyway (workaround for MSAL redirect handling issues with hash-based auth responses)
-    const returnTo = sessionStorage.getItem(RETURN_TO_KEY) || localStorage.getItem(RETURN_TO_KEY);
-    const hasAuthMarkers = window.location.search.includes("code") || 
-                           window.location.search.includes("session_state") ||
-                           window.location.hash.includes("code") || 
-                           window.location.hash.includes("session_state");
-    if (returnTo && hasAuthMarkers) {
-      sessionStorage.removeItem(RETURN_TO_KEY);
-      localStorage.removeItem(RETURN_TO_KEY);
-      window.history.replaceState(null, "", returnTo);
-      window.location.reload();
-    }
+  }
+  
+  const allAccounts = msalInstance.getAllAccounts();
+  debugLog("bootstrap", `After redirect: allAccounts.length=${allAccounts.length}`);
+  if (allAccounts.length > 0) {
+    debugLog("bootstrap", `First account username: ${allAccounts[0].username}`);
   }
 
   ReactDOM.createRoot(document.getElementById("root")!).render(

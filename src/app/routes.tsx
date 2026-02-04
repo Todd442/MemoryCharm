@@ -1,6 +1,7 @@
 import React from "react";
 import { createBrowserRouter, Link } from "react-router-dom";
 import { AppShell } from "./shell/AppShell";
+import { AuthGuard } from "./auth/AuthGuard";
 import { CharmEntryPage } from "../features/playback/pages/CharmEntryPage";
 import { ClaimCharmPage } from "../features/claim/pages/ClaimCharmPage";
 import { RequireAuth } from "../app/auth/RequireAuth";
@@ -43,7 +44,11 @@ function NotFound() {
 
 export const router = createBrowserRouter([
   {
-    element: <AppShell />,
+    element: (
+      <AuthGuard>
+        <AppShell />
+      </AuthGuard>
+    ),
     children: [
       { path: "/", element: <Home /> },
 
@@ -53,7 +58,7 @@ export const router = createBrowserRouter([
       // Clean URL: /c/:code
       { path: "/c/:code", element: <CharmEntryPage /> },
 
-      // Claim flow
+      // Claim flow (protected)
       {  path: "/claim/:code",
         element: (
           <RequireAuth>
@@ -63,9 +68,6 @@ export const router = createBrowserRouter([
       },
       { path: "/test/scroll", element: <ScrollTestPage /> },
       { path: "*", element: <NotFound /> },
-    
-
-
     ],
   },
 ]);

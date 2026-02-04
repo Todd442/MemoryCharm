@@ -5,11 +5,11 @@ export const msalConfig: Configuration = {
     clientId: "ba1dc3e7-4c7b-49c3-b526-dd06fa667a5b",
     authority: "https://MemoryCharms.ciamlogin.com/98a6abae-6060-40da-a43f-f7187cd56710/",
     redirectUri: window.location.origin,
-    navigateToLoginRequestUrl: true,
+    navigateToLoginRequestUrl: false,
     knownAuthorities: ["MemoryCharms.ciamlogin.com"],
   },
   cache: {
-    cacheLocation: "sessionStorage", // safer; switch to localStorage if you want SSO across tabs
+    cacheLocation: "localStorage",
     storeAuthStateInCookie: false,
   },
   system: {

@@ -46,3 +46,6 @@ export function displayDebugLogs() {
   console.groupEnd();
   return logs;
 }
+
+// Make debug functions globally accessible
+(window as any).debugLogs = displayDebugLogs;
