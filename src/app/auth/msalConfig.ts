@@ -29,4 +29,5 @@ export const msalConfig: Configuration = {
 // Minimal scopes for sign-in (MSAL automatically adds openid/profile/email)
 export const loginRequest = {
   scopes: [],
+  prompt: "login",
 };

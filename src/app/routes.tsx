@@ -59,12 +59,13 @@ export const router = createBrowserRouter([
       { path: "/c/:code", element: <CharmEntryPage /> },
 
       // Claim flow (protected)
-      {  path: "/claim/:code",
+      {
+        path: "/claim/:code",
         element: (
           <RequireAuth>
             <ClaimCharmPage />
           </RequireAuth>
-        ), 
+        ),
       },
       { path: "/test/scroll", element: <ScrollTestPage /> },
       { path: "*", element: <NotFound /> },
