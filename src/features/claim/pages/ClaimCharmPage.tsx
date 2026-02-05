@@ -277,13 +277,6 @@ export function ClaimCharmPage() {
               </div>
             </div>
 
-            {/* Back navigation */}
-            {step !== "loading" && (
-              <button className="teBtn teBtnSm teBtnGhost teBackBtn" onClick={goBack} type="button">
-                ← Back
-              </button>
-            )}
-
             {/* STEP: LOADING */}
             {step === "loading" && (
               <div className="teCardBody">
@@ -477,6 +470,15 @@ export function ClaimCharmPage() {
     {/* Portal: auth actions into the frame footer */}
     {isAuthed && footerEl && createPortal(
       <div className="te-footerActions">
+        {step !== "loading" && (
+          <button
+            className="teBtn teBtnSm teBtnGhost"
+            onClick={goBack}
+            type="button"
+          >
+            ← Back
+          </button>
+        )}
         <button
           className="teBtn teBtnSm teBtnGhost"
           onClick={doEditProfile}

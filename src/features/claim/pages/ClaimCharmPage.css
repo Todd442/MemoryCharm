@@ -304,11 +304,6 @@
   align-items: start;
 }
 
-.teBackBtn {
-  width: fit-content;
-  margin-bottom: 4px;
-}
-
 .teBtn {
   height: 44px;
   padding: 0 14px;
