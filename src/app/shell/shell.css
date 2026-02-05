@@ -7,6 +7,7 @@
   height: 1600px;
   position: relative;
   overflow: hidden;
+  margin-left: 30px;
 
   /* Base typography inside the frame */
   color: #f3e7cf;
@@ -93,7 +94,7 @@
 
 /* Scrollable middle */
 .te-scroll {
-  padding: 32px 100px 32px 100px; /* top right bottom left */
+  padding: 32px 75px 32px 75px; /* top right bottom left */
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;

@@ -119,7 +119,7 @@
 /* Core card */
 .teCard {
   position: relative;
-  padding: 16px;
+  padding: 26px 46px 26px 46px;
   background: rgba(32, 18, 10, 0.62);
   border: 1px solid rgba(210, 170, 110, 0.25);
   border-radius: 18px;
@@ -205,11 +205,11 @@
 
 /* pills */
 .teFieldLabel {
-  font-size: 12px;
+  font-size: 24px;
   opacity: 0.75;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .tePills {
@@ -337,7 +337,7 @@
   position: relative;
   width: 108%;
   margin-left: -4%;
-  aspect-ratio: 2270 / 332;
+  aspect-ratio: 2270 / 286;
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
