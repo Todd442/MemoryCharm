@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
@@ -36,6 +37,43 @@ export function ClaimCharmPage() {
   const [authMode, setAuthMode] = useState<AuthMode>("none");
 
   const [fileName, setFileName] = useState<string>("");
+  const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setFooterEl(document.getElementById("te-footer"));
+  }, []);
+
+  // History-backed step navigation ------------------------------------------
+  // setInitialStep: the first real step after loading.  replaceState so that
+  // browser-back from here leaves the claim flow entirely.
+  function setInitialStep(s: Step) {
+    setStep(s);
+    window.history.replaceState({ step: s }, "");
+  }
+
+  // advanceTo: every subsequent step.  pushState so browser-back pops it off.
+  function advanceTo(s: Step) {
+    setStep(s);
+    window.history.pushState({ step: s }, "");
+  }
+
+  function goBack() {
+    window.history.back();
+  }
+
+  // Sync browser back-button with step state
+  useEffect(() => {
+    const onPopState = (e: PopStateEvent) => {
+      if (e.state?.step) {
+        setStep(e.state.step as Step);
+      } else {
+        nav("/");
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [nav]);
+  // ---------------------------------------------------------------------------
 
   const [profileData, setProfileData] = useState<UserProfile>({
     firstName: "",
@@ -56,14 +94,14 @@ export function ClaimCharmPage() {
     getUserMe()
       .then((res) => {
         if (res.hasProfile) {
-          setStep("configure");
+          setInitialStep("configure");
         } else {
-          setStep("profile");
+          setInitialStep("profile");
         }
       })
       .catch((e: any) => {
         setErr(e?.message ?? "Failed to check profile.");
-        setStep("configure"); // fall back so the page isn't stuck
+        setInitialStep("configure"); // fall back so the page isn't stuck
       });
   }, [isAuthed, emailish]);
 
@@ -132,7 +170,7 @@ export function ClaimCharmPage() {
     setBusy(true);
     try {
       await saveProfile(profileData);
-      setStep("configure");
+      advanceTo("configure");
     } catch (e: any) {
       setErr(e?.message ?? "Failed to save profile.");
     } finally {
@@ -148,7 +186,7 @@ export function ClaimCharmPage() {
       setClaimed({ charmId: c.charmId });
 
       await configureCharm(code, memoryType, authMode);
-      setStep("upload");
+      advanceTo("upload");
     } catch (e: any) {
       setErr(e?.message ?? "Claim/configure failed.");
     } finally {
@@ -167,7 +205,7 @@ export function ClaimCharmPage() {
       }
 
       await uploadCharm(code, memoryType, fileName.trim());
-      setStep("done");
+      advanceTo("done");
     } catch (e: any) {
       setErr(e?.message ?? "Upload failed.");
     } finally {
@@ -178,6 +216,7 @@ export function ClaimCharmPage() {
   const working = inProgress !== InteractionStatus.None;
 
   return (
+    <>
     <div className="teClaimWrap">
       <div className="teClaimPanel">
         <div className="teClaimMeta">
@@ -193,23 +232,6 @@ export function ClaimCharmPage() {
                 <div className="teAuthKicker">Signed in</div>
                 <div className="teAuthName">{displayName}</div>
                 {emailish && <div className="teAuthEmail">{emailish}</div>}
-              </div>
-
-              <div className="teAuthActions">
-                <button
-                  className="teBtn teBtnSm teBtnGhost"
-                  onClick={doEditProfile}
-                  disabled={working}
-                >
-                  Edit profile
-                </button>
-                <button
-                  className="teBtn teBtnSm teBtnGhost"
-                  onClick={doSignOut}
-                  disabled={working}
-                >
-                  Sign out
-                </button>
               </div>
             </div>
           ) : (
@@ -254,6 +276,13 @@ export function ClaimCharmPage() {
                 </span>
               </div>
             </div>
+
+            {/* Back navigation */}
+            {step !== "loading" && (
+              <button className="teBtn teBtnSm teBtnGhost teBackBtn" onClick={goBack} type="button">
+                ← Back
+              </button>
+            )}
 
             {/* STEP: LOADING */}
             {step === "loading" && (
@@ -444,5 +473,27 @@ export function ClaimCharmPage() {
         </div>
       </div>
     </div>
+
+    {/* Portal: auth actions into the frame footer */}
+    {isAuthed && footerEl && createPortal(
+      <div className="te-footerActions">
+        <button
+          className="teBtn teBtnSm teBtnGhost"
+          onClick={doEditProfile}
+          disabled={working}
+        >
+          Edit profile
+        </button>
+        <button
+          className="teBtn teBtnSm teBtnGhost"
+          onClick={doSignOut}
+          disabled={working}
+        >
+          Sign out
+        </button>
+      </div>,
+      footerEl
+    )}
+    </>
   );
 }

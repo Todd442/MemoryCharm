@@ -103,6 +103,14 @@
 /* Bottom command plate */
 .te-commands {
   padding: 22px 80px 34px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.te-footerActions {
+  display: flex;
+  gap: 12px;
 }
 
 /* Link styling */

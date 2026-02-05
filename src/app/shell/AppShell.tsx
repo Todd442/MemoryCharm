@@ -22,9 +22,7 @@ export function AppShell() {
               <Outlet />
             </main>
 
-            <footer className="te-commands">
-              <div className="te-commandHint"> </div>
-            </footer>
+            <footer className="te-commands" id="te-footer" />
           </div>
         </StatusProvider>
       </div>
