@@ -10,6 +10,7 @@ import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
 
 import "./ClaimCharmPage.css";
+import textInputBg from "../../../assets/textInput-background.png";
 
 type Step = "loading" | "profile" | "configure" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
@@ -37,6 +38,7 @@ export function ClaimCharmPage() {
   const [authMode, setAuthMode] = useState<AuthMode>("none");
 
   const [fileName, setFileName] = useState<string>("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -178,6 +180,18 @@ export function ClaimCharmPage() {
     }
   }
 
+  async function doSaveDraft() {
+    setErr(null);
+    setBusy(true);
+    try {
+      await saveProfile(profileData);
+    } catch (e: any) {
+      setErr(e?.message ?? "Failed to save draft.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function doClaimAndConfigure() {
     setErr(null);
     setBusy(true);
@@ -265,7 +279,7 @@ export function ClaimCharmPage() {
             <div className="teCardHeader">
               <div className="teCardHeaderLine" />
               <div className="teCardHeaderTitle">
-                {step === "loading" ? "…" : step === "profile" ? "PROFILE SETUP" : step === "configure" ? "CHARM CONFIGURATION" : step === "upload" ? "MEMORY UPLOAD" : "SEALED"}
+                {step === "loading" ? "…" : step === "profile" ? "REGISTRATION" : step === "configure" ? "CHARM CONFIGURATION" : step === "upload" ? "MEMORY UPLOAD" : "SEALED"}
               </div>
               <div className="teCardHeaderLine" />
 
@@ -289,35 +303,58 @@ export function ClaimCharmPage() {
               <div className="teCardBody">
                 <div className="teGrid">
                   {([
-                    { key: "firstName" as const, label: "First name", icon: "✦", placeholder: "Aria" },
-                    { key: "lastName" as const, label: "Last name", icon: "✦", placeholder: "Venn" },
-                    { key: "address" as const, label: "Address", icon: "◎", placeholder: "12 Hollow Lane" },
-                    { key: "email" as const, label: "Email", icon: "✉", placeholder: "keeper@example.com" },
-                    { key: "cellNumber" as const, label: "Cell number", icon: "☎", placeholder: "+1 555 012 3456" },
-                  ] as const).map(({ key, label, icon, placeholder }) => (
+                    { key: "firstName"  as const, label: "Given Name",            placeholder: "e.g., Elowen",              hint: "" },
+                    { key: "lastName"   as const, label: "Family Name",           placeholder: "e.g., Blackthorne",         hint: "" },
+                    { key: "address"    as const, label: "Dwelling Place",        placeholder: "e.g., 12 Hollow Lane",     hint: "" },
+                    { key: "email"      as const, label: "Signal Address (Email)",placeholder: "captain@trianglesend.com",  hint: "We'll send a seal-confirmation missive to this address." },
+                    { key: "cellNumber" as const, label: "Cipher Line",           placeholder: "e.g., +1 555 012 3456",    hint: "" },
+                  ] as const).map(({ key, label, placeholder, hint }) => (
                     <label key={key} className="teField">
                       <div className="teFieldLabel">{label}</div>
-                      <div className="teRail">
-                        <div className="teRailIcon" aria-hidden="true">{icon}</div>
+                      <div className="teField--bgWrap" style={{ backgroundImage: `url(${textInputBg})` }}>
                         <input
-                          className="teRailInput"
+                          className="teFieldInput"
                           value={profileData[key]}
                           onChange={(e) => setProfileData((prev) => ({ ...prev, [key]: e.target.value }))}
                           disabled={busy}
                           placeholder={placeholder}
                         />
                       </div>
+                      {hint && <div className="teFieldHint">{hint}</div>}
                     </label>
                   ))}
 
-                  <div className="teActionsRow">
+                  {/* Terms acceptance */}
+                  <label className="teTermsRow">
+                    <input
+                      className="teTermsCheck"
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      disabled={busy}
+                    />
+                    <span className="teTermsText">
+                      I accept the <a href="#" onClick={(e) => e.preventDefault()}>Code of Conduct</a> and the <a href="#" onClick={(e) => e.preventDefault()}>Terms of Passage</a>.
+                    </span>
+                  </label>
+
+                  {/* Save draft + seal */}
+                  <div className="teBtnsRow">
                     <button
-                      className="teBtn teBtnPrimary teBtnWide"
-                      onClick={doSaveProfile}
+                      className="teBtn teBtnGhost"
+                      onClick={doSaveDraft}
                       disabled={busy || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
                       type="button"
                     >
-                      {busy ? "Saving…" : "Save & Continue"}
+                      {busy ? "Saving…" : "Save Draft"}
+                    </button>
+                    <button
+                      className="teBtn teBtnPrimary"
+                      onClick={doSaveProfile}
+                      disabled={busy || !termsAccepted || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
+                      type="button"
+                    >
+                      {busy ? "Binding…" : "Seal & Continue"}
                     </button>
                   </div>
                 </div>
