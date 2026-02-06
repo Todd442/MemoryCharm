@@ -8,6 +8,7 @@ import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from 
 import type { UserProfile } from "../api";
 import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
+import { ALL_GLYPHS, type GlyphInfo } from "../../../app/data/glyphs";
 
 import "./ClaimCharmPage.css";
 import textInputBg from "../../../assets/textInput-background.png";
@@ -37,7 +38,9 @@ export function ClaimCharmPage() {
   const [memoryType, setMemoryType] = useState<MemoryType>("video");
   const [authMode, setAuthMode] = useState<AuthMode>("none");
 
-  const [fileName, setFileName] = useState<string>("");
+  const [selectedGlyph, setSelectedGlyph] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadPct, setUploadPct] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
 
@@ -199,7 +202,7 @@ export function ClaimCharmPage() {
       const c = await claimCharm(code);
       setClaimed({ charmId: c.charmId });
 
-      await configureCharm(code, memoryType, authMode);
+      await configureCharm(code, memoryType, authMode, selectedGlyph ?? undefined);
       advanceTo("upload");
     } catch (e: any) {
       setErr(e?.message ?? "Claim/configure failed.");
@@ -210,15 +213,14 @@ export function ClaimCharmPage() {
 
   async function doUpload() {
     setErr(null);
+    if (!file) {
+      setErr("Select a file to upload.");
+      return;
+    }
     setBusy(true);
+    setUploadPct(0);
     try {
-      if (!fileName.trim()) {
-        setErr("Pick a file (name) to upload. (Mock upload only)");
-        setBusy(false);
-        return;
-      }
-
-      await uploadCharm(code, memoryType, fileName.trim());
+      await uploadCharm(code, file, file.type, setUploadPct);
       advanceTo("done");
     } catch (e: any) {
       setErr(e?.message ?? "Upload failed.");
@@ -226,6 +228,12 @@ export function ClaimCharmPage() {
       setBusy(false);
     }
   }
+
+  const acceptTypes: Record<MemoryType, string> = {
+    video: "video/mp4,video/webm,video/quicktime",
+    image: "image/jpeg,image/png,image/gif,image/webp",
+    audio: "audio/mpeg,audio/wav,audio/ogg,audio/aac",
+  };
 
   const working = inProgress !== InteractionStatus.None;
 
@@ -403,16 +411,43 @@ export function ClaimCharmPage() {
                       </button>
                     </div>
 
-                    <div className="teHint">
-                      (Dev) Mock glyph success is “7”. We’ll make this configurable later.
-                    </div>
                   </div>
+
+                  {authMode === "glyph" && (
+                    <div>
+                      <div className="teFieldLabel">Choose your secret glyph</div>
+                      <div className="teHint" style={{ marginBottom: 8 }}>
+                        Select the glyph that will unlock this charm's memory.
+                      </div>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(6, minmax(52px, 1fr))",
+                          gap: 8,
+                          maxWidth: 420,
+                        }}
+                      >
+                        {ALL_GLYPHS.map((g) => (
+                          <button
+                            key={g.id}
+                            type="button"
+                            disabled={busy}
+                            onClick={() => setSelectedGlyph(g.id)}
+                            className={"tePill " + (selectedGlyph === g.id ? "isActive" : "")}
+                            style={{ fontSize: 12, padding: "8px 4px" }}
+                          >
+                            {g.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
                       onClick={doClaimAndConfigure}
-                      disabled={busy || working}
+                      disabled={busy || working || (authMode === "glyph" && !selectedGlyph)}
                       type="button"
                     >
                       {busy ? "Binding charm…" : "Claim & Continue"}
@@ -431,39 +466,57 @@ export function ClaimCharmPage() {
             {/* STEP: UPLOAD */}
             {step === "upload" && (
               <div className="teCardBody">
-                <div className="teHint">
-                  We’re not doing real file transfer yet. Pick a filename; the server will attach a sample media URL.
-                </div>
-
                 <label className="teField">
-                  <div className="teFieldLabel">File name</div>
+                  <div className="teFieldLabel">
+                    Select {memoryType} file
+                  </div>
 
                   <div className="teRail">
-                    <div className="teRailIcon" aria-hidden="true">✦</div>
+                    <div className="teRailIcon" aria-hidden="true">&#x2726;</div>
                     <input
-                      className="teRailInput"
-                      value={fileName}
-                      onChange={(e) => setFileName(e.target.value)}
+                      type="file"
+                      accept={acceptTypes[memoryType]}
                       disabled={busy}
-                      placeholder={
-                        memoryType === "video"
-                          ? "my_video.mov"
-                          : memoryType === "image"
-                          ? "my_photo.jpg"
-                          : "my_audio.m4a"
-                      }
+                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      style={{ flex: 1, padding: "6px 0" }}
                     />
                   </div>
+                  {file && (
+                    <div className="teHint" style={{ marginTop: 4 }}>
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                    </div>
+                  )}
                 </label>
+
+                {busy && (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{
+                      height: 6,
+                      borderRadius: 3,
+                      background: "rgba(0,0,0,0.1)",
+                      overflow: "hidden",
+                    }}>
+                      <div style={{
+                        height: "100%",
+                        width: `${uploadPct}%`,
+                        background: "rgba(60,60,60,0.85)",
+                        transition: "width 0.2s",
+                      }} />
+                    </div>
+                    <div className="teHint" style={{ marginTop: 4 }}>
+                      {Math.round(uploadPct)}%
+                    </div>
+                  </div>
+                )}
 
                 <div className="teActionsRow">
                   <button
                     className="teBtn teBtnPrimary"
                     onClick={doUpload}
-                    disabled={busy || working}
+                    disabled={busy || working || !file}
                     type="button"
                   >
-                    {busy ? "Uploading…" : "Upload"}
+                    {busy ? "Uploading\u2026" : "Upload"}
                   </button>
                 </div>
               </div>

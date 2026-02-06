@@ -285,6 +285,20 @@ function mockApi() {
   };
 }
 
-export default defineConfig({
-  plugins: [react(), mockApi()],
+export default defineConfig(() => {
+  const useMock = process.env.VITE_USE_MOCK === "true";
+
+  return {
+    plugins: [react(), ...(useMock ? [mockApi()] : [])],
+    server: useMock
+      ? {}
+      : {
+          proxy: {
+            "/api": {
+              target: "http://localhost:7040",
+              changeOrigin: true,
+            },
+          },
+        },
+  };
 });

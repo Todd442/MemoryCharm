@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
+import { selectRandomGlyphs, type GlyphInfo } from "../app/data/glyphs";
 
 export function GlyphAuthPanel(props: {
   attemptsLeft: number;
   busy: boolean;
-  onSubmit: (glyph: string) => void | Promise<void>;
+  onSubmit: (glyphId: string) => void | Promise<void>;
 }) {
-  const glyphIds = useMemo(() => ["1", "2", "3", "4", "5", "6", "7", "8", "9"], []);
+  const glyphs = useMemo<GlyphInfo[]>(() => selectRandomGlyphs(9), []);
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
@@ -23,27 +24,27 @@ export function GlyphAuthPanel(props: {
           maxWidth: 320,
         }}
       >
-        {glyphIds.map((id) => {
+        {glyphs.map((g) => {
           const selectedStyle =
-            selected === id
+            selected === g.id
               ? { outline: "3px solid rgba(80,80,80,0.55)", background: "rgba(180,180,180,0.35)" }
               : {};
           return (
             <button
-              key={id}
+              key={g.id}
               disabled={props.busy}
-              onClick={() => setSelected(id)}
+              onClick={() => setSelected(g.id)}
               style={{
                 height: 64,
                 borderRadius: 12,
                 border: "1px solid rgba(0,0,0,0.25)",
                 background: "rgba(230,230,230,0.6)",
-                fontSize: 22,
+                fontSize: 14,
                 cursor: props.busy ? "default" : "pointer",
                 ...selectedStyle,
               }}
             >
-              {id}
+              {g.name}
             </button>
           );
         })}
@@ -62,12 +63,8 @@ export function GlyphAuthPanel(props: {
             cursor: props.busy ? "default" : "pointer",
           }}
         >
-          {props.busy ? "Verifying…" : "Invoke"}
+          {props.busy ? "Verifying\u2026" : "Invoke"}
         </button>
-      </div>
-
-      <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>
-        (Mock: choose <strong>7</strong> for success)
       </div>
     </div>
   );

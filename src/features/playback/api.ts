@@ -1,38 +1,104 @@
-import type { EntryResponse } from "./types";
+import type { EntryResponse, PlaybackUrlResponse } from "./types";
+import {
+  normalizeApiResponse,
+  toEntryResponse,
+  toPlaybackUrl,
+  toGlyphVerifyResult,
+  type CharmStatusApiResponse,
+} from "./apiAdapters";
 
-async function postJson<T>(url: string, body: any): Promise<T> {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+/** Safely parse JSON and normalize PascalCase keys to camelCase. */
+async function safeJsonNormalized(res: Response): Promise<CharmStatusApiResponse | null> {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return normalizeApiResponse(JSON.parse(text));
+  } catch {
+    return null;
+  }
 }
 
-async function getJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
+/**
+ * Entry by NFC token. The SPA already extracts the code from the URL param
+ * (/c?Token=t:CODE) and navigates to /c/:code. This just delegates.
+ */
 export function entryByToken(token: string): Promise<EntryResponse> {
-  return postJson("/api/entry/by-token", { token });
+  const code = token.startsWith("t:") ? token.slice(2) : token;
+  return entryByCode(code);
 }
 
-export function entryByCode(code: string): Promise<EntryResponse> {
-  return getJson(`/api/entry/by-code/${encodeURIComponent(code)}`);
+/**
+ * Entry by charm code. GET /api/charm/{code}
+ */
+export async function entryByCode(code: string): Promise<EntryResponse> {
+  const res = await fetch(`/api/charm/${encodeURIComponent(code)}`, {
+    headers: { Accept: "application/json" },
+  });
+
+  if (res.status === 404) {
+    return { kind: "not_found" };
+  }
+
+  const body = await safeJsonNormalized(res);
+  if (!body) {
+    throw new Error(`API returned ${res.status} with no parseable body`);
+  }
+  return toEntryResponse(body, res.status);
 }
 
-export type PlaybackResponse = {
-  memoryType: "video" | "image" | "audio";
-  playbackUrl: string;
-};
+export type PlaybackResponse = PlaybackUrlResponse;
 
-export function getPlaybackUrl(code: string): Promise<PlaybackResponse> {
-  return getJson(`/api/c/${encodeURIComponent(code)}/playback-url`);
+/**
+ * Get playback URL for an open (no-auth) charm.
+ * The GET /api/charm/{code} response includes Primary/Fallback URLs when status="ready".
+ */
+export async function getPlaybackUrl(code: string): Promise<PlaybackResponse> {
+  const res = await fetch(`/api/charm/${encodeURIComponent(code)}`, {
+    headers: { Accept: "application/json" },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `${res.status} ${res.statusText}`);
+  }
+
+  const body = await safeJsonNormalized(res);
+  if (!body) {
+    throw new Error("Empty response from API");
+  }
+
+  const playback = toPlaybackUrl(body);
+  if (!playback) {
+    throw new Error("Content not yet available");
+  }
+
+  return playback;
 }
 
-export function verifyGlyph(code: string, glyph: string): Promise<{ ok: boolean; attemptsLeft: number }> {
-  return postJson(`/api/c/${encodeURIComponent(code)}/auth/verify-glyph`, { glyph });
+/**
+ * Verify glyph for a charm. POST /api/charm/{code} with { glyphId }.
+ * Accepts a glyph GUID string. Returns playback URLs on success.
+ */
+export async function verifyGlyph(
+  code: string,
+  glyphId: string
+): Promise<{
+  ok: boolean;
+  attemptsLeft: number;
+  playback: PlaybackResponse | null;
+}> {
+  const res = await fetch(`/api/charm/${encodeURIComponent(code)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ glyphId }),
+  });
+
+  const body = await safeJsonNormalized(res);
+  if (!body) {
+    throw new Error(`Glyph verify returned ${res.status} with no parseable body`);
+  }
+  return toGlyphVerifyResult(body, res.status);
 }

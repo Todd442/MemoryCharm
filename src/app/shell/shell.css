@@ -7,7 +7,7 @@
   height: 1600px;
   position: relative;
   overflow: hidden;
-  margin-left: 30px;
+  transform: translateX(30px);
 
   /* Base typography inside the frame */
   color: #f3e7cf;

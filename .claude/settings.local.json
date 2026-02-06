@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(where:*)",
+      "Bash(ls:*)",
+      "Bash(curl:*)",
+      "Bash(func start:*)",
+      "Bash(taskkill:*)",
+      "Bash(del \"c:\\\\Users\\\\appli\\\\source\\\\repos\\\\MemoryCharm\\\\src\\\\app\\\\http\\\\authFetch.ts\")",
+      "Bash(del:*)",
+      "Bash(del \"c:\\\\Users\\\\appli\\\\source\\\\repos\\\\MemoryCharm\\\\src\\\\app\\\\auth\\\\token.ts\")",
+      "Bash(del \"c:\\\\Users\\\\appli\\\\source\\\\repos\\\\MemoryCharm\\\\src\\\\lib\\\\http.ts\")",
+      "Bash(npx vite build)",
+      "Bash(dotnet build:*)",
+      "Bash(git add:*)"
     ]
   }
 }

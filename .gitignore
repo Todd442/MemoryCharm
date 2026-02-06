@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Azure local dev
+__azurite_db_*
+.env
+nul

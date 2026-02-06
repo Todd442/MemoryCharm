@@ -144,9 +144,13 @@ export function CharmEntryPage() {
       const res = await verifyGlyph(ui.entry.code, glyph);
 
       if (res.ok) {
-        setUi({ s: "loading", detail: "Awakening memory…" });
-        const media = await getPlaybackUrl(ui.entry.code);
-        setPlayback({ url: media.playbackUrl, type: media.memoryType });
+        if (res.playback) {
+          setPlayback({ url: res.playback.playbackUrl, type: res.playback.memoryType });
+        } else {
+          setUi({ s: "loading", detail: "Awakening memory…" });
+          const media = await getPlaybackUrl(ui.entry.code);
+          setPlayback({ url: media.playbackUrl, type: media.memoryType });
+        }
         setUi({ s: "ready", entry: ui.entry });
       } else {
         setAttemptsLeft(res.attemptsLeft);
