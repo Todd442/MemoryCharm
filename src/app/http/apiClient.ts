@@ -19,12 +19,13 @@ async function getBearerToken(): Promise<string> {
   return result.accessToken;
 }
 
-/** Lowercase the first character of each key (PascalCase → camelCase). */
+/** Recursively lowercase the first character of each key (PascalCase → camelCase). */
 function camelKeys<T>(obj: unknown): T {
-  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) return obj as T;
+  if (obj === null || typeof obj !== "object") return obj as T;
+  if (Array.isArray(obj)) return obj.map((item) => camelKeys(item)) as T;
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
-    out[k[0].toLowerCase() + k.slice(1)] = v;
+    out[k[0].toLowerCase() + k.slice(1)] = camelKeys(v);
   }
   return out as T;
 }

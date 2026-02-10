@@ -2,7 +2,7 @@ import type { EntryResponse, PlaybackUrlResponse } from "./types";
 import {
   normalizeApiResponse,
   toEntryResponse,
-  toPlaybackUrl,
+  toPlaybackUrls,
   toGlyphVerifyResult,
   type CharmStatusApiResponse,
 } from "./apiAdapters";
@@ -49,10 +49,10 @@ export async function entryByCode(code: string): Promise<EntryResponse> {
 export type PlaybackResponse = PlaybackUrlResponse;
 
 /**
- * Get playback URL for an open (no-auth) charm.
- * The GET /api/charm/{code} response includes Primary/Fallback URLs when status="ready".
+ * Get playback URLs for an open (no-auth) charm.
+ * The GET /api/charm/{code} response includes Files[] when status="ready".
  */
-export async function getPlaybackUrl(code: string): Promise<PlaybackResponse> {
+export async function getPlaybackUrls(code: string): Promise<PlaybackResponse> {
   const res = await fetch(`/api/charm/${encodeURIComponent(code)}`, {
     headers: { Accept: "application/json" },
   });
@@ -67,7 +67,7 @@ export async function getPlaybackUrl(code: string): Promise<PlaybackResponse> {
     throw new Error("Empty response from API");
   }
 
-  const playback = toPlaybackUrl(body);
+  const playback = toPlaybackUrls(body);
   if (!playback) {
     throw new Error("Content not yet available");
   }

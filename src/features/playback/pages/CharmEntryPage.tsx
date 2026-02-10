@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
-import { entryByCode, entryByToken, getPlaybackUrl, verifyGlyph } from "../api";
-import type { EntryResponse } from "../types";
+import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
+import type { EntryResponse, ContentFile } from "../types";
 import { GlyphAuthPanel } from "../../../components/GlyphAuthPanel";
 
 type UiState =
@@ -10,11 +10,9 @@ type UiState =
   | { s: "error"; message: string };
 
 type PlaybackState = null | {
-  url: string;
+  files: ContentFile[];
   type: "video" | "image" | "audio";
 };
-
-const tokenKey = (code: string) => `charm.token.${code}`;
 
 function getTokenCaseInsensitive(search: string): string | null {
   const qs = new URLSearchParams(search);
@@ -63,9 +61,6 @@ export function CharmEntryPage() {
           if (cancelled) return;
 
           if (entry.kind === "claimed" || entry.kind === "unclaimed") {
-            // Store token for this session under resolved code
-            sessionStorage.setItem(tokenKey(entry.code), token);
-
             // Replace URL with clean route
             nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true });
           }
@@ -104,19 +99,16 @@ export function CharmEntryPage() {
 
         if (entry.authMode === "glyph") {
           setAttemptsLeft(entry.attemptsLeft ?? 3);
+          return; // Glyph charms wait for user to submit the correct glyph
         }
-
-        // If glyph-locked and we got here via clean URL without a session token, ask to tap again.
-        const hasSessionToken = sessionStorage.getItem(tokenKey(entry.code));
-        if (entry.authMode === "glyph" && !hasSessionToken) return;
 
         // Auto-play only for OPEN charms
         if (entry.configured && entry.authMode === "none") {
           setUi({ s: "loading", detail: "Awakening memory…" });
-          const media = await getPlaybackUrl(entry.code);
+          const media = await getPlaybackUrls(entry.code);
           if (cancelled) return;
 
-          setPlayback({ url: media.playbackUrl, type: media.memoryType });
+          setPlayback({ files: media.files, type: media.memoryType });
           setUi({ s: "ready", entry });
         }
       } catch (err: any) {
@@ -136,20 +128,17 @@ export function CharmEntryPage() {
     if (ui.entry.authMode !== "glyph") return;
     if (blocked) return;
 
-    const hasSessionToken = sessionStorage.getItem(tokenKey(ui.entry.code));
-    if (!hasSessionToken) return;
-
     setGlyphBusy(true);
     try {
       const res = await verifyGlyph(ui.entry.code, glyph);
 
       if (res.ok) {
         if (res.playback) {
-          setPlayback({ url: res.playback.playbackUrl, type: res.playback.memoryType });
+          setPlayback({ files: res.playback.files, type: res.playback.memoryType });
         } else {
           setUi({ s: "loading", detail: "Awakening memory…" });
-          const media = await getPlaybackUrl(ui.entry.code);
-          setPlayback({ url: media.playbackUrl, type: media.memoryType });
+          const media = await getPlaybackUrls(ui.entry.code);
+          setPlayback({ files: media.files, type: media.memoryType });
         }
         setUi({ s: "ready", entry: ui.entry });
       } else {
@@ -191,7 +180,7 @@ export function CharmEntryPage() {
     return (
       <div style={{ padding: 24 }}>
         <div style={{ fontSize: 26, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 16, opacity: 0.9 }}>This charm can’t be found.</div>
+        <div style={{ fontSize: 16, opacity: 0.9 }}>This charm can't be found.</div>
         <div style={{ marginTop: 14 }}>
           <Link to="/">Return home</Link>
         </div>
@@ -203,7 +192,7 @@ export function CharmEntryPage() {
     return (
       <div style={{ padding: 24 }}>
         <div style={{ fontSize: 26, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 16, opacity: 0.9 }}>This charm’s memory has faded.</div>
+        <div style={{ fontSize: 16, opacity: 0.9 }}>This charm's memory has faded.</div>
         <div style={{ marginTop: 14 }}>
           <Link to="/">Return home</Link>
         </div>
@@ -227,37 +216,90 @@ export function CharmEntryPage() {
         <div style={{ marginTop: 12 }}>
           <div style={{ fontSize: 16, opacity: 0.9 }}>This charm is locked.</div>
 
-          {!sessionStorage.getItem(tokenKey(entry.code)) ? (
-            <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(0,0,0,0.06)" }}>
-              Please tap the charm again to awaken this memory.
-            </div>
-          ) : blocked ? (
+          {blocked ? (
             <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(220,0,0,0.08)" }}>
               The charm rejects this attempt.
             </div>
           ) : (
-            <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} />
+            <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} glyphs={entry.glyphs} />
           )}
         </div>
       )}
 
       {/* Playback */}
-      {playback && (
-        <div style={{ marginTop: 16 }}>
-          {playback.type === "video" && (
-            <video src={playback.url} controls playsInline style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
-          )}
-          {playback.type === "image" && (
-            <img src={playback.url} alt="Memory" style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
-          )}
-          {playback.type === "audio" && (
-            <audio src={playback.url} controls style={{ width: "100%", maxWidth: 980 }} />
-          )}
-        </div>
-      )}
+      {playback && <PlaybackRenderer files={playback.files} type={playback.type} />}
 
       <div style={{ marginTop: 18, fontSize: 13, opacity: 0.7 }}>
         <Link to="/">Home</Link>
+      </div>
+    </div>
+  );
+}
+
+/** Renders content files based on memory type. */
+function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image" | "audio" }) {
+  const { files, type } = props;
+
+  if (files.length === 0) return null;
+
+  if (type === "video") {
+    return (
+      <div style={{ marginTop: 16 }}>
+        <video src={files[0].url} controls playsInline style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
+      </div>
+    );
+  }
+
+  if (type === "audio") {
+    return (
+      <div style={{ marginTop: 16 }}>
+        <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 980 }} />
+      </div>
+    );
+  }
+
+  // Image(s)
+  if (files.length === 1) {
+    return (
+      <div style={{ marginTop: 16 }}>
+        <img src={files[0].url} alt="Memory" style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
+      </div>
+    );
+  }
+
+  return <ImageSlideshow files={files} />;
+}
+
+/** Simple prev/next slideshow for multiple images. */
+function ImageSlideshow(props: { files: ContentFile[] }) {
+  const { files } = props;
+  const [index, setIndex] = useState(0);
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      <img
+        src={files[index].url}
+        alt={`Memory ${index + 1} of ${files.length}`}
+        style={{ width: "100%", maxWidth: 980, borderRadius: 12 }}
+      />
+      <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}>
+        <button
+          onClick={() => setIndex((i) => Math.max(0, i - 1))}
+          disabled={index === 0}
+          style={{ padding: "4px 12px" }}
+        >
+          Prev
+        </button>
+        <span style={{ fontSize: 14, opacity: 0.8 }}>
+          {index + 1} / {files.length}
+        </span>
+        <button
+          onClick={() => setIndex((i) => Math.min(files.length - 1, i + 1))}
+          disabled={index === files.length - 1}
+          style={{ padding: "4px 12px" }}
+        >
+          Next
+        </button>
       </div>
     </div>
   );

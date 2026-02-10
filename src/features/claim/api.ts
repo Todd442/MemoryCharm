@@ -26,12 +26,23 @@ type ConfigureCharmApiResponse = {
   authMode: string;
 };
 
-type UploadContentApiResponse = {
+type UploadFileEntryApi = {
+  index: number;
   azureUploadUrl: string;
-  r2UploadUrl: string;
+  r2UploadUrl: string | null;
   objectKey: string;
+};
+
+type UploadContentApiResponse = {
+  files: UploadFileEntryApi[];
   expiresInSeconds: number;
   instructions: string;
+};
+
+type FinalizeCharmApiResponse = {
+  charmId: string;
+  status: string;
+  fileCount: number;
 };
 
 type UserProfileApiResponse = {
@@ -50,15 +61,24 @@ type UserProfileApiResponse = {
 
 /**
  * Claim a charm. POST /api/charm/{code}/claim
+ * Treats "already_owned" (409) as success — if you already own it, proceed.
  */
 export async function claimCharm(
   code: string
 ): Promise<{ ok: true; charmId: string; code: string }> {
-  const res = await authPost<ClaimCharmApiResponse>(
-    `/api/charm/${encodeURIComponent(code)}/claim`,
-    {}
-  );
-  return { ok: true, charmId: res.charmId, code };
+  try {
+    const res = await authPost<ClaimCharmApiResponse>(
+      `/api/charm/${encodeURIComponent(code)}/claim`,
+      {}
+    );
+    return { ok: true, charmId: res.charmId, code };
+  } catch (err: any) {
+    const msg = (err?.message ?? "").toLowerCase();
+    if (msg.includes("already own") || msg.includes("already_owned")) {
+      return { ok: true, charmId: code, code };
+    }
+    throw err;
+  }
 }
 
 /**
@@ -85,14 +105,29 @@ export async function configureCharm(
 
 /**
  * Get signed upload URLs for charm content.
+ * fileCount > 1 is only valid for image memory types.
  */
 export async function getUploadUrls(
   code: string,
-  contentType: string
+  contentType: string,
+  fileCount: number = 1
 ): Promise<UploadContentApiResponse> {
   return authPost<UploadContentApiResponse>(
     `/api/charm/${encodeURIComponent(code)}/content`,
-    { contentType }
+    { contentType, fileCount }
+  );
+}
+
+/**
+ * Finalize a charm after content upload. POST /api/charm/{code}/finalize
+ * Verifies blobs exist and sets status to "active".
+ */
+export async function finalizeCharm(
+  code: string
+): Promise<FinalizeCharmApiResponse> {
+  return authPost<FinalizeCharmApiResponse>(
+    `/api/charm/${encodeURIComponent(code)}/finalize`,
+    {}
   );
 }
 
@@ -127,20 +162,64 @@ export function uploadToSignedUrl(
 }
 
 /**
- * Full upload flow: get signed URLs, then upload file to both destinations.
+ * In dev mode, rewrite an Azurite signed URL to go through the Vite proxy
+ * at /azurite, avoiding CORS issues (browser → Vite → Azurite).
+ */
+function proxyAzuriteUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `/azurite${parsed.pathname}${parsed.search}`;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * Full upload flow: get signed URLs for N files, upload all in parallel,
+ * then finalize the charm (sets status to "active").
+ *
+ * In dev mode (VITE_DEV_TOKEN set), proxies Azure through Vite and skips R2.
  */
 export async function uploadCharm(
   code: string,
-  file: File,
+  files: File[],
   contentType: string,
   onProgress?: (pct: number) => void
 ): Promise<{ ok: true; code: string }> {
-  const urls = await getUploadUrls(code, contentType);
+  const urlsResponse = await getUploadUrls(code, contentType, files.length);
+  const isDev = !!import.meta.env.VITE_DEV_TOKEN;
 
-  await Promise.all([
-    uploadToSignedUrl(urls.azureUploadUrl, file, contentType, onProgress),
-    uploadToSignedUrl(urls.r2UploadUrl, file, contentType),
-  ]);
+  // Track per-file progress and aggregate
+  const fileProgress = new Array(files.length).fill(0);
+  const reportProgress = (fileIdx: number) => (pct: number) => {
+    fileProgress[fileIdx] = pct;
+    if (onProgress) {
+      const total = fileProgress.reduce((a, b) => a + b, 0) / files.length;
+      onProgress(total);
+    }
+  };
+
+  // Upload all files in parallel
+  const uploads = urlsResponse.files.map((entry, i) => {
+    const file = files[i];
+    if (isDev) {
+      const proxiedUrl = proxyAzuriteUrl(entry.azureUploadUrl);
+      return uploadToSignedUrl(proxiedUrl, file, contentType, reportProgress(i));
+    } else {
+      const azureUpload = uploadToSignedUrl(
+        entry.azureUploadUrl, file, contentType, reportProgress(i)
+      );
+      const r2Upload = entry.r2UploadUrl
+        ? uploadToSignedUrl(entry.r2UploadUrl, file, contentType)
+        : Promise.resolve();
+      return Promise.all([azureUpload, r2Upload]);
+    }
+  });
+
+  await Promise.all(uploads);
+
+  // Finalize: verify blobs exist and set status to "active"
+  await finalizeCharm(code);
 
   return { ok: true, code };
 }

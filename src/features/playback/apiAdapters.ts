@@ -1,22 +1,22 @@
-import type { EntryResponse, PlaybackUrlResponse, MemoryType } from "./types";
+import type { EntryResponse, PlaybackUrlResponse, MemoryType, ContentFile } from "./types";
 
 /** Shape returned by GET /api/charm/{code} and POST /api/charm/{code} */
 export type CharmStatusApiResponse = {
   status: string;
   code: string;
-  primary?: string;
-  fallback?: string;
+  files?: { url: string; name: string }[];
   memoryType?: string;
   expiresIn?: number;
   authMode?: string;
   attemptsLeft?: number;
   message?: string;
+  glyphs?: { id: string; name: string }[];
 };
 
 /**
- * Normalize an object's keys to camelCase.
- * .NET's System.Text.Json returns PascalCase by default (Status, Code, Primary…)
- * but we want camelCase (status, code, primary…).
+ * Normalize an object's keys to camelCase (shallow).
+ * .NET's System.Text.Json returns PascalCase by default (Status, Code…)
+ * but we want camelCase (status, code…).
  */
 function camelKeys<T extends Record<string, unknown>>(obj: T): T {
   const out: Record<string, unknown> = {};
@@ -28,7 +28,23 @@ function camelKeys<T extends Record<string, unknown>>(obj: T): T {
 
 /** Normalize raw API JSON into our expected camelCase shape. */
 export function normalizeApiResponse(raw: Record<string, unknown>): CharmStatusApiResponse {
-  return camelKeys(raw) as CharmStatusApiResponse;
+  const base = camelKeys(raw) as CharmStatusApiResponse;
+
+  // Normalize nested file objects (PascalCase → camelCase)
+  if (Array.isArray(base.files)) {
+    base.files = base.files.map((f: Record<string, unknown>) =>
+      camelKeys(f) as { url: string; name: string }
+    );
+  }
+
+  // Normalize nested glyph objects (PascalCase → camelCase)
+  if (Array.isArray(base.glyphs)) {
+    base.glyphs = base.glyphs.map((g: Record<string, unknown>) =>
+      camelKeys(g) as { id: string; name: string }
+    );
+  }
+
+  return base;
 }
 
 /**
@@ -57,6 +73,7 @@ export function toEntryResponse(
       configured: true,
       authMode: "glyph",
       attemptsLeft: api.attemptsLeft ?? 3,
+      glyphs: api.glyphs,
     };
   }
 
@@ -74,16 +91,20 @@ export function toEntryResponse(
 }
 
 /**
- * Extracts playback URL info from an API response that includes content URLs.
+ * Extracts playback info from an API response that includes content files.
  */
-export function toPlaybackUrl(
+export function toPlaybackUrls(
   api: CharmStatusApiResponse
 ): PlaybackUrlResponse | null {
-  const url = api.primary ?? api.fallback;
-  if (!url) return null;
+  if (!api.files || api.files.length === 0) return null;
+
+  const files: ContentFile[] = api.files.map((f) => ({
+    url: f.url,
+    name: f.name,
+  }));
 
   return {
-    playbackUrl: url,
+    files,
     memoryType: (api.memoryType as MemoryType) ?? "video",
   };
 }
@@ -105,6 +126,6 @@ export function toGlyphVerifyResult(
   return {
     ok: isSuccess,
     attemptsLeft: api.attemptsLeft ?? 0,
-    playback: isSuccess ? toPlaybackUrl(api) : null,
+    playback: isSuccess ? toPlaybackUrls(api) : null,
   };
 }

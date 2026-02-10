@@ -5,8 +5,12 @@ export function GlyphAuthPanel(props: {
   attemptsLeft: number;
   busy: boolean;
   onSubmit: (glyphId: string) => void | Promise<void>;
+  glyphs?: { id: string; name: string }[];
 }) {
-  const glyphs = useMemo<GlyphInfo[]>(() => selectRandomGlyphs(9), []);
+  const glyphs = useMemo<GlyphInfo[]>(
+    () => props.glyphs ?? selectRandomGlyphs(9),
+    [props.glyphs]
+  );
   const [selected, setSelected] = useState<string | null>(null);
 
   return (

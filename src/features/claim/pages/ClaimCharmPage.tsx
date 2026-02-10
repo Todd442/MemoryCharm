@@ -39,7 +39,7 @@ export function ClaimCharmPage() {
   const [authMode, setAuthMode] = useState<AuthMode>("none");
 
   const [selectedGlyph, setSelectedGlyph] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [uploadPct, setUploadPct] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
@@ -211,16 +211,24 @@ export function ClaimCharmPage() {
     }
   }
 
+  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 40;
+  const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
+
   async function doUpload() {
     setErr(null);
-    if (!file) {
+    if (files.length === 0) {
       setErr("Select a file to upload.");
+      return;
+    }
+    const totalBytes = files.reduce((s, f) => s + f.size, 0);
+    if (totalBytes > MAX_CHARM_BYTES) {
+      setErr(`Total file size exceeds ${maxCharmMB} MB limit (${(totalBytes / 1024 / 1024).toFixed(1)} MB selected).`);
       return;
     }
     setBusy(true);
     setUploadPct(0);
     try {
-      await uploadCharm(code, file, file.type, setUploadPct);
+      await uploadCharm(code, files, files[0].type, setUploadPct);
       advanceTo("done");
     } catch (e: any) {
       setErr(e?.message ?? "Upload failed.");
@@ -468,7 +476,7 @@ export function ClaimCharmPage() {
               <div className="teCardBody">
                 <label className="teField">
                   <div className="teFieldLabel">
-                    Select {memoryType} file
+                    Select {memoryType} file{memoryType === "image" ? "(s)" : ""}
                   </div>
 
                   <div className="teRail">
@@ -476,14 +484,23 @@ export function ClaimCharmPage() {
                     <input
                       type="file"
                       accept={acceptTypes[memoryType]}
+                      multiple={memoryType === "image"}
                       disabled={busy}
-                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      onChange={(e) => {
+                        const selected = e.target.files;
+                        setFiles(selected ? Array.from(selected) : []);
+                      }}
                       style={{ flex: 1, padding: "6px 0" }}
                     />
                   </div>
-                  {file && (
+                  {files.length === 1 && (
                     <div className="teHint" style={{ marginTop: 4 }}>
-                      {file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                      {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
+                    </div>
+                  )}
+                  {files.length > 1 && (
+                    <div className="teHint" style={{ marginTop: 4 }}>
+                      {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
                     </div>
                   )}
                 </label>
@@ -513,7 +530,7 @@ export function ClaimCharmPage() {
                   <button
                     className="teBtn teBtnPrimary"
                     onClick={doUpload}
-                    disabled={busy || working || !file}
+                    disabled={busy || working || files.length === 0}
                     type="button"
                   >
                     {busy ? "Uploading\u2026" : "Upload"}

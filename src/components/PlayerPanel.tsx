@@ -1,11 +1,13 @@
 import React from "react";
-import type { MemoryType } from "../features/playback/types";
+import type { MemoryType, ContentFile } from "../features/playback/types";
 
-export function PlayerPanel(props: { playbackUrl: string; memoryType: MemoryType }) {
+export function PlayerPanel(props: { files: ContentFile[]; memoryType: MemoryType }) {
+  if (props.files.length === 0) return null;
+
   if (props.memoryType === "video") {
     return (
       <div>
-        <video className="te-video" src={props.playbackUrl} controls playsInline autoPlay />
+        <video className="te-video" src={props.files[0].url} controls playsInline autoPlay />
       </div>
     );
   }
@@ -13,14 +15,16 @@ export function PlayerPanel(props: { playbackUrl: string; memoryType: MemoryType
   if (props.memoryType === "image") {
     return (
       <div>
-        <img className="te-image" src={props.playbackUrl} alt="Memory" />
+        {props.files.map((f, i) => (
+          <img key={i} className="te-image" src={f.url} alt={f.name || "Memory"} />
+        ))}
       </div>
     );
   }
 
   return (
     <div>
-      <audio className="te-audio" src={props.playbackUrl} controls autoPlay />
+      <audio className="te-audio" src={props.files[0].url} controls autoPlay />
     </div>
   );
 }

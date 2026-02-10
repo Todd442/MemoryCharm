@@ -16,7 +16,11 @@
       "Bash(del \"c:\\\\Users\\\\appli\\\\source\\\\repos\\\\MemoryCharm\\\\src\\\\lib\\\\http.ts\")",
       "Bash(npx vite build)",
       "Bash(dotnet build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(powershell:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\appli\\source\\repos\\Mnemosyne\\Mnemosyne.API"
     ]
   }
 }
