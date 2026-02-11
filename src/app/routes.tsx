@@ -7,6 +7,7 @@ import { ClaimCharmPage } from "../features/claim/pages/ClaimCharmPage";
 import { HomePage } from "../features/home/pages/HomePage";
 import { AccountPage } from "../features/account/pages/AccountPage";
 import { CharmDetailPage } from "../features/account/pages/CharmDetailPage";
+import { PurchasePage } from "../features/account/pages/PurchasePage";
 import { RequireAuth } from "../app/auth/RequireAuth";
 import { ScrollTestPage } from "../features/test/pages/ScrollTestPage.tsx";
 
@@ -46,6 +47,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <CharmDetailPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: "/account/charms/:code/purchase",
+        element: (
+          <RequireAuth>
+            <PurchasePage />
           </RequireAuth>
         ),
       },

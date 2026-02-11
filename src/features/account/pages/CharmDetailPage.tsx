@@ -228,7 +228,17 @@ export function CharmDetailPage() {
               </div>
               <div className="teCharmInfoItem">
                 <div className="teCharmInfoLabel">Status</div>
-                <div className="teCharmInfoValue">{charm.isSettled ? "Settled" : charm.status}</div>
+                <div className="teCharmInfoValue">{charm.isExpired ? "Expired" : charm.isSettled ? "Settled" : charm.status}</div>
+              </div>
+              <div className="teCharmInfoItem">
+                <div className="teCharmInfoLabel">Charm Tier</div>
+                <div className="teCharmInfoValue">
+                  {charm.charmTier === "retail" ? "Retail" : charm.charmTier ? `${charm.charmTier.replace("-", "-Year ").replace(/^\w/, (c) => c.toUpperCase()).replace(/ $/, "")}` : "\u2014"}
+                </div>
+              </div>
+              <div className="teCharmInfoItem">
+                <div className="teCharmInfoLabel">Expires</div>
+                <div className="teCharmInfoValue">{charm.expiresAt ? fmtDate(charm.expiresAt) : "Never"}</div>
               </div>
               <div className="teCharmInfoItem">
                 <div className="teCharmInfoLabel">Memory Type</div>
@@ -262,6 +272,21 @@ export function CharmDetailPage() {
                     style={{ width: `${settleProgress}%` }}
                   />
                 </div>
+              </div>
+            )}
+
+            {/* Fading warning */}
+            {charm.isFading && (
+              <div className="teCharmFadingBar">
+                This memory will begin to fade in {charm.fadingInDays} day{charm.fadingInDays === 1 ? "" : "s"}.
+                Visit the shop to extend its life.
+              </div>
+            )}
+
+            {/* Expired notice */}
+            {charm.isExpired && (
+              <div className="teCharmFadingBar teCharmFadingBar--expired">
+                This memory has faded beyond recall.
               </div>
             )}
           </div>
@@ -330,7 +355,11 @@ export function CharmDetailPage() {
           {/* Content Management */}
           <div className="teCharmSection">
             <div className="teCharmSectionTitle">Content</div>
-            {charm.isSettled ? (
+            {charm.isExpired ? (
+              <div className="teCharmSettledMsg">
+                This memory has faded and can no longer be changed.
+              </div>
+            ) : charm.isSettled ? (
               <div className="teCharmSettledMsg">
                 This memory has settled and can no longer be changed.
               </div>
@@ -390,6 +419,17 @@ export function CharmDetailPage() {
                   : "Content management is not available for this charm."}
               </div>
             )}
+          </div>
+
+          {/* Manage / Purchase */}
+          <div className="teCharmSection" style={{ textAlign: "center" }}>
+            <button
+              className="teBtn teBtnPrimary"
+              onClick={() => nav(`/account/charms/${encodeURIComponent(charm.charmId)}/purchase`)}
+              type="button"
+            >
+              Manage Charm
+            </button>
           </div>
 
           <div className="teCharmNav">

@@ -97,6 +97,24 @@
   transition: width 0.3s;
 }
 
+/* Fading warning bar */
+.teCharmFadingBar {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 180, 60, 0.10);
+  border: 1px solid rgba(255, 180, 60, 0.25);
+  color: #ffcc66;
+  font-size: 13px;
+  text-align: center;
+}
+
+.teCharmFadingBar--expired {
+  background: rgba(120, 100, 80, 0.12);
+  border-color: rgba(120, 100, 80, 0.25);
+  color: rgba(180, 160, 140, 0.7);
+}
+
 /* Glyph grid */
 .teCharmGlyphGrid {
   display: grid;

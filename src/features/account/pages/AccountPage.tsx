@@ -93,10 +93,36 @@ export function AccountPage() {
   }
 
   function statusBadgeClass(charm: UserCharmSummary): string {
+    if (isCharmExpired(charm)) return "teAcctBadge teAcctBadge--expired";
     if (charm.isSettled) return "teAcctBadge teAcctBadge--settled";
     if (charm.status === "locked") return "teAcctBadge teAcctBadge--locked";
     if (charm.status === "active") return "teAcctBadge teAcctBadge--active";
     return "teAcctBadge teAcctBadge--configured";
+  }
+
+  function isCharmExpired(charm: UserCharmSummary): boolean {
+    if (!charm.expiresAt) return false;
+    return Date.now() > new Date(charm.expiresAt).getTime();
+  }
+
+  function isCharmFading(charm: UserCharmSummary): boolean {
+    if (!charm.expiresAt || isCharmExpired(charm)) return false;
+    const msLeft = new Date(charm.expiresAt).getTime() - Date.now();
+    return msLeft <= 365 * 86400000;
+  }
+
+  function fadingLabel(charm: UserCharmSummary): string | null {
+    if (!charm.expiresAt) return null;
+    if (isCharmExpired(charm)) return "Expired";
+    if (!isCharmFading(charm)) return null;
+    const daysLeft = Math.ceil((new Date(charm.expiresAt).getTime() - Date.now()) / 86400000);
+    return `Fading in ${daysLeft}d`;
+  }
+
+  function tierLabel(tier: string | null): string {
+    if (!tier) return "";
+    if (tier === "retail") return "Retail";
+    return tier.replace("-", "-Year ").replace(/^\w/, (c) => c.toUpperCase()).replace(/ $/, "");
   }
 
   if (loading) {
@@ -205,12 +231,18 @@ export function AccountPage() {
                       </div>
                       <div className="teAcctCharmMeta">
                         <span className={statusBadgeClass(charm)}>
-                          {charm.isSettled ? "settled" : charm.status}
+                          {isCharmExpired(charm) ? "expired" : charm.isSettled ? "settled" : charm.status}
                         </span>
+                        {charm.charmTier && <span>{tierLabel(charm.charmTier)}</span>}
                         {charm.memoryType && <span>{charm.memoryType}</span>}
                         <span>{charm.authMode === "glyph" ? "Glyph Lock" : "Open"}</span>
                         {settlingLabel(charm) && !charm.isSettled && (
                           <span>{settlingLabel(charm)}</span>
+                        )}
+                        {fadingLabel(charm) && (
+                          <span className={isCharmExpired(charm) ? "teAcctBadge teAcctBadge--expired" : "teAcctBadge teAcctBadge--fading"}>
+                            {fadingLabel(charm)}
+                          </span>
                         )}
                       </div>
                     </div>

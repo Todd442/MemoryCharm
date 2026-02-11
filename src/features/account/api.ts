@@ -19,6 +19,8 @@ export type UserCharmSummary = {
   configuredAt: string | null;
   firstFinalizedAt: string | null;
   isSettled: boolean;
+  charmTier: string | null;
+  expiresAt: string | null;
 };
 
 export type UserCharmDetail = {
@@ -33,6 +35,11 @@ export type UserCharmDetail = {
   isSettled: boolean;
   settlesAt: string | null;
   canEditContent: boolean;
+  charmTier: string | null;
+  expiresAt: string | null;
+  isExpired: boolean;
+  isFading: boolean;
+  fadingInDays: number | null;
 };
 
 type ListUserCharmsApiResponse = {
