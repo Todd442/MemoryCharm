@@ -279,7 +279,7 @@ export function CharmDetailPage() {
             {charm.isFading && (
               <div className="teCharmFadingBar">
                 This memory will begin to fade in {charm.fadingInDays} day{charm.fadingInDays === 1 ? "" : "s"}.
-                Visit the shop to extend its life.
+                Visit the Arcane Emporium to extend its life.
               </div>
             )}
 
@@ -428,7 +428,7 @@ export function CharmDetailPage() {
               onClick={() => nav(`/account/charms/${encodeURIComponent(charm.charmId)}/purchase`)}
               type="button"
             >
-              Manage Charm
+              Arcane Emporium
             </button>
           </div>
 

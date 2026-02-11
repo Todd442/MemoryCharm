@@ -468,6 +468,39 @@
   border-bottom-color: rgba(140, 230, 205, 0.8);
 }
 
+/* File input — dark-fantasy themed */
+input[type="file"] {
+  color: rgba(235, 210, 170, 0.85);
+  font-family: "Cinzel", serif;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+
+input[type="file"]::file-selector-button {
+  height: 36px;
+  padding: 0 16px;
+  margin-right: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(210, 170, 110, 0.35);
+  background: linear-gradient(180deg, rgba(60, 35, 15, 0.7), rgba(30, 18, 8, 0.85));
+  color: rgba(235, 210, 170, 0.9);
+  font-family: "Cinzel", serif;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: linear-gradient(180deg, rgba(80, 50, 22, 0.75), rgba(45, 28, 12, 0.9));
+  border-color: rgba(210, 170, 110, 0.5);
+}
+
+input[type="file"]:disabled::file-selector-button {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* Mobile tweaks */
 @media (max-width: 720px) {
   .teClaimWrap { padding: 16px; }
