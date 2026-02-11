@@ -1,15 +1,11 @@
-import { authGet, authPost, authPut } from "../../app/http/apiClient";
+import { authPost, authPut } from "../../app/http/apiClient";
+
+// Re-export shared profile API so existing imports don't break
+export { getUserMe, saveProfile } from "../../app/api/profileApi";
+export type { UserProfile } from "../../app/api/profileApi";
 
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
-
-export type UserProfile = {
-  firstName: string;
-  lastName: string;
-  address: string;
-  email: string;
-  cellNumber: string;
-};
 
 // -- API response types (from Mnemosyne) ------------------------------------
 
@@ -43,18 +39,6 @@ type FinalizeCharmApiResponse = {
   charmId: string;
   status: string;
   fileCount: number;
-};
-
-type UserProfileApiResponse = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  address?: string;
-  cellNumber?: string;
-  displayName?: string;
-  totalCharmsOwned: number;
-  createdAt: string;
-  lastLoginAt?: string;
 };
 
 // -- Exported functions ------------------------------------------------------
@@ -224,53 +208,3 @@ export async function uploadCharm(
   return { ok: true, code };
 }
 
-/**
- * Get user profile. GET /api/user/profile
- * Returns { hasProfile, profile? } to match existing SPA contract.
- */
-export async function getUserMe(): Promise<{
-  hasProfile: boolean;
-  profile?: UserProfile;
-}> {
-  try {
-    const res = await authGet<UserProfileApiResponse>("/api/user/profile");
-    return {
-      hasProfile: true,
-      profile: {
-        firstName: res.firstName,
-        lastName: res.lastName,
-        address: res.address ?? "",
-        email: res.email,
-        cellNumber: res.cellNumber ?? "",
-      },
-    };
-  } catch (err: any) {
-    const msg = (err?.message ?? "").toLowerCase();
-    if (msg.includes("404") || msg.includes("not found") || msg.includes("not_found")) {
-      return { hasProfile: false };
-    }
-    throw err;
-  }
-}
-
-/**
- * Save user profile. POST /api/user/profile
- */
-export async function saveProfile(
-  profile: UserProfile
-): Promise<{ ok: boolean; profile: UserProfile }> {
-  const res = await authPost<UserProfileApiResponse>(
-    "/api/user/profile",
-    profile
-  );
-  return {
-    ok: true,
-    profile: {
-      firstName: res.firstName,
-      lastName: res.lastName,
-      address: res.address ?? "",
-      email: res.email,
-      cellNumber: res.cellNumber ?? "",
-    },
-  };
-}

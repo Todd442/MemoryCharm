@@ -6,6 +6,7 @@ import { InteractionStatus } from "@azure/msal-browser";
 
 import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
 import type { UserProfile } from "../api";
+import { entryByCode } from "../../playback/api";
 import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
 import { ALL_GLYPHS, type GlyphInfo } from "../../../app/data/glyphs";
@@ -88,17 +89,23 @@ export function ClaimCharmPage() {
     cellNumber: "",
   });
 
-  // Once authed, check whether this account already has a profile.
-  // New accounts land on the profile step; existing accounts skip straight to configure.
+  // Once authed, check whether the charm is already active (redirect to playback)
+  // and whether this account already has a profile (skip profile step if so).
   useEffect(() => {
-    if (!isAuthed) return;
+    if (!isAuthed || !code) return;
 
     // Pre-fill email from the MSAL account
     setProfileData((prev) => ({ ...prev, email: emailish }));
 
-    getUserMe()
-      .then((res) => {
-        if (res.hasProfile) {
+    Promise.all([getUserMe(), entryByCode(code)])
+      .then(([profileRes, entry]) => {
+        // If charm is already configured with content, go straight to playback
+        if (entry.kind === "claimed" && entry.configured) {
+          nav(`/c/${encodeURIComponent(code)}`, { replace: true });
+          return;
+        }
+
+        if (profileRes.hasProfile) {
           setInitialStep("configure");
         } else {
           setInitialStep("profile");
@@ -108,7 +115,7 @@ export function ClaimCharmPage() {
         setErr(e?.message ?? "Failed to check profile.");
         setInitialStep("configure"); // fall back so the page isn't stuck
       });
-  }, [isAuthed, emailish]);
+  }, [isAuthed, emailish, code, nav]);
 
   // Keep the top status bar in sync with the current step
   useEffect(() => {
