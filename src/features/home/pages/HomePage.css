@@ -24,7 +24,7 @@
 
 .teHomeTitle {
   margin: 0;
-  font-size: 54px;
+  font-size: var(--fs-title);
   letter-spacing: 1.5px;
   color: #f1dfbf;
   text-shadow: 0 2px 0 rgba(0,0,0,0.55);
@@ -32,7 +32,7 @@
 
 .teHomeTagline {
   margin: 10px 0 0;
-  font-size: 28px;
+  font-size: var(--fs-body);
   opacity: 0.9;
   line-height: 1.45;
 }
@@ -54,7 +54,7 @@
 }
 
 .teHomeFeatureTitle {
-  font-size: 34px;
+  font-size: var(--fs-heading);
   letter-spacing: 1px;
   margin-bottom: 6px;
   color: rgba(239, 213, 170, 0.95);
@@ -62,7 +62,7 @@
 }
 
 .teHomeFeatureDesc {
-  font-size: 28px;
+  font-size: var(--fs-body);
   opacity: 0.85;
   line-height: 1.5;
 }
@@ -78,7 +78,7 @@
 }
 
 .teHomeCtaText {
-  font-size: 28px;
+  font-size: var(--fs-body);
   opacity: 0.85;
   margin-bottom: 14px;
   line-height: 1.45;
@@ -87,7 +87,7 @@
 /* Footer links */
 .teHomeFooter {
   text-align: center;
-  font-size: 26px;
+  font-size: var(--fs-label);
   opacity: 0.85;
 }
 

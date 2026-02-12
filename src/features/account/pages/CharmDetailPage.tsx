@@ -136,7 +136,7 @@ export function CharmDetailPage() {
       <div className="teCharmWrap">
         <div className="teCharmPanel">
           <div className="teCharmSection">
-            <div style={{ textAlign: "center", padding: 20, fontSize: 24, opacity: 0.7 }}>
+            <div style={{ textAlign: "center", padding: 20, fontSize: "var(--fs-meta)", opacity: 0.7 }}>
               Loading charm...
             </div>
           </div>
@@ -150,7 +150,7 @@ export function CharmDetailPage() {
       <div className="teCharmWrap">
         <div className="teCharmPanel">
           <div className="teCharmSection">
-            <div style={{ textAlign: "center", padding: 20, fontSize: 24, opacity: 0.7 }}>
+            <div style={{ textAlign: "center", padding: 20, fontSize: "var(--fs-meta)", opacity: 0.7 }}>
               Charm not found.
             </div>
           </div>
@@ -200,7 +200,7 @@ export function CharmDetailPage() {
               background: "rgba(220,0,0,0.08)",
               color: "#ff6a6a",
               border: "1px solid rgba(255,90,90,0.18)",
-              fontSize: 24,
+              fontSize: "var(--fs-meta)",
             }}>
               {err}
             </div>
@@ -213,7 +213,7 @@ export function CharmDetailPage() {
               background: "rgba(100,200,130,0.08)",
               color: "#a6ffb9",
               border: "1px solid rgba(100,200,130,0.18)",
-              fontSize: 24,
+              fontSize: "var(--fs-meta)",
             }}>
               {msg}
             </div>
@@ -305,7 +305,7 @@ export function CharmDetailPage() {
                         disabled={busy}
                         onClick={() => handleGlyphSelect(g.id)}
                         className={"tePill " + (editGlyphId === g.id ? "isActive" : "")}
-                        style={{ fontSize: 22, padding: "8px 6px" }}
+                        style={{ fontSize: "var(--fs-small)", padding: "8px 6px" }}
                       >
                         {g.name}
                       </button>
@@ -356,12 +356,12 @@ export function CharmDetailPage() {
                     style={{ padding: "6px 0" }}
                   />
                   {files.length === 1 && (
-                    <div style={{ fontSize: 20, opacity: 0.7, marginTop: 4 }}>
+                    <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
                       {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
                     </div>
                   )}
                   {files.length > 1 && (
-                    <div style={{ fontSize: 20, opacity: 0.7, marginTop: 4 }}>
+                    <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
                       {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
                     </div>
                   )}

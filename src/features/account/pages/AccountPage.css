@@ -22,7 +22,7 @@
 }
 
 .teAcctSectionTitle {
-  font-size: 38px;
+  font-size: var(--fs-section);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -76,12 +76,12 @@
 }
 
 .teAcctCharmName {
-  font-size: 30px;
+  font-size: var(--fs-heading);
   font-weight: 600;
 }
 
 .teAcctCharmMeta {
-  font-size: 24px;
+  font-size: var(--fs-meta);
   opacity: 0.80;
   margin-top: 3px;
   display: flex;
@@ -90,7 +90,7 @@
 }
 
 .teAcctCharmArrow {
-  font-size: 28px;
+  font-size: var(--fs-body);
   opacity: 0.5;
 }
 
@@ -99,7 +99,7 @@
   display: inline-block;
   padding: 3px 10px;
   border-radius: 6px;
-  font-size: 22px;
+  font-size: var(--fs-small);
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -144,14 +144,14 @@
 .teAcctEmpty {
   text-align: center;
   padding: 20px 0;
-  font-size: 26px;
+  font-size: var(--fs-label);
   opacity: 0.7;
 }
 
 /* Footer */
 .teAcctFooter {
   text-align: center;
-  font-size: 26px;
+  font-size: var(--fs-label);
   opacity: 0.85;
   margin-top: 4px;
 }

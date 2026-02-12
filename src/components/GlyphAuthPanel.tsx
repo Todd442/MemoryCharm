@@ -14,7 +14,7 @@ export function GlyphAuthPanel(props: {
 
   return (
     <div style={{ marginTop: 18 }}>
-      <div style={{ fontSize: 30, marginBottom: 8 }}>Glyph Required</div>
+      <div style={{ fontSize: "var(--fs-heading)", marginBottom: 8 }}>Glyph Required</div>
       <div style={{ marginBottom: 12 }}>
         Attempts left: <strong>{props.attemptsLeft}</strong>
       </div>
@@ -37,7 +37,7 @@ export function GlyphAuthPanel(props: {
               borderRadius: 12,
               border: "1px solid rgba(0,0,0,0.25)",
               background: "rgba(230,230,230,0.6)",
-              fontSize: 22,
+              fontSize: "var(--fs-small)",
               cursor: props.busy ? "default" : "pointer",
             }}
           >
@@ -47,7 +47,7 @@ export function GlyphAuthPanel(props: {
       </div>
 
       {props.busy && (
-        <div style={{ marginTop: 14, fontSize: 22, opacity: 0.7 }}>Verifying…</div>
+        <div style={{ marginTop: 14, fontSize: "var(--fs-small)", opacity: 0.7 }}>Verifying…</div>
       )}
     </div>
   );

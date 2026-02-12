@@ -22,7 +22,7 @@
 }
 
 .tePurchaseSectionTitle {
-  font-size: 38px;
+  font-size: var(--fs-section);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -60,13 +60,13 @@
 }
 
 .tePurchaseCardTitle {
-  font-size: 30px;
+  font-size: var(--fs-heading);
   font-weight: 600;
   margin-bottom: 6px;
 }
 
 .tePurchaseCardDesc {
-  font-size: 26px;
+  font-size: var(--fs-label);
   opacity: 0.75;
   margin-bottom: 12px;
   line-height: 1.4;
@@ -80,7 +80,7 @@
   background: rgba(210,170,110,0.08);
   color: rgba(210,170,110,0.65);
   font-family: "Cinzel", serif;
-  font-size: 24px;
+  font-size: var(--fs-meta);
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: not-allowed;
@@ -91,13 +91,13 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  font-size: 22px;
+  font-size: var(--fs-small);
   opacity: 0.8;
   margin-bottom: 4px;
 }
 
 .tePurchaseCharmInfoLabel {
-  font-size: 22px;
+  font-size: var(--fs-small);
   letter-spacing: 0.8px;
   text-transform: uppercase;
   opacity: 0.6;
@@ -107,7 +107,7 @@
 .tePurchaseNav {
   margin-top: 4px;
   text-align: center;
-  font-size: 26px;
+  font-size: var(--fs-label);
   opacity: 0.85;
 }
 

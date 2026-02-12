@@ -156,8 +156,8 @@ export function CharmEntryPage() {
   if (ui.s === "loading") {
     return (
       <div style={{ padding: 24 }}>
-        <div style={{ fontSize: 38, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 26, opacity: 0.85 }}>{ui.detail}</div>
+        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-label)", opacity: 0.85 }}>{ui.detail}</div>
       </div>
     );
   }
@@ -165,7 +165,7 @@ export function CharmEntryPage() {
   if (ui.s === "error") {
     return (
       <div style={{ padding: 24 }}>
-        <div style={{ fontSize: 38, marginBottom: 8 }}>Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
         <div style={{ marginTop: 8, color: "crimson" }}>{ui.message}</div>
         <div style={{ marginTop: 14 }}>
           <Link to="/">Return home</Link>
@@ -179,8 +179,8 @@ export function CharmEntryPage() {
   if (entry.kind === "not_found") {
     return (
       <div style={{ padding: 24 }}>
-        <div style={{ fontSize: 38, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 26, opacity: 0.9 }}>This charm can't be found.</div>
+        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm can't be found.</div>
         <div style={{ marginTop: 14 }}>
           <Link to="/">Return home</Link>
         </div>
@@ -191,8 +191,8 @@ export function CharmEntryPage() {
   if (entry.kind === "expired") {
     return (
       <div style={{ padding: 24 }}>
-        <div style={{ fontSize: 38, marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: 26, opacity: 0.9 }}>This charm's memory has faded.</div>
+        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm's memory has faded.</div>
         <div style={{ marginTop: 14 }}>
           <Link to="/">Return home</Link>
         </div>
@@ -203,7 +203,7 @@ export function CharmEntryPage() {
   // claimed
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ fontSize: 38, marginBottom: 8 }}>Memory Charm</div>
+      <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
 
       {!entry.configured && (
         <div style={{ marginTop: 12, opacity: 0.9 }}>
@@ -214,7 +214,7 @@ export function CharmEntryPage() {
       {/* Glyph gate */}
       {entry.authMode === "glyph" && !playback && (
         <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 26, opacity: 0.9 }}>This charm is locked.</div>
+          <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
 
           {blocked ? (
             <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(220,0,0,0.08)" }}>
@@ -229,7 +229,7 @@ export function CharmEntryPage() {
       {/* Playback */}
       {playback && <PlaybackRenderer files={playback.files} type={playback.type} />}
 
-      <div style={{ marginTop: 18, fontSize: 22, opacity: 0.7 }}>
+      <div style={{ marginTop: 18, fontSize: "var(--fs-small)", opacity: 0.7 }}>
         <Link to="/">Home</Link>
       </div>
     </div>
@@ -290,7 +290,7 @@ function ImageSlideshow(props: { files: ContentFile[] }) {
         >
           Prev
         </button>
-        <span style={{ fontSize: 22, opacity: 0.8 }}>
+        <span style={{ fontSize: "var(--fs-small)", opacity: 0.8 }}>
           {index + 1} / {files.length}
         </span>
         <button

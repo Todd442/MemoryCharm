@@ -57,7 +57,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   if (!isAuthed) {
     return (
       <div style={{ padding: 24 }}>
-        <div style={{ fontSize: 28 }}>
+        <div style={{ fontSize: "var(--fs-body)" }}>
           {inProgress !== InteractionStatus.None ? "Finishing sign-in…" : "Signing you in…"}
         </div>
       </div>

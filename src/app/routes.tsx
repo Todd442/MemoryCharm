@@ -10,11 +10,12 @@ import { CharmDetailPage } from "../features/account/pages/CharmDetailPage";
 import { PurchasePage } from "../features/account/pages/PurchasePage";
 import { RequireAuth } from "../app/auth/RequireAuth";
 import { ScrollTestPage } from "../features/test/pages/ScrollTestPage.tsx";
+import { NfcCheckPage } from "../features/nfc-check/pages/NfcCheckPage";
 
 function NotFound() {
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ fontSize: 38 }}>404</div>
+      <div style={{ fontSize: "var(--fs-section)" }}>404</div>
       <div style={{ marginTop: 12 }}>That page doesn't exist.</div>
       <p style={{ marginTop: 12 }}>
         <Link to="/">Go Home</Link>
@@ -74,6 +75,9 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
+      // NFC Check & Guide (public)
+      { path: "/nfc-check", element: <NfcCheckPage /> },
+
       { path: "/test/scroll", element: <ScrollTestPage /> },
       { path: "*", element: <NotFound /> },
     ],

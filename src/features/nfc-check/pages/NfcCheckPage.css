@@ -1,0 +1,244 @@
+/* Page wrapper — same pattern as .teClaimWrap / .teHomeWrap */
+.teNfcWrap {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.teNfcPanel {
+  width: min(760px, 100%);
+  color: #f3e7cf;
+  font-family: "Cinzel", serif;
+}
+
+/* Detection spinner */
+.teNfcDetecting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 30px 0;
+}
+
+.teNfcSpinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(210,170,110,0.20);
+  border-top-color: rgba(210,170,110,0.70);
+  border-radius: 50%;
+  animation: teNfcSpin 0.8s linear infinite;
+}
+
+@keyframes teNfcSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Info rows */
+.teNfcInfoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(210,170,110,0.12);
+  font-size: var(--fs-body);
+}
+
+.teNfcInfoLabel {
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: var(--fs-meta);
+}
+
+.teNfcInfoValue {
+  text-transform: capitalize;
+}
+
+/* NFC status badges */
+.teNfcBadge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.teNfcBadge--ok {
+  background: rgba(100, 200, 130, 0.15);
+  color: #a6ffb9;
+  border: 1px solid rgba(100, 200, 130, 0.3);
+}
+
+.teNfcBadge--warn {
+  background: rgba(255, 211, 138, 0.15);
+  color: #ffd38a;
+  border: 1px solid rgba(255, 211, 138, 0.3);
+}
+
+/* Step title */
+.teNfcStepTitle {
+  font-size: var(--fs-heading);
+  color: rgba(239, 213, 170, 0.95);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+}
+
+/* Instruction hints */
+.teNfcHints {
+  margin: 0;
+  padding-left: 24px;
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
+.teNfcHints li {
+  margin-bottom: 8px;
+}
+
+.teNfcHints li::marker {
+  color: rgba(210,170,110,0.65);
+}
+
+/* Tip box */
+.teNfcTip {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(210,170,110,0.08);
+  border: 1px solid rgba(210,170,110,0.18);
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+}
+
+/* External link buttons */
+.teNfcLinks {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.teNfcLinkBtn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Phone SVG container */
+.teNfcPhoneWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.teNfcPhoneWrap svg {
+  width: 200px;
+  height: auto;
+}
+
+.teNfcPhoneSmall svg,
+.teNfcPhoneSmall {
+  width: 140px;
+}
+
+.teNfcPhoneCaption {
+  text-align: center;
+  font-size: var(--fs-meta);
+  opacity: 0.85;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* SVG pulse animation */
+@keyframes teNfcPulse {
+  0%   { transform: scale(1);    opacity: 0.55; }
+  50%  { transform: scale(1.4);  opacity: 0.15; }
+  100% { transform: scale(1);    opacity: 0.55; }
+}
+
+.teNfcHighlight {
+  animation: teNfcPulse 2s ease-in-out infinite;
+}
+
+/* Desktop message */
+.teNfcDesktopMsg {
+  text-align: center;
+  padding: 24px 12px;
+}
+
+.teNfcIcon {
+  font-size: 52px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+/* Tap test area */
+.teNfcTestArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 0;
+}
+
+.teNfcWaiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  font-size: var(--fs-body);
+}
+
+.teNfcSuccess {
+  text-align: center;
+}
+
+.teNfcSuccessIcon {
+  font-size: 52px;
+  color: #a6ffb9;
+  margin-bottom: 8px;
+}
+
+.teNfcFailed {
+  text-align: center;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.teNfcManualTest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.teNfcManualTestHint {
+  font-size: var(--fs-body);
+  text-align: center;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+/* Footer */
+.teNfcFooter {
+  margin-top: 16px;
+  text-align: center;
+  font-size: var(--fs-label);
+  opacity: 0.85;
+}
+
+.teNfcFooter a {
+  color: rgba(140, 230, 205, 0.95);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(140, 230, 205, 0.35);
+}
+
+.teNfcFooter a:hover {
+  border-bottom-color: rgba(140, 230, 205, 0.8);
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .teNfcWrap { padding: 16px; }
+}

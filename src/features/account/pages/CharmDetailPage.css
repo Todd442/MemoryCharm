@@ -22,7 +22,7 @@
 }
 
 .teCharmSectionTitle {
-  font-size: 38px;
+  font-size: var(--fs-section);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -54,7 +54,7 @@
 }
 
 .teCharmInfoLabel {
-  font-size: 24px;
+  font-size: var(--fs-meta);
   letter-spacing: 0.8px;
   text-transform: uppercase;
   opacity: 0.75;
@@ -71,7 +71,7 @@
 }
 
 .teCharmSettleLabel {
-  font-size: 24px;
+  font-size: var(--fs-meta);
   margin-bottom: 6px;
 }
 
@@ -97,7 +97,7 @@
   background: rgba(255, 180, 60, 0.10);
   border: 1px solid rgba(255, 180, 60, 0.25);
   color: #ffcc66;
-  font-size: 24px;
+  font-size: var(--fs-meta);
   text-align: center;
 }
 
@@ -126,7 +126,7 @@
   border-radius: 10px;
   background: rgba(180, 160, 140, 0.10);
   border: 1px solid rgba(180, 160, 140, 0.2);
-  font-size: 26px;
+  font-size: var(--fs-label);
   text-align: center;
   opacity: 0.8;
 }
@@ -150,7 +150,7 @@
 .teCharmNav {
   margin-top: 4px;
   text-align: center;
-  font-size: 26px;
+  font-size: var(--fs-label);
   opacity: 0.85;
 }
 
