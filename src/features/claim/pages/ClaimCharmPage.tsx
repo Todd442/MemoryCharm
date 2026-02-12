@@ -9,14 +9,74 @@ import type { UserProfile } from "../api";
 import { entryByCode } from "../../playback/api";
 import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
-import { ALL_GLYPHS, type GlyphInfo } from "../../../app/data/glyphs";
+import { ALL_GLYPHS } from "../../../app/data/glyphs";
 
 import "./ClaimCharmPage.css";
 import { ThemedInput } from "../../../components/ThemedInput";
 
-type Step = "loading" | "profile" | "configure" | "upload" | "done";
+type Step = "loading" | "profile" | "memoryType" | "protection" | "glyphSelect" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
+
+type StepMeta = {
+  cardTitle: string;
+  statusText: string;
+  statusSubtitle: string;
+  stickyTitle: string;
+  stickyDesc: string;
+};
+
+const STEP_META: Record<Step, StepMeta> = {
+  loading: {
+    cardTitle: "\u2026",
+    statusText: "Bind the Charm",
+    statusSubtitle: "Bind thy name to the ledger, and the Mechanism shall remember.",
+    stickyTitle: "",
+    stickyDesc: "",
+  },
+  profile: {
+    cardTitle: "REGISTRATION",
+    statusText: "Keeper Registration",
+    statusSubtitle: "Inscribe your details upon the ledger.",
+    stickyTitle: "Register as Keeper",
+    stickyDesc: "Inscribe your name and details upon the Mechanism\u2019s ledger. Only registered Keepers may bind memories to a charm.",
+  },
+  memoryType: {
+    cardTitle: "MEMORY FORM",
+    statusText: "Bind the Charm",
+    statusSubtitle: "Choose the form this memory shall take.",
+    stickyTitle: "What form shall this memory take?",
+    stickyDesc: "Each charm holds a single memory. Choose whether it will be a moving picture, a still image, or a spoken word.",
+  },
+  protection: {
+    cardTitle: "CHARM PROTECTION",
+    statusText: "Bind the Charm",
+    statusSubtitle: "Choose how this charm shall be guarded.",
+    stickyTitle: "Choose how this charm shall be guarded",
+    stickyDesc: "An open charm reveals its memory to anyone who touches it. A glyph-locked charm demands a secret sign before it will yield.",
+  },
+  glyphSelect: {
+    cardTitle: "SECRET GLYPH",
+    statusText: "Bind the Charm",
+    statusSubtitle: "Select the glyph that will unseal this memory.",
+    stickyTitle: "Select the secret glyph",
+    stickyDesc: "This glyph will be the key to unseal your charm\u2019s memory. Choose wisely \u2014 only those who know the sign may unlock it.",
+  },
+  upload: {
+    cardTitle: "MEMORY UPLOAD",
+    statusText: "Bind the Charm",
+    statusSubtitle: "Attach a memory to seal the charm.",
+    stickyTitle: "Attach your memory",
+    stickyDesc: "The charm is bound and configured. Now breathe life into it \u2014 upload the memory that the Mechanism will guard.",
+  },
+  done: {
+    cardTitle: "SEALED",
+    statusText: "Charm Sealed",
+    statusSubtitle: "The Mechanism shall remember.",
+    stickyTitle: "Your charm is sealed",
+    stickyDesc: "The memory is bound and the Mechanism stands ready. Your charm now lives.",
+  },
+};
 
 export function ClaimCharmPage() {
   const nav = useNavigate();
@@ -44,6 +104,21 @@ export function ClaimCharmPage() {
   const [uploadPct, setUploadPct] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
+
+  // Dynamic step counter — adjusts when glyphSelect is included/excluded
+  const orderedSteps = useMemo<Step[]>(() => {
+    const base: Step[] = ["profile", "memoryType", "protection"];
+    if (authMode === "glyph") base.push("glyphSelect");
+    base.push("upload", "done");
+    return base;
+  }, [authMode]);
+
+  const stepNumber = useMemo(() => {
+    const idx = orderedSteps.indexOf(step);
+    return idx >= 0 ? idx + 1 : null;
+  }, [orderedSteps, step]);
+
+  const totalSteps = orderedSteps.length;
 
   useEffect(() => {
     setFooterEl(document.getElementById("te-footer"));
@@ -106,27 +181,21 @@ export function ClaimCharmPage() {
         }
 
         if (profileRes.hasProfile) {
-          setInitialStep("configure");
+          setInitialStep("memoryType");
         } else {
           setInitialStep("profile");
         }
       })
       .catch((e: any) => {
         setErr(e?.message ?? "Failed to check profile.");
-        setInitialStep("configure"); // fall back so the page isn't stuck
+        setInitialStep("memoryType"); // fall back so the page isn't stuck
       });
   }, [isAuthed, emailish, code, nav]);
 
   // Keep the top status bar in sync with the current step
   useEffect(() => {
-    const titles: Record<Step, { text: string; subtitle: string }> = {
-      loading:   { text: "Bind the Charm",      subtitle: "Bind thy name to the ledger, and the Mechanism shall remember." },
-      profile:   { text: "Keeper Registration", subtitle: "Inscribe your details upon the ledger." },
-      configure: { text: "Bind the Charm",      subtitle: "Bind thy name to the ledger, and the Mechanism shall remember." },
-      upload:    { text: "Bind the Charm",      subtitle: "Attach a memory to seal the charm." },
-      done:      { text: "Charm Sealed",        subtitle: "The Mechanism shall remember." },
-    };
-    setStatus(titles[step]);
+    const meta = STEP_META[step];
+    setStatus({ text: meta.statusText, subtitle: meta.statusSubtitle });
   }, [step, setStatus]);
 
   if (!code) {
@@ -182,7 +251,7 @@ export function ClaimCharmPage() {
     setBusy(true);
     try {
       await saveProfile(profileData);
-      advanceTo("configure");
+      advanceTo("memoryType");
     } catch (e: any) {
       setErr(e?.message ?? "Failed to save profile.");
     } finally {
@@ -254,27 +323,41 @@ export function ClaimCharmPage() {
 
   return (
     <>
-    <div className="teClaimWrap">
-      <div className="teClaimPanel">
-        <div className="teClaimMeta">
-          <span className="teClaimMetaLabel">Charm code</span>
-          <span className="teClaimMetaValue">{code}</span>
-        </div>
-
-        {/* Auth banner */}
-        <div className="teAuthBanner">
-          {isAuthed ? (
-            <div className="teAuthRow">
-              <div className="teAuthLeft">
-                <div className="teAuthKicker">Signed in</div>
-                <div className="teAuthName">{displayName}</div>
-                {emailish && <div className="teAuthEmail">{emailish}</div>}
+    <div className="teClaimLayout">
+      {/* Fixed instruction header — always visible, never scrolls */}
+      {step !== "loading" && (
+        <div className="teClaimInstructions">
+          {stepNumber !== null && (
+            <div className="teIlluminatedNum">{stepNumber}</div>
+          )}
+          <div className="teInstructionsText">
+            {stepNumber !== null && (
+              <div className="teStickyCounter">
+                Step {stepNumber} of {totalSteps}
               </div>
-            </div>
-          ) : (
+            )}
+            <div className="teStickyTitle">{STEP_META[step].stickyTitle}</div>
+            <div className="teStickyDesc">{STEP_META[step].stickyDesc}</div>
+          </div>
+          <div className="teStatusPill" role="status" aria-live="polite">
+            <span className={"teStatusDot " + (busy ? "isBusy" : "isReady")} />
+            <span className="teStatusText">
+              {busy ? "Working" : "Seal Engaged"}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Scrollable content */}
+      <div className="teClaimScrollArea">
+      <div className="teClaimWrap">
+      <div className="teClaimPanel">
+        {/* Auth banner — only when not signed in */}
+        {!isAuthed && (
+          <div className="teAuthBanner">
             <div className="teAuthRow">
               <div className="teAuthLeft">
-                <div className="teAuthKicker">You’ll need an account to claim this charm.</div>
+                <div className="teAuthKicker">You'll need an account to claim this charm.</div>
                 <div className="teAuthHint">Sign up or sign in with Entra External ID.</div>
               </div>
 
@@ -286,8 +369,8 @@ export function ClaimCharmPage() {
                 {working ? "Working…" : "Sign in"}
               </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {err && <div className="teClaimError">{err}</div>}
 
@@ -302,16 +385,9 @@ export function ClaimCharmPage() {
             <div className="teCardHeader">
               <div className="teCardHeaderLine" />
               <div className="teCardHeaderTitle">
-                {step === "loading" ? "…" : step === "profile" ? "REGISTRATION" : step === "configure" ? "CHARM CONFIGURATION" : step === "upload" ? "MEMORY UPLOAD" : "SEALED"}
+                {STEP_META[step].cardTitle}
               </div>
               <div className="teCardHeaderLine" />
-
-              <div className="teStatusPill" role="status" aria-live="polite">
-                <span className={"teStatusDot " + (busy ? "isBusy" : "isReady")} />
-                <span className="teStatusText">
-                  {busy ? "Mechanism Working" : "Secure Seal Engaged"}
-                </span>
-              </div>
             </div>
 
             {/* STEP: LOADING */}
@@ -380,88 +456,122 @@ export function ClaimCharmPage() {
               </div>
             )}
 
-            {/* STEP: CONFIGURE */}
-            {step === "configure" && (
+            {/* STEP: MEMORY TYPE */}
+            {step === "memoryType" && (
               <div className="teCardBody">
                 <div className="teGrid">
-                  <div>
-                    <div className="teFieldLabel">Memory type</div>
-                    <div className="tePills">
-                      {(["video", "image", "audio"] as MemoryType[]).map((t) => (
-                        <button
-                          key={t}
-                          className={"tePill " + (memoryType === t ? "isActive" : "")}
-                          onClick={() => setMemoryType(t)}
-                          disabled={busy}
-                          type="button"
-                        >
-                          {t.toUpperCase()}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="teFieldLabel">Playback protection</div>
-                    <div className="tePills">
+                  <div className="tePills" style={{ flexDirection: "column" }}>
+                    {(["video", "image", "audio"] as MemoryType[]).map((t) => (
                       <button
-                        className={"tePill " + (authMode === "none" ? "isActive" : "")}
-                        onClick={() => setAuthMode("none")}
+                        key={t}
+                        className={"tePill tePillLarge " + (memoryType === t ? "isActive" : "")}
+                        onClick={() => setMemoryType(t)}
                         disabled={busy}
                         type="button"
                       >
-                        OPEN
+                        <span className="tePillLabel">{t.toUpperCase()}</span>
+                        <span className="tePillDesc">
+                          {t === "video" ? "A moving picture, captured in time."
+                            : t === "image" ? "A still frame, frozen forever."
+                            : "A voice or melody, preserved in sound."}
+                        </span>
                       </button>
-                      <button
-                        className={"tePill " + (authMode === "glyph" ? "isActive" : "")}
-                        onClick={() => setAuthMode("glyph")}
-                        disabled={busy}
-                        type="button"
-                      >
-                        GLYPH LOCK
-                      </button>
-                    </div>
-
+                    ))}
                   </div>
 
-                  {authMode === "glyph" && (
-                    <div>
-                      <div className="teFieldLabel">Choose your secret glyph</div>
-                      <div className="teHint" style={{ marginBottom: 8 }}>
-                        Select the glyph that will unlock this charm's memory.
-                      </div>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "repeat(6, minmax(52px, 1fr))",
-                          gap: 8,
-                          maxWidth: 420,
-                        }}
+                  <div className="teActionsRow">
+                    <button
+                      className="teBtn teBtnPrimary teBtnWide"
+                      onClick={() => advanceTo("protection")}
+                      disabled={busy}
+                      type="button"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP: PROTECTION */}
+            {step === "protection" && (
+              <div className="teCardBody">
+                <div className="teGrid">
+                  <div className="tePills" style={{ flexDirection: "column" }}>
+                    <button
+                      className={"tePill tePillLarge " + (authMode === "none" ? "isActive" : "")}
+                      onClick={() => setAuthMode("none")}
+                      disabled={busy}
+                      type="button"
+                    >
+                      <span className="tePillLabel">OPEN</span>
+                      <span className="tePillDesc">Anyone who touches the charm may view the memory.</span>
+                    </button>
+                    <button
+                      className={"tePill tePillLarge " + (authMode === "glyph" ? "isActive" : "")}
+                      onClick={() => setAuthMode("glyph")}
+                      disabled={busy}
+                      type="button"
+                    >
+                      <span className="tePillLabel">GLYPH LOCK</span>
+                      <span className="tePillDesc">A secret glyph must be entered to unseal the memory.</span>
+                    </button>
+                  </div>
+
+                  <div className="teActionsRow">
+                    <button
+                      className="teBtn teBtnPrimary teBtnWide"
+                      onClick={() => {
+                        if (authMode === "glyph") {
+                          advanceTo("glyphSelect");
+                        } else {
+                          doClaimAndConfigure();
+                        }
+                      }}
+                      disabled={busy || working}
+                      type="button"
+                    >
+                      {busy ? "Binding charm\u2026" : "Continue"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP: GLYPH SELECT */}
+            {step === "glyphSelect" && (
+              <div className="teCardBody">
+                <div className="teGrid">
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(6, minmax(52px, 1fr))",
+                      gap: 8,
+                      maxWidth: 420,
+                    }}
+                  >
+                    {ALL_GLYPHS.map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setSelectedGlyph(g.id)}
+                        className={"tePill " + (selectedGlyph === g.id ? "isActive" : "")}
+                        style={{ fontSize: "var(--fs-xs)", padding: "8px 4px" }}
                       >
-                        {ALL_GLYPHS.map((g) => (
-                          <button
-                            key={g.id}
-                            type="button"
-                            disabled={busy}
-                            onClick={() => setSelectedGlyph(g.id)}
-                            className={"tePill " + (selectedGlyph === g.id ? "isActive" : "")}
-                            style={{ fontSize: "var(--fs-xs)", padding: "8px 4px" }}
-                          >
-                            {g.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                        {g.name}
+                      </button>
+                    ))}
+                  </div>
 
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
                       onClick={doClaimAndConfigure}
-                      disabled={busy || working || (authMode === "glyph" && !selectedGlyph)}
+                      disabled={busy || working || !selectedGlyph}
                       type="button"
                     >
-                      {busy ? "Binding charm…" : "Claim & Continue"}
+                      {busy ? "Binding charm\u2026" : "Claim & Continue"}
                     </button>
 
                     {claimed && (
@@ -576,6 +686,8 @@ export function ClaimCharmPage() {
         </div>
       </div>
     </div>
+    </div>{/* close teClaimScrollArea */}
+    </div>{/* close teClaimLayout */}
 
     {/* Portal: auth actions into the frame footer */}
     {isAuthed && footerEl && createPortal(
