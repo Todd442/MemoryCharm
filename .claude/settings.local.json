@@ -17,7 +17,8 @@
       "Bash(npx vite build)",
       "Bash(dotnet build:*)",
       "Bash(git add:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm run build:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\source\\repos\\Mnemosyne\\Mnemosyne.API"

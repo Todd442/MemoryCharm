@@ -14,7 +14,7 @@ import { ScrollTestPage } from "../features/test/pages/ScrollTestPage.tsx";
 function NotFound() {
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ fontSize: 24 }}>404</div>
+      <div style={{ fontSize: 38 }}>404</div>
       <div style={{ marginTop: 12 }}>That page doesn't exist.</div>
       <p style={{ marginTop: 12 }}>
         <Link to="/">Go Home</Link>

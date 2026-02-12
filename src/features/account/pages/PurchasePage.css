@@ -22,7 +22,7 @@
 }
 
 .tePurchaseSectionTitle {
-  font-size: 18px;
+  font-size: 38px;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -60,13 +60,13 @@
 }
 
 .tePurchaseCardTitle {
-  font-size: 16px;
+  font-size: 30px;
   font-weight: 600;
   margin-bottom: 6px;
 }
 
 .tePurchaseCardDesc {
-  font-size: 13px;
+  font-size: 26px;
   opacity: 0.75;
   margin-bottom: 12px;
   line-height: 1.4;
@@ -74,13 +74,13 @@
 
 .tePurchaseCardBtn {
   display: inline-block;
-  padding: 8px 20px;
+  padding: 10px 20px;
   border-radius: 8px;
   border: 1px solid rgba(210,170,110,0.30);
   background: rgba(210,170,110,0.08);
   color: rgba(210,170,110,0.65);
   font-family: "Cinzel", serif;
-  font-size: 13px;
+  font-size: 24px;
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: not-allowed;
@@ -91,13 +91,13 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  font-size: 13px;
+  font-size: 22px;
   opacity: 0.8;
   margin-bottom: 4px;
 }
 
 .tePurchaseCharmInfoLabel {
-  font-size: 11px;
+  font-size: 22px;
   letter-spacing: 0.8px;
   text-transform: uppercase;
   opacity: 0.6;
@@ -107,7 +107,7 @@
 .tePurchaseNav {
   margin-top: 4px;
   text-align: center;
-  font-size: 13px;
+  font-size: 26px;
   opacity: 0.85;
 }
 

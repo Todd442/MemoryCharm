@@ -445,7 +445,7 @@ export function ClaimCharmPage() {
                             disabled={busy}
                             onClick={() => setSelectedGlyph(g.id)}
                             className={"tePill " + (selectedGlyph === g.id ? "isActive" : "")}
-                            style={{ fontSize: 12, padding: "8px 4px" }}
+                            style={{ fontSize: 20, padding: "8px 4px" }}
                           >
                             {g.name}
                           </button>

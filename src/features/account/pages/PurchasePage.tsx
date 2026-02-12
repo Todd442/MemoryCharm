@@ -61,7 +61,7 @@ export function PurchasePage() {
       <div className="tePurchaseWrap">
         <div className="tePurchasePanel">
           <div className="tePurchaseSection">
-            <div style={{ textAlign: "center", padding: 20, fontSize: 14, opacity: 0.7 }}>
+            <div style={{ textAlign: "center", padding: 20, fontSize: 24, opacity: 0.7 }}>
               Loading...
             </div>
           </div>
@@ -75,7 +75,7 @@ export function PurchasePage() {
       <div className="tePurchaseWrap">
         <div className="tePurchasePanel">
           <div className="tePurchaseSection">
-            <div style={{ textAlign: "center", padding: 20, fontSize: 14, opacity: 0.7 }}>
+            <div style={{ textAlign: "center", padding: 20, fontSize: 24, opacity: 0.7 }}>
               Charm not found.
             </div>
           </div>
@@ -99,7 +99,7 @@ export function PurchasePage() {
               background: "rgba(220,0,0,0.08)",
               color: "#ff6a6a",
               border: "1px solid rgba(255,90,90,0.18)",
-              fontSize: 14,
+              fontSize: 24,
             }}>
               {err}
             </div>

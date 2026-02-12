@@ -8,6 +8,7 @@ import { getCharmDetail, updateGlyph, uploadCharm } from "../api";
 import type { UserCharmDetail } from "../api";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
 import { useStatus } from "../../../app/providers/StatusProvider";
+import { ThemedInput } from "../../../components/ThemedInput";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill, .teBtn styles
 import "./CharmDetailPage.css";
 
@@ -135,7 +136,7 @@ export function CharmDetailPage() {
       <div className="teCharmWrap">
         <div className="teCharmPanel">
           <div className="teCharmSection">
-            <div style={{ textAlign: "center", padding: 20, fontSize: 14, opacity: 0.7 }}>
+            <div style={{ textAlign: "center", padding: 20, fontSize: 24, opacity: 0.7 }}>
               Loading charm...
             </div>
           </div>
@@ -149,7 +150,7 @@ export function CharmDetailPage() {
       <div className="teCharmWrap">
         <div className="teCharmPanel">
           <div className="teCharmSection">
-            <div style={{ textAlign: "center", padding: 20, fontSize: 14, opacity: 0.7 }}>
+            <div style={{ textAlign: "center", padding: 20, fontSize: 24, opacity: 0.7 }}>
               Charm not found.
             </div>
           </div>
@@ -199,7 +200,7 @@ export function CharmDetailPage() {
               background: "rgba(220,0,0,0.08)",
               color: "#ff6a6a",
               border: "1px solid rgba(255,90,90,0.18)",
-              fontSize: 14,
+              fontSize: 24,
             }}>
               {err}
             </div>
@@ -212,7 +213,7 @@ export function CharmDetailPage() {
               background: "rgba(100,200,130,0.08)",
               color: "#a6ffb9",
               border: "1px solid rgba(100,200,130,0.18)",
-              fontSize: 14,
+              fontSize: 24,
             }}>
               {msg}
             </div>
@@ -222,40 +223,14 @@ export function CharmDetailPage() {
           <div className="teCharmSection">
             <div className="teCharmSectionTitle">Charm Info</div>
             <div className="teCharmInfo">
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Charm ID</div>
-                <div className="teCharmInfoValue">{charm.charmId}</div>
-              </div>
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Status</div>
-                <div className="teCharmInfoValue">{charm.isExpired ? "Expired" : charm.isSettled ? "Settled" : charm.status}</div>
-              </div>
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Charm Tier</div>
-                <div className="teCharmInfoValue">
-                  {charm.charmTier === "retail" ? "Retail" : charm.charmTier ? `${charm.charmTier.replace("-", "-Year ").replace(/^\w/, (c) => c.toUpperCase()).replace(/ $/, "")}` : "\u2014"}
-                </div>
-              </div>
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Expires</div>
-                <div className="teCharmInfoValue">{charm.expiresAt ? fmtDate(charm.expiresAt) : "Never"}</div>
-              </div>
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Memory Type</div>
-                <div className="teCharmInfoValue">{charm.memoryType ?? "\u2014"}</div>
-              </div>
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Protection</div>
-                <div className="teCharmInfoValue">{charm.authMode === "glyph" ? "Glyph Lock" : "Open"}</div>
-              </div>
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Claimed</div>
-                <div className="teCharmInfoValue">{fmtDate(charm.claimedAt)}</div>
-              </div>
-              <div className="teCharmInfoItem">
-                <div className="teCharmInfoLabel">Configured</div>
-                <div className="teCharmInfoValue">{fmtDate(charm.configuredAt)}</div>
-              </div>
+              <ThemedInput readOnly label="Charm ID" value={charm.charmId} />
+              <ThemedInput readOnly label="Status" value={charm.isExpired ? "Expired" : charm.isSettled ? "Settled" : charm.status} />
+              <ThemedInput readOnly label="Charm Tier" value={charm.charmTier === "retail" ? "Retail" : charm.charmTier ? `${charm.charmTier.replace("-", "-Year ").replace(/^\w/, (c) => c.toUpperCase()).replace(/ $/, "")}` : ""} />
+              <ThemedInput readOnly label="Expires" value={charm.expiresAt ? fmtDate(charm.expiresAt) : "Never"} />
+              <ThemedInput readOnly label="Memory Type" value={charm.memoryType ?? ""} />
+              <ThemedInput readOnly label="Protection" value={charm.authMode === "glyph" ? "Glyph Lock" : "Open"} />
+              <ThemedInput readOnly label="Claimed" value={fmtDate(charm.claimedAt)} />
+              <ThemedInput readOnly label="Configured" value={fmtDate(charm.configuredAt)} />
             </div>
 
             {/* Settling progress */}
@@ -330,7 +305,7 @@ export function CharmDetailPage() {
                         disabled={busy}
                         onClick={() => handleGlyphSelect(g.id)}
                         className={"tePill " + (editGlyphId === g.id ? "isActive" : "")}
-                        style={{ fontSize: 12, padding: "8px 4px" }}
+                        style={{ fontSize: 22, padding: "8px 6px" }}
                       >
                         {g.name}
                       </button>
@@ -381,12 +356,12 @@ export function CharmDetailPage() {
                     style={{ padding: "6px 0" }}
                   />
                   {files.length === 1 && (
-                    <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+                    <div style={{ fontSize: 20, opacity: 0.7, marginTop: 4 }}>
                       {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
                     </div>
                   )}
                   {files.length > 1 && (
-                    <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+                    <div style={{ fontSize: 20, opacity: 0.7, marginTop: 4 }}>
                       {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
                     </div>
                   )}

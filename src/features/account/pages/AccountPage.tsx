@@ -131,7 +131,7 @@ export function AccountPage() {
       <div className="teAcctWrap">
         <div className="teAcctPanel">
           <div className="teAcctSection">
-            <div style={{ textAlign: "center", padding: 20, fontSize: 14, opacity: 0.7 }}>
+            <div style={{ textAlign: "center", padding: 20, fontSize: 24, opacity: 0.7 }}>
               Loading account...
             </div>
           </div>
@@ -152,7 +152,7 @@ export function AccountPage() {
               background: "rgba(220,0,0,0.08)",
               color: "#ff6a6a",
               border: "1px solid rgba(255,90,90,0.18)",
-              fontSize: 14,
+              fontSize: 24,
             }}>
               {err}
             </div>
@@ -165,7 +165,7 @@ export function AccountPage() {
               background: "rgba(100,200,130,0.08)",
               color: "#a6ffb9",
               border: "1px solid rgba(100,200,130,0.18)",
-              fontSize: 14,
+              fontSize: 24,
             }}>
               {msg}
             </div>
