@@ -65,9 +65,9 @@ const STEP_META: Record<Step, StepMeta> = {
   upload: {
     cardTitle: "MEMORY UPLOAD",
     statusText: "Bind the Charm",
-    statusSubtitle: "Attach a memory to seal the charm.",
-    stickyTitle: "Attach your memory",
-    stickyDesc: "The charm is bound and configured. Now breathe life into it \u2014 upload the memory that the Mechanism will guard.",
+    statusSubtitle: "Select the memory to seal within the charm.",
+    stickyTitle: "Select your memory",
+    stickyDesc: "Choose the file that holds the memory you wish to bind. You\u2019ll secure and seal the charm in the next step.",
   },
   done: {
     cardTitle: "SEALED",
@@ -102,14 +102,16 @@ export function ClaimCharmPage() {
   const [selectedGlyph, setSelectedGlyph] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadPct, setUploadPct] = useState(0);
+  const [sealPhase, setSealPhase] = useState<"claim" | "configure" | "upload" | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
 
   // Dynamic step counter — adjusts when glyphSelect is included/excluded
   const orderedSteps = useMemo<Step[]>(() => {
-    const base: Step[] = ["profile", "memoryType", "protection"];
+    const base: Step[] = ["profile", "memoryType", "upload", "protection"];
     if (authMode === "glyph") base.push("glyphSelect");
-    base.push("upload", "done");
+    base.push("done");
     return base;
   }, [authMode]);
 
@@ -123,6 +125,16 @@ export function ClaimCharmPage() {
   useEffect(() => {
     setFooterEl(document.getElementById("te-footer"));
   }, []);
+
+  // Create/revoke object URL for content preview on done page
+  useEffect(() => {
+    if (files.length > 0) {
+      const url = URL.createObjectURL(files[0]);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setPreviewUrl(null);
+  }, [files]);
 
   // History-backed step navigation ------------------------------------------
   // setInitialStep: the first real step after loading.  replaceState so that
@@ -271,29 +283,13 @@ export function ClaimCharmPage() {
     }
   }
 
-  async function doClaimAndConfigure() {
-    setErr(null);
-    setBusy(true);
-    try {
-      const c = await claimCharm(code);
-      setClaimed({ charmId: c.charmId });
-
-      await configureCharm(code, memoryType, authMode, selectedGlyph ?? undefined);
-      advanceTo("upload");
-    } catch (e: any) {
-      setErr(e?.message ?? "Claim/configure failed.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 40;
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
 
-  async function doUpload() {
+  async function doSealCharm() {
     setErr(null);
     if (files.length === 0) {
-      setErr("Select a file to upload.");
+      setErr("Please go back and select a file first.");
       return;
     }
     const totalBytes = files.reduce((s, f) => s + f.size, 0);
@@ -304,12 +300,22 @@ export function ClaimCharmPage() {
     setBusy(true);
     setUploadPct(0);
     try {
+      setSealPhase("claim");
+      const c = await claimCharm(code);
+      setClaimed({ charmId: c.charmId });
+
+      setSealPhase("configure");
+      await configureCharm(code, memoryType, authMode, selectedGlyph ?? undefined);
+
+      setSealPhase("upload");
       await uploadCharm(code, files, files[0].type, setUploadPct);
+
       advanceTo("done");
     } catch (e: any) {
-      setErr(e?.message ?? "Upload failed.");
+      setErr(e?.message ?? "Seal failed.");
     } finally {
       setBusy(false);
+      setSealPhase(null);
     }
   }
 
@@ -482,7 +488,7 @@ export function ClaimCharmPage() {
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
-                      onClick={() => advanceTo("protection")}
+                      onClick={() => advanceTo("upload")}
                       disabled={busy}
                       type="button"
                     >
@@ -518,6 +524,21 @@ export function ClaimCharmPage() {
                     </button>
                   </div>
 
+                  {busy && sealPhase && (
+                    <div>
+                      <div className="teHint">
+                        {sealPhase === "claim" ? "Claiming charm\u2026"
+                          : sealPhase === "configure" ? "Configuring\u2026"
+                          : `Uploading\u2026 ${Math.round(uploadPct)}%`}
+                      </div>
+                      {sealPhase === "upload" && (
+                        <div style={{ marginTop: 6, height: 6, borderRadius: 3, background: "rgba(0,0,0,0.1)", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${uploadPct}%`, background: "rgba(60,60,60,0.85)", transition: "width 0.2s" }} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
@@ -525,13 +546,13 @@ export function ClaimCharmPage() {
                         if (authMode === "glyph") {
                           advanceTo("glyphSelect");
                         } else {
-                          doClaimAndConfigure();
+                          doSealCharm();
                         }
                       }}
                       disabled={busy || working}
                       type="button"
                     >
-                      {busy ? "Binding charm\u2026" : "Continue"}
+                      {busy ? "Sealing\u2026" : authMode === "glyph" ? "Continue" : "Seal the Charm"}
                     </button>
                   </div>
                 </div>
@@ -564,27 +585,36 @@ export function ClaimCharmPage() {
                     ))}
                   </div>
 
+                  {busy && sealPhase && (
+                    <div>
+                      <div className="teHint">
+                        {sealPhase === "claim" ? "Claiming charm\u2026"
+                          : sealPhase === "configure" ? "Configuring\u2026"
+                          : `Uploading\u2026 ${Math.round(uploadPct)}%`}
+                      </div>
+                      {sealPhase === "upload" && (
+                        <div style={{ marginTop: 6, height: 6, borderRadius: 3, background: "rgba(0,0,0,0.1)", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${uploadPct}%`, background: "rgba(60,60,60,0.85)", transition: "width 0.2s" }} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
-                      onClick={doClaimAndConfigure}
+                      onClick={doSealCharm}
                       disabled={busy || working || !selectedGlyph}
                       type="button"
                     >
-                      {busy ? "Binding charm\u2026" : "Claim & Continue"}
+                      {busy ? "Sealing\u2026" : "Seal the Charm"}
                     </button>
-
-                    {claimed && (
-                      <div className="teHint">
-                        Claimed as: <strong>{claimed.charmId}</strong>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* STEP: UPLOAD */}
+            {/* STEP: UPLOAD (file selection only — sealing happens on protection step) */}
             {step === "upload" && (
               <div className="teCardBody">
                 <label className="teField">
@@ -618,35 +648,14 @@ export function ClaimCharmPage() {
                   )}
                 </label>
 
-                {busy && (
-                  <div style={{ marginTop: 10 }}>
-                    <div style={{
-                      height: 6,
-                      borderRadius: 3,
-                      background: "rgba(0,0,0,0.1)",
-                      overflow: "hidden",
-                    }}>
-                      <div style={{
-                        height: "100%",
-                        width: `${uploadPct}%`,
-                        background: "rgba(60,60,60,0.85)",
-                        transition: "width 0.2s",
-                      }} />
-                    </div>
-                    <div className="teHint" style={{ marginTop: 4 }}>
-                      {Math.round(uploadPct)}%
-                    </div>
-                  </div>
-                )}
-
                 <div className="teActionsRow">
                   <button
-                    className="teBtn teBtnPrimary"
-                    onClick={doUpload}
-                    disabled={busy || working || files.length === 0}
+                    className="teBtn teBtnPrimary teBtnWide"
+                    onClick={() => advanceTo("protection")}
+                    disabled={files.length === 0}
                     type="button"
                   >
-                    {busy ? "Uploading\u2026" : "Upload"}
+                    Continue
                   </button>
                 </div>
               </div>
@@ -656,24 +665,30 @@ export function ClaimCharmPage() {
             {step === "done" && (
               <div className="teCardBody">
                 <div className="teHint">
-                  Your charm is claimed, configured, and has a memory attached.
+                  Your charm is sealed. The memory is bound and the Mechanism stands ready.
                 </div>
 
-                <div className="tePills tePillsWrap">
+                {previewUrl && (
+                  <div style={{ marginTop: 14 }}>
+                    {memoryType === "video" && (
+                      <video src={previewUrl} controls playsInline style={{ maxWidth: "100%", borderRadius: 12 }} />
+                    )}
+                    {memoryType === "image" && (
+                      <img src={previewUrl} alt="Memory preview" style={{ maxWidth: "100%", borderRadius: 12 }} />
+                    )}
+                    {memoryType === "audio" && (
+                      <audio src={previewUrl} controls style={{ width: "100%" }} />
+                    )}
+                  </div>
+                )}
+
+                <div className="tePills tePillsWrap" style={{ marginTop: 14 }}>
                   <button
                     className="tePill"
                     onClick={() => nav(`/c/${encodeURIComponent(code)}`)}
                     type="button"
                   >
-                    View Landing (/c/{code})
-                  </button>
-
-                  <button
-                    className="tePill"
-                    onClick={() => nav(`/c?Token=t:${encodeURIComponent(code)}`)}
-                    type="button"
-                  >
-                    Simulate NFC (/c?Token=…)
+                    View Charm
                   </button>
                 </div>
               </div>
