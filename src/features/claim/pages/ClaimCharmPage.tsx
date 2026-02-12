@@ -12,7 +12,7 @@ import { useStatus } from "../../../app/providers/StatusProvider";
 import { ALL_GLYPHS, type GlyphInfo } from "../../../app/data/glyphs";
 
 import "./ClaimCharmPage.css";
-import textInputBg from "../../../assets/textInput-background.png";
+import { ThemedInput } from "../../../components/ThemedInput";
 
 type Step = "loading" | "profile" | "configure" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
@@ -332,19 +332,15 @@ export function ClaimCharmPage() {
                     { key: "email"      as const, label: "Signal Address (Email)",placeholder: "captain@trianglesend.com",  hint: "We'll send a seal-confirmation missive to this address." },
                     { key: "cellNumber" as const, label: "Cipher Line",           placeholder: "e.g., +1 555 012 3456",    hint: "" },
                   ] as const).map(({ key, label, placeholder, hint }) => (
-                    <label key={key} className="teField">
-                      <div className="teFieldLabel">{label}</div>
-                      <div className="teField--bgWrap" style={{ backgroundImage: `url(${textInputBg})` }}>
-                        <input
-                          className="teFieldInput"
-                          value={profileData[key]}
-                          onChange={(e) => setProfileData((prev) => ({ ...prev, [key]: e.target.value }))}
-                          disabled={busy}
-                          placeholder={placeholder}
-                        />
-                      </div>
-                      {hint && <div className="teFieldHint">{hint}</div>}
-                    </label>
+                    <ThemedInput
+                      key={key}
+                      label={label}
+                      value={profileData[key]}
+                      onChange={(v) => setProfileData((prev) => ({ ...prev, [key]: v }))}
+                      disabled={busy}
+                      placeholder={placeholder}
+                      hint={hint || undefined}
+                    />
                   ))}
 
                   {/* Terms acceptance */}

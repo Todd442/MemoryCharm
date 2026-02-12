@@ -7,6 +7,7 @@ import { InteractionStatus } from "@azure/msal-browser";
 import { getUserMe, saveProfile, getUserCharms } from "../api";
 import type { UserProfile, UserCharmSummary } from "../api";
 import { useStatus } from "../../../app/providers/StatusProvider";
+import { ThemedInput } from "../../../components/ThemedInput";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .teBtn styles
 import "./AccountPage.css";
 
@@ -181,16 +182,14 @@ export function AccountPage() {
                 { key: "email" as const, label: "Signal Address (Email)", placeholder: "captain@trianglesend.com" },
                 { key: "cellNumber" as const, label: "Cipher Line", placeholder: "e.g., +1 555 012 3456" },
               ]).map(({ key, label, placeholder }) => (
-                <label key={key}>
-                  <div className="teAcctFieldLabel">{label}</div>
-                  <input
-                    className="teAcctFieldInput"
-                    value={profile[key]}
-                    onChange={(e) => setProfile((p) => ({ ...p, [key]: e.target.value }))}
-                    disabled={busy}
-                    placeholder={placeholder}
-                  />
-                </label>
+                <ThemedInput
+                  key={key}
+                  label={label}
+                  value={profile[key]}
+                  onChange={(v) => setProfile((p) => ({ ...p, [key]: v }))}
+                  disabled={busy}
+                  placeholder={placeholder}
+                />
               ))}
               <div>
                 <button
