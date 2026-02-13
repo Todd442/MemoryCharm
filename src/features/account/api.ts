@@ -23,6 +23,11 @@ export type UserCharmSummary = {
   expiresAt: string | null;
 };
 
+export type ContentFile = {
+  url: string;
+  name: string;
+};
+
 export type UserCharmDetail = {
   charmId: string;
   nickname: string | null;
@@ -40,6 +45,7 @@ export type UserCharmDetail = {
   isExpired: boolean;
   isFading: boolean;
   fadingInDays: number | null;
+  files: ContentFile[] | null;
 };
 
 type ListUserCharmsApiResponse = {

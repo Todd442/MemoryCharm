@@ -559,6 +559,121 @@ input[type="file"]:disabled::file-selector-button {
   cursor: default;
 }
 
+/* Content preview on done page */
+.tePreview {
+  margin-top: 14px;
+}
+
+.tePreviewMedia {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+/* Image carousel */
+.teCarousel {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(210, 170, 110, 0.25);
+  background: rgba(10, 6, 3, 0.5);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.teCarouselViewport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 12px;
+}
+
+.teCarouselImg {
+  max-width: 100%;
+  max-height: 500px;
+  border-radius: 8px;
+  object-fit: contain;
+  transition: opacity 0.25s ease;
+}
+
+.teCarouselArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(210, 170, 110, 0.35);
+  background:
+    radial-gradient(circle at 40% 35%, rgba(80, 50, 20, 0.85), rgba(25, 14, 6, 0.9));
+  color: rgba(230, 195, 130, 0.9);
+  font-size: 18px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 225, 170, 0.12);
+  backdrop-filter: blur(4px);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.teCarouselArrow:hover {
+  border-color: rgba(210, 170, 110, 0.6);
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 225, 170, 0.2),
+    0 0 12px rgba(210, 170, 110, 0.15);
+}
+
+.teCarouselPrev { left: 10px; }
+.teCarouselNext { right: 10px; }
+
+/* Dot indicators */
+.teCarouselDots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0 14px;
+}
+
+.teCarouselDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(210, 170, 110, 0.3);
+  background: rgba(40, 25, 12, 0.6);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.teCarouselDot.isActive {
+  background: rgba(230, 195, 130, 0.8);
+  border-color: rgba(210, 170, 110, 0.6);
+  box-shadow: 0 0 8px rgba(210, 170, 110, 0.4);
+}
+
+.teCarouselDot:hover:not(.isActive) {
+  background: rgba(210, 170, 110, 0.3);
+}
+
+/* Film-style counter */
+.teCarouselCounter {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(10, 6, 3, 0.7);
+  border: 1px solid rgba(210, 170, 110, 0.2);
+  font-size: var(--fs-small);
+  letter-spacing: 1.5px;
+  color: rgba(230, 195, 130, 0.8);
+  backdrop-filter: blur(4px);
+}
+
 /* Mobile tweaks */
 @media (max-width: 720px) {
   .teClaimWrap { padding: 16px; }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
@@ -36,6 +36,7 @@ export function CharmDetailPage() {
   // Upload state
   const [files, setFiles] = useState<File[]>([]);
   const [uploadPct, setUploadPct] = useState(0);
+  const [carouselIdx, setCarouselIdx] = useState(0);
 
   useEffect(() => {
     setFooterEl(document.getElementById("te-footer"));
@@ -52,6 +53,7 @@ export function CharmDetailPage() {
       try {
         const detail = await getCharmDetail(code!);
         setCharm(detail);
+        setCarouselIdx(0);
         setEditAuthMode(detail.authMode as "none" | "glyph");
       } catch (e: any) {
         setErr(e?.message ?? "Failed to load charm.");
@@ -330,6 +332,64 @@ export function CharmDetailPage() {
           {/* Content Management */}
           <div className="teCharmSection">
             <div className="teCharmSectionTitle">Content</div>
+
+            {/* Content preview — owner always sees their stored media */}
+            {charm.files && charm.files.length > 0 && charm.memoryType && (
+              <div className="tePreview" style={{ marginBottom: 14 }}>
+                {charm.memoryType === "video" && (
+                  <video src={charm.files[0].url} controls playsInline className="tePreviewMedia" />
+                )}
+                {charm.memoryType === "image" && (
+                  <div className="teCarousel">
+                    <div className="teCarouselViewport">
+                      <img
+                        src={charm.files[carouselIdx % charm.files.length]?.url}
+                        alt={`Memory ${(carouselIdx % charm.files.length) + 1}`}
+                        className="teCarouselImg"
+                      />
+                    </div>
+                    {charm.files.length > 1 && (
+                      <>
+                        <button
+                          className="teCarouselArrow teCarouselPrev"
+                          onClick={() => setCarouselIdx((i) => (i - 1 + charm.files!.length) % charm.files!.length)}
+                          type="button"
+                          aria-label="Previous image"
+                        >
+                          &#x276E;
+                        </button>
+                        <button
+                          className="teCarouselArrow teCarouselNext"
+                          onClick={() => setCarouselIdx((i) => (i + 1) % charm.files!.length)}
+                          type="button"
+                          aria-label="Next image"
+                        >
+                          &#x276F;
+                        </button>
+                        <div className="teCarouselDots">
+                          {charm.files.map((_, i) => (
+                            <button
+                              key={i}
+                              className={"teCarouselDot " + (i === carouselIdx % charm.files!.length ? "isActive" : "")}
+                              onClick={() => setCarouselIdx(i)}
+                              type="button"
+                              aria-label={`Image ${i + 1}`}
+                            />
+                          ))}
+                        </div>
+                        <div className="teCarouselCounter">
+                          {(carouselIdx % charm.files.length) + 1} / {charm.files.length}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+                {charm.memoryType === "audio" && (
+                  <audio src={charm.files[0].url} controls style={{ width: "100%" }} />
+                )}
+              </div>
+            )}
+
             {charm.isExpired ? (
               <div className="teCharmSettledMsg">
                 This memory has faded and can no longer be changed.

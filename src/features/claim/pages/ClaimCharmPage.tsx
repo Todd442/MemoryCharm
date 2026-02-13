@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
@@ -103,7 +103,9 @@ export function ClaimCharmPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploadPct, setUploadPct] = useState(0);
   const [sealPhase, setSealPhase] = useState<"claim" | "configure" | "upload" | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const lastUploadedRef = useRef<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
 
@@ -126,14 +128,15 @@ export function ClaimCharmPage() {
     setFooterEl(document.getElementById("te-footer"));
   }, []);
 
-  // Create/revoke object URL for content preview on done page
+  // Create/revoke object URLs for content preview on done page
   useEffect(() => {
+    setCarouselIdx(0);
     if (files.length > 0) {
-      const url = URL.createObjectURL(files[0]);
-      setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      const urls = files.map((f) => URL.createObjectURL(f));
+      setPreviewUrls(urls);
+      return () => urls.forEach((u) => URL.revokeObjectURL(u));
     }
-    setPreviewUrl(null);
+    setPreviewUrls([]);
   }, [files]);
 
   // History-backed step navigation ------------------------------------------
@@ -287,6 +290,7 @@ export function ClaimCharmPage() {
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
 
   async function doSealCharm() {
+    if (!code) return;
     setErr(null);
     if (files.length === 0) {
       setErr("Please go back and select a file first.");
@@ -297,18 +301,26 @@ export function ClaimCharmPage() {
       setErr(`Total file size exceeds ${maxCharmMB} MB limit (${(totalBytes / 1024 / 1024).toFixed(1)} MB selected).`);
       return;
     }
+    const filesKey = files.map(f => `${f.name}:${f.size}:${f.lastModified}`).join("|");
+    const needsUpload = lastUploadedRef.current !== filesKey;
+
     setBusy(true);
     setUploadPct(0);
     try {
-      setSealPhase("claim");
-      const c = await claimCharm(code);
-      setClaimed({ charmId: c.charmId });
+      if (!claimed) {
+        setSealPhase("claim");
+        const c = await claimCharm(code);
+        setClaimed({ charmId: c.charmId });
+      }
 
       setSealPhase("configure");
       await configureCharm(code, memoryType, authMode, selectedGlyph ?? undefined);
 
-      setSealPhase("upload");
-      await uploadCharm(code, files, files[0].type, setUploadPct);
+      if (needsUpload) {
+        setSealPhase("upload");
+        await uploadCharm(code, files, files[0].type, setUploadPct);
+        lastUploadedRef.current = filesKey;
+      }
 
       advanceTo("done");
     } catch (e: any) {
@@ -668,16 +680,58 @@ export function ClaimCharmPage() {
                   Your charm is sealed. The memory is bound and the Mechanism stands ready.
                 </div>
 
-                {previewUrl && (
-                  <div style={{ marginTop: 14 }}>
+                {previewUrls.length > 0 && (
+                  <div className="tePreview">
                     {memoryType === "video" && (
-                      <video src={previewUrl} controls playsInline style={{ maxWidth: "100%", borderRadius: 12 }} />
+                      <video src={previewUrls[0]} controls playsInline className="tePreviewMedia" />
                     )}
                     {memoryType === "image" && (
-                      <img src={previewUrl} alt="Memory preview" style={{ maxWidth: "100%", borderRadius: 12 }} />
+                      <div className="teCarousel">
+                        <div className="teCarouselViewport">
+                          <img
+                            src={previewUrls[carouselIdx]}
+                            alt={`Memory ${carouselIdx + 1}`}
+                            className="teCarouselImg"
+                          />
+                        </div>
+                        {previewUrls.length > 1 && (
+                          <>
+                            <button
+                              className="teCarouselArrow teCarouselPrev"
+                              onClick={() => setCarouselIdx((i) => (i - 1 + previewUrls.length) % previewUrls.length)}
+                              type="button"
+                              aria-label="Previous image"
+                            >
+                              &#x276E;
+                            </button>
+                            <button
+                              className="teCarouselArrow teCarouselNext"
+                              onClick={() => setCarouselIdx((i) => (i + 1) % previewUrls.length)}
+                              type="button"
+                              aria-label="Next image"
+                            >
+                              &#x276F;
+                            </button>
+                            <div className="teCarouselDots">
+                              {previewUrls.map((_, i) => (
+                                <button
+                                  key={i}
+                                  className={"teCarouselDot " + (i === carouselIdx ? "isActive" : "")}
+                                  onClick={() => setCarouselIdx(i)}
+                                  type="button"
+                                  aria-label={`Image ${i + 1}`}
+                                />
+                              ))}
+                            </div>
+                            <div className="teCarouselCounter">
+                              {carouselIdx + 1} / {previewUrls.length}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     )}
                     {memoryType === "audio" && (
-                      <audio src={previewUrl} controls style={{ width: "100%" }} />
+                      <audio src={previewUrls[0]} controls style={{ width: "100%" }} />
                     )}
                   </div>
                 )}
