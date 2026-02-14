@@ -6,6 +6,7 @@ import { InteractionStatus } from "@azure/msal-browser";
 
 import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
 import type { UserProfile } from "../api";
+import { getUserCharms, getCharmDetail } from "../../account/api";
 import { entryByCode } from "../../playback/api";
 import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
@@ -200,6 +201,20 @@ export function ClaimCharmPage() {
         } else {
           setInitialStep("profile");
         }
+
+        // Pre-select the glyph from the user's most recently claimed glyph charm
+        getUserCharms()
+          .then((charms) => {
+            const glyphCharms = charms
+              .filter((c) => c.authMode === "glyph")
+              .sort((a, b) => new Date(b.claimedAt).getTime() - new Date(a.claimedAt).getTime());
+            if (glyphCharms.length > 0) return getCharmDetail(glyphCharms[0].charmId);
+            return null;
+          })
+          .then((detail) => {
+            if (detail?.glyphId) setSelectedGlyph(detail.glyphId);
+          })
+          .catch(() => {}); // silently ignore — pre-selection is a nicety
       })
       .catch((e: any) => {
         setErr(e?.message ?? "Failed to check profile.");

@@ -3,6 +3,8 @@ import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
 import { GlyphAuthPanel } from "../../../components/GlyphAuthPanel";
+import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill styles
+import "../../account/pages/CharmDetailPage.css"; // shared .teCharmWrap/.teCharmPanel/.teCharmSection
 
 type UiState =
   | { s: "loading"; detail: string }
@@ -155,20 +157,28 @@ export function CharmEntryPage() {
   // ===== Render =====
   if (ui.s === "loading") {
     return (
-      <div style={{ padding: 24 }}>
-        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: "var(--fs-label)", opacity: 0.85 }}>{ui.detail}</div>
+      <div className="teCharmWrap">
+        <div className="teCharmPanel">
+          <div className="teCharmSection">
+            <div className="teCharmSectionTitle">Memory Charm</div>
+            <div style={{ fontSize: "var(--fs-label)", opacity: 0.85 }}>{ui.detail}</div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (ui.s === "error") {
     return (
-      <div style={{ padding: 24 }}>
-        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ marginTop: 8, color: "crimson" }}>{ui.message}</div>
-        <div style={{ marginTop: 14 }}>
-          <Link to="/">Return home</Link>
+      <div className="teCharmWrap">
+        <div className="teCharmPanel">
+          <div className="teCharmSection">
+            <div className="teCharmSectionTitle">Memory Charm</div>
+            <div style={{ marginTop: 8, color: "#ff6a6a" }}>{ui.message}</div>
+          </div>
+          <div className="teCharmNav">
+            <Link to="/">Return home</Link>
+          </div>
         </div>
       </div>
     );
@@ -178,11 +188,15 @@ export function CharmEntryPage() {
 
   if (entry.kind === "not_found") {
     return (
-      <div style={{ padding: 24 }}>
-        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm can't be found.</div>
-        <div style={{ marginTop: 14 }}>
-          <Link to="/">Return home</Link>
+      <div className="teCharmWrap">
+        <div className="teCharmPanel">
+          <div className="teCharmSection">
+            <div className="teCharmSectionTitle">Memory Charm</div>
+            <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm can't be found.</div>
+          </div>
+          <div className="teCharmNav">
+            <Link to="/">Return home</Link>
+          </div>
         </div>
       </div>
     );
@@ -190,11 +204,15 @@ export function CharmEntryPage() {
 
   if (entry.kind === "expired") {
     return (
-      <div style={{ padding: 24 }}>
-        <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
-        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm's memory has faded.</div>
-        <div style={{ marginTop: 14 }}>
-          <Link to="/">Return home</Link>
+      <div className="teCharmWrap">
+        <div className="teCharmPanel">
+          <div className="teCharmSection">
+            <div className="teCharmSectionTitle">Memory Charm</div>
+            <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm's memory has faded.</div>
+          </div>
+          <div className="teCharmNav">
+            <Link to="/">Return home</Link>
+          </div>
         </div>
       </div>
     );
@@ -202,35 +220,47 @@ export function CharmEntryPage() {
 
   // claimed
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ fontSize: "var(--fs-section)", marginBottom: 8 }}>Memory Charm</div>
+    <div className="teCharmWrap">
+      <div className="teCharmPanel">
+        <div className="teCharmSection">
+          <div className="teCharmSectionTitle">Memory Charm</div>
 
-      {!entry.configured && (
-        <div style={{ marginTop: 12, opacity: 0.9 }}>
-          This charm has not yet been awakened by its keeper.
-        </div>
-      )}
-
-      {/* Glyph gate */}
-      {entry.authMode === "glyph" && !playback && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
-
-          {blocked ? (
-            <div style={{ marginTop: 14, padding: 12, borderRadius: 10, background: "rgba(220,0,0,0.08)" }}>
-              The charm rejects this attempt.
+          {!entry.configured && (
+            <div style={{ opacity: 0.9, fontSize: "var(--fs-label)" }}>
+              This charm has not yet been awakened by its keeper.
             </div>
-          ) : (
-            <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} glyphs={entry.glyphs} />
           )}
+
+          {/* Glyph gate */}
+          {entry.authMode === "glyph" && !playback && (
+            <>
+              <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
+
+              {blocked ? (
+                <div style={{
+                  marginTop: 14,
+                  padding: 12,
+                  borderRadius: 10,
+                  background: "rgba(220,0,0,0.08)",
+                  border: "1px solid rgba(255,90,90,0.18)",
+                  color: "#ff6a6a",
+                  fontSize: "var(--fs-meta)",
+                }}>
+                  The charm rejects this attempt.
+                </div>
+              ) : (
+                <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} glyphs={entry.glyphs} />
+              )}
+            </>
+          )}
+
+          {/* Playback */}
+          {playback && <PlaybackRenderer files={playback.files} type={playback.type} />}
         </div>
-      )}
 
-      {/* Playback */}
-      {playback && <PlaybackRenderer files={playback.files} type={playback.type} />}
-
-      <div style={{ marginTop: 18, fontSize: "var(--fs-small)", opacity: 0.7 }}>
-        <Link to="/">Home</Link>
+        <div className="teCharmNav">
+          <Link to="/">Home</Link>
+        </div>
       </div>
     </div>
   );

@@ -55,6 +55,7 @@ export function CharmDetailPage() {
         setCharm(detail);
         setCarouselIdx(0);
         setEditAuthMode(detail.authMode as "none" | "glyph");
+        if (detail.glyphId) setEditGlyphId(detail.glyphId);
       } catch (e: any) {
         setErr(e?.message ?? "Failed to load charm.");
       } finally {

@@ -14,45 +14,50 @@ export function GlyphAuthPanel(props: {
 
   return (
     <div style={{ marginTop: 18 }}>
-      <div style={{ fontSize: "var(--fs-heading)", marginBottom: 8 }}>Glyph Required</div>
-      <div style={{ marginBottom: 12 }}>
+      <div
+        style={{
+          fontSize: "var(--fs-heading)",
+          letterSpacing: 2,
+          textTransform: "uppercase" as const,
+          marginBottom: 8,
+        }}
+      >
+        Glyph Required
+      </div>
+      <div style={{ marginBottom: 16, fontSize: "var(--fs-label)", opacity: 0.85 }}>
         Attempts left: <strong>{props.attemptsLeft}</strong>
       </div>
 
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(64px, 1fr))",
+          gridTemplateColumns: "repeat(3, 1fr)",
           gap: 10,
-          maxWidth: 320,
         }}
       >
         {glyphs.map((g) => (
           <button
             key={g.id}
+            className="tePill"
             disabled={props.busy}
             onClick={() => props.onSubmit(g.id)}
             style={{
-              height: 100,
-              borderRadius: 12,
-              border: "1px solid rgba(0,0,0,0.25)",
-              background: "rgba(230,230,230,0.6)",
-              cursor: props.busy ? "default" : "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: 6,
+              padding: 10,
+              cursor: props.busy ? "default" : "pointer",
             }}
           >
             {g.image ? (
               <img
                 src={g.image}
                 alt="Glyph"
-                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+                style={{ maxWidth: "100%", maxHeight: 140, objectFit: "contain" }}
                 draggable={false}
               />
             ) : (
-              <span style={{ fontSize: "var(--fs-small)" }}>{g.name}</span>
+              <span style={{ fontSize: "var(--fs-label)" }}>{g.name}</span>
             )}
           </button>
         ))}

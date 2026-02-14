@@ -34,6 +34,7 @@ export type UserCharmDetail = {
   status: string;
   memoryType: string | null;
   authMode: string;
+  glyphId: string | null;
   claimedAt: string | null;
   configuredAt: string | null;
   firstFinalizedAt: string | null;
