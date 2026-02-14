@@ -94,7 +94,7 @@ export function CharmDetailPage() {
     }
   }
 
-  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 40;
+  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 150;
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
 
   const acceptTypes: Record<MemoryType, string> = {
@@ -307,9 +307,14 @@ export function CharmDetailPage() {
                         disabled={busy}
                         onClick={() => handleGlyphSelect(g.id)}
                         className={"tePill " + (editGlyphId === g.id ? "isActive" : "")}
-                        style={{ fontSize: "var(--fs-small)", padding: "8px 6px" }}
+                        style={{ padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
-                        {g.name}
+                        <img
+                          src={g.image}
+                          alt="Glyph"
+                          style={{ maxWidth: "100%", maxHeight: 100, objectFit: "contain" }}
+                          draggable={false}
+                        />
                       </button>
                     ))}
                   </div>

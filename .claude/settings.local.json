@@ -18,7 +18,11 @@
       "Bash(dotnet build:*)",
       "Bash(git add:*)",
       "Bash(powershell:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(ren:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\source\\repos\\Mnemosyne\\Mnemosyne.API"

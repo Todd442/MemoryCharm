@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { selectRandomGlyphs, type GlyphInfo } from "../app/data/glyphs";
+import { selectRandomGlyphs, glyphById, type GlyphInfo } from "../app/data/glyphs";
 
 export function GlyphAuthPanel(props: {
   attemptsLeft: number;
@@ -7,10 +7,10 @@ export function GlyphAuthPanel(props: {
   onSubmit: (glyphId: string) => void | Promise<void>;
   glyphs?: { id: string; name: string }[];
 }) {
-  const glyphs = useMemo<GlyphInfo[]>(
-    () => props.glyphs ?? selectRandomGlyphs(9),
-    [props.glyphs]
-  );
+  const glyphs = useMemo<GlyphInfo[]>(() => {
+    if (!props.glyphs) return selectRandomGlyphs(9);
+    return props.glyphs.map((g) => glyphById(g.id) ?? { ...g, image: "" });
+  }, [props.glyphs]);
 
   return (
     <div style={{ marginTop: 18 }}>
@@ -33,15 +33,27 @@ export function GlyphAuthPanel(props: {
             disabled={props.busy}
             onClick={() => props.onSubmit(g.id)}
             style={{
-              height: 64,
+              height: 100,
               borderRadius: 12,
               border: "1px solid rgba(0,0,0,0.25)",
               background: "rgba(230,230,230,0.6)",
-              fontSize: "var(--fs-small)",
               cursor: props.busy ? "default" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 6,
             }}
           >
-            {g.name}
+            {g.image ? (
+              <img
+                src={g.image}
+                alt="Glyph"
+                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+                draggable={false}
+              />
+            ) : (
+              <span style={{ fontSize: "var(--fs-small)" }}>{g.name}</span>
+            )}
           </button>
         ))}
       </div>

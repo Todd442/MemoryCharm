@@ -286,7 +286,7 @@ export function ClaimCharmPage() {
     }
   }
 
-  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 40;
+  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 150;
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
 
   async function doSealCharm() {
@@ -578,9 +578,8 @@ export function ClaimCharmPage() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(6, minmax(52px, 1fr))",
-                      gap: 8,
-                      maxWidth: 420,
+                      gridTemplateColumns: "repeat(3, 1fr)",
+                      gap: 10,
                     }}
                   >
                     {ALL_GLYPHS.map((g) => (
@@ -590,9 +589,14 @@ export function ClaimCharmPage() {
                         disabled={busy}
                         onClick={() => setSelectedGlyph(g.id)}
                         className={"tePill " + (selectedGlyph === g.id ? "isActive" : "")}
-                        style={{ fontSize: "var(--fs-xs)", padding: "8px 4px" }}
+                        style={{ padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
-                        {g.name}
+                        <img
+                          src={g.image}
+                          alt="Glyph"
+                          style={{ maxWidth: "100%", maxHeight: 100, objectFit: "contain" }}
+                          draggable={false}
+                        />
                       </button>
                     ))}
                   </div>
