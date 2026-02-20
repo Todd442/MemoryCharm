@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
 import { GlyphAuthPanel } from "../../../components/GlyphAuthPanel";
+import { MemoryGallery } from "../components/MemoryGallery";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill styles
 
 type UiState =
@@ -281,41 +282,6 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
     );
   }
 
-  // Multiple images — slideshow
-  return <ImageSlideshow files={files} />;
-}
-
-function ImageSlideshow(props: { files: ContentFile[] }) {
-  const { files } = props;
-  const [index, setIndex] = useState(0);
-
-  return (
-    <div className="pb-frame">
-      <div className="pb-brand">Memory Charm</div>
-      <img
-        src={files[index].url}
-        alt={`Memory ${index + 1} of ${files.length}`}
-        className="pb-media"
-      />
-      <div className="pb-controls">
-        <button
-          onClick={() => setIndex((i) => Math.max(0, i - 1))}
-          disabled={index === 0}
-          style={{ padding: "4px 12px" }}
-        >
-          Prev
-        </button>
-        <span style={{ opacity: 0.8 }}>
-          {index + 1} / {files.length}
-        </span>
-        <button
-          onClick={() => setIndex((i) => Math.min(files.length - 1, i + 1))}
-          disabled={index === files.length - 1}
-          style={{ padding: "4px 12px" }}
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
+  // Multiple images — 3D gallery
+  return <MemoryGallery files={files} />;
 }

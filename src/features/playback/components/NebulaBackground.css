@@ -67,7 +67,7 @@
      19vw 91vh 0 0.4px rgba(255,255,255,0.2),
      82vw 25vh 0 0.3px rgba(255,255,255,0.25),
      60vw 85vh 0 0.3px rgba(255,255,255,0.22);
-  animation: stars-drift-1 80s linear infinite;
+  animation: stars-drift-1 40s linear infinite;
 }
 
 /* Layer 2: Mid-field — moderate stars */
@@ -88,7 +88,7 @@
      76vw 50vh 0 0.5px rgba(255,255,255,0.42),
      52vw  4vh 0 0.6px rgba(255,255,255,0.38),
      18vw 47vh 0 0.5px rgba(255,255,255,0.4);
-  animation: stars-drift-2 55s linear infinite;
+  animation: stars-drift-2 28s linear infinite;
 }
 
 /* Layer 3: Near — fewer brighter stars with twinkle */
@@ -104,7 +104,7 @@
       7vw 11vh 0 0.9px rgba(230,220,255,0.6),
      59vw 73vh 0 0.8px rgba(255,255,255,0.5),
      43vw  7vh 0 1.0px rgba(255,248,230,0.65);
-  animation: stars-drift-3 40s linear infinite, stars-twinkle 5s ease-in-out infinite;
+  animation: stars-drift-3 20s linear infinite, stars-twinkle 2.5s ease-in-out infinite;
 }
 
 /* Star drift keyframes — noticeable but smooth pan */
@@ -164,7 +164,7 @@
     rgba(180, 130, 70, 0.15) 50%,
     transparent 80%
   );
-  animation: nebula-drift-1 34s ease-in-out infinite;
+  animation: nebula-drift-1 17s ease-in-out infinite;
 }
 
 /* Blob 2: Deep purple — centre-right */
@@ -179,7 +179,7 @@
     rgba(80, 30, 140, 0.12) 55%,
     transparent 80%
   );
-  animation: nebula-drift-2 43s ease-in-out infinite;
+  animation: nebula-drift-2 22s ease-in-out infinite;
 }
 
 /* Blob 3: Teal / cyan — lower-left */
@@ -194,7 +194,7 @@
     rgba(30, 100, 120, 0.1) 55%,
     transparent 80%
   );
-  animation: nebula-drift-3 37s ease-in-out infinite;
+  animation: nebula-drift-3 19s ease-in-out infinite;
 }
 
 /* Blob 4: Rose / magenta — upper-right */
@@ -209,7 +209,7 @@
     rgba(140, 40, 90, 0.08) 55%,
     transparent 80%
   );
-  animation: nebula-drift-4 47s ease-in-out infinite;
+  animation: nebula-drift-4 24s ease-in-out infinite;
 }
 
 /* Blob 5: Faint warm white — centre, subtle glow */
@@ -224,7 +224,7 @@
     rgba(200, 180, 140, 0.05) 50%,
     transparent 75%
   );
-  animation: nebula-drift-5 53s ease-in-out infinite;
+  animation: nebula-drift-5 27s ease-in-out infinite;
 }
 
 /* ── Blob keyframes ──
