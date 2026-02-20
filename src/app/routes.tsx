@@ -3,6 +3,7 @@ import { createBrowserRouter, Link } from "react-router-dom";
 import { AppShell } from "./shell/AppShell";
 import { AuthGuard } from "./auth/AuthGuard";
 import { CharmEntryPage } from "../features/playback/pages/CharmEntryPage";
+import { PlaybackShell } from "../features/playback/shell/PlaybackShell";
 import { ClaimCharmPage } from "../features/claim/pages/ClaimCharmPage";
 import { HomePage } from "../features/home/pages/HomePage";
 import { AccountPage } from "../features/account/pages/AccountPage";
@@ -25,6 +26,22 @@ function NotFound() {
 }
 
 export const router = createBrowserRouter([
+  // Playback routes — immersive nebula shell, no frame
+  {
+    element: (
+      <AuthGuard>
+        <PlaybackShell />
+      </AuthGuard>
+    ),
+    children: [
+      // NFC bootstrap: /c?Token=...
+      { path: "/c", element: <CharmEntryPage /> },
+      // Clean URL: /c/:code
+      { path: "/c/:code", element: <CharmEntryPage /> },
+    ],
+  },
+
+  // App routes — ornamental frame shell
   {
     element: (
       <AuthGuard>
@@ -59,12 +76,6 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
-
-      // NFC bootstrap: /c?Token=...
-      { path: "/c", element: <CharmEntryPage /> },
-
-      // Clean URL: /c/:code
-      { path: "/c/:code", element: <CharmEntryPage /> },
 
       // Claim flow (protected)
       {

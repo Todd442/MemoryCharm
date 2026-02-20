@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
 import { GlyphAuthPanel } from "../../../components/GlyphAuthPanel";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill styles
-import "../../account/pages/CharmDetailPage.css"; // shared .teCharmWrap/.teCharmPanel/.teCharmSection
 
 type UiState =
   | { s: "loading"; detail: string }
@@ -63,7 +62,6 @@ export function CharmEntryPage() {
           if (cancelled) return;
 
           if (entry.kind === "claimed" || entry.kind === "unclaimed") {
-            // Replace URL with clean route
             nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true });
           }
         }
@@ -101,7 +99,7 @@ export function CharmEntryPage() {
 
         if (entry.authMode === "glyph") {
           setAttemptsLeft(entry.attemptsLeft ?? 3);
-          return; // Glyph charms wait for user to submit the correct glyph
+          return;
         }
 
         // Auto-play only for OPEN charms
@@ -155,118 +153,101 @@ export function CharmEntryPage() {
   }
 
   // ===== Render =====
+
+  // Loading
   if (ui.s === "loading") {
     return (
-      <div className="teCharmWrap">
-        <div className="teCharmPanel">
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Memory Charm</div>
-            <div style={{ fontSize: "var(--fs-label)", opacity: 0.85 }}>{ui.detail}</div>
-          </div>
-        </div>
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-label)", opacity: 0.85 }}>{ui.detail}</div>
       </div>
     );
   }
 
+  // Error
   if (ui.s === "error") {
     return (
-      <div className="teCharmWrap">
-        <div className="teCharmPanel">
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Memory Charm</div>
-            <div style={{ marginTop: 8, color: "#ff6a6a" }}>{ui.message}</div>
-          </div>
-          <div className="teCharmNav">
-            <Link to="/">Return home</Link>
-          </div>
-        </div>
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <div style={{ marginTop: 8, color: "#ff6a6a" }}>{ui.message}</div>
       </div>
     );
   }
 
   const entry = ui.entry;
 
+  // Not found
   if (entry.kind === "not_found") {
     return (
-      <div className="teCharmWrap">
-        <div className="teCharmPanel">
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Memory Charm</div>
-            <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm can't be found.</div>
-          </div>
-          <div className="teCharmNav">
-            <Link to="/">Return home</Link>
-          </div>
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
+          This charm can't be found.
         </div>
       </div>
     );
   }
 
+  // Expired
   if (entry.kind === "expired") {
     return (
-      <div className="teCharmWrap">
-        <div className="teCharmPanel">
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Memory Charm</div>
-            <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm's memory has faded.</div>
-          </div>
-          <div className="teCharmNav">
-            <Link to="/">Return home</Link>
-          </div>
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
+          This charm's memory has faded.
         </div>
       </div>
     );
   }
 
-  // claimed
-  return (
-    <div className="teCharmWrap">
-      <div className="teCharmPanel">
-        <div className="teCharmSection">
-          <div className="teCharmSectionTitle">Memory Charm</div>
-
-          {!entry.configured && (
-            <div style={{ opacity: 0.9, fontSize: "var(--fs-label)" }}>
-              This charm has not yet been awakened by its keeper.
-            </div>
-          )}
-
-          {/* Glyph gate */}
-          {entry.authMode === "glyph" && !playback && (
-            <>
-              <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
-
-              {blocked ? (
-                <div style={{
-                  marginTop: 14,
-                  padding: 12,
-                  borderRadius: 10,
-                  background: "rgba(220,0,0,0.08)",
-                  border: "1px solid rgba(255,90,90,0.18)",
-                  color: "#ff6a6a",
-                  fontSize: "var(--fs-meta)",
-                }}>
-                  The charm rejects this attempt.
-                </div>
-              ) : (
-                <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} glyphs={entry.glyphs} />
-              )}
-            </>
-          )}
-
-          {/* Playback */}
-          {playback && <PlaybackRenderer files={playback.files} type={playback.type} />}
-        </div>
-
-        <div className="teCharmNav">
-          <Link to="/">Home</Link>
+  // Claimed — not configured
+  if (!entry.configured) {
+    return (
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <div style={{ opacity: 0.9, fontSize: "var(--fs-label)" }}>
+          This charm has not yet been awakened by its keeper.
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  // Claimed — glyph gate (no playback yet)
+  if (entry.authMode === "glyph" && !playback) {
+    return (
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
+
+        {blocked ? (
+          <div style={{
+            marginTop: 14,
+            padding: 12,
+            borderRadius: 10,
+            background: "rgba(220,0,0,0.08)",
+            border: "1px solid rgba(255,90,90,0.18)",
+            color: "#ff6a6a",
+            fontSize: "var(--fs-meta)",
+          }}>
+            The charm rejects this attempt.
+          </div>
+        ) : (
+          <GlyphAuthPanel attemptsLeft={attemptsLeft} busy={glyphBusy} onSubmit={handleGlyphSubmit} glyphs={entry.glyphs} />
+        )}
+      </div>
+    );
+  }
+
+  // Playback — media is the hero
+  if (playback) {
+    return <PlaybackRenderer files={playback.files} type={playback.type} />;
+  }
+
+  // Fallback
+  return null;
 }
 
-/** Renders content files based on memory type. */
+/** Renders media inside a tight frame. The image/video determines the frame size. */
 function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image" | "audio" }) {
   const { files, type } = props;
 
@@ -274,45 +255,49 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
 
   if (type === "video") {
     return (
-      <div style={{ marginTop: 16 }}>
-        <video src={files[0].url} controls playsInline style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
+      <div className="pb-frame">
+        <div className="pb-brand">Memory Charm</div>
+        <video src={files[0].url} controls playsInline className="pb-media" />
       </div>
     );
   }
 
   if (type === "audio") {
     return (
-      <div style={{ marginTop: 16 }}>
-        <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 980 }} />
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 400 }} />
       </div>
     );
   }
 
-  // Image(s)
+  // Single image
   if (files.length === 1) {
     return (
-      <div style={{ marginTop: 16 }}>
-        <img src={files[0].url} alt="Memory" style={{ width: "100%", maxWidth: 980, borderRadius: 12 }} />
+      <div className="pb-frame">
+        <div className="pb-brand">Memory Charm</div>
+        <img src={files[0].url} alt="Memory" className="pb-media" />
       </div>
     );
   }
 
+  // Multiple images — slideshow
   return <ImageSlideshow files={files} />;
 }
 
-/** Simple prev/next slideshow for multiple images. */
 function ImageSlideshow(props: { files: ContentFile[] }) {
   const { files } = props;
   const [index, setIndex] = useState(0);
 
   return (
-    <div style={{ marginTop: 16 }}>
+    <div className="pb-frame">
+      <div className="pb-brand">Memory Charm</div>
       <img
         src={files[index].url}
         alt={`Memory ${index + 1} of ${files.length}`}
-        style={{ width: "100%", maxWidth: 980, borderRadius: 12 }}
+        className="pb-media"
       />
-      <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 12, justifyContent: "center" }}>
+      <div className="pb-controls">
         <button
           onClick={() => setIndex((i) => Math.max(0, i - 1))}
           disabled={index === 0}
@@ -320,7 +305,7 @@ function ImageSlideshow(props: { files: ContentFile[] }) {
         >
           Prev
         </button>
-        <span style={{ fontSize: "var(--fs-small)", opacity: 0.8 }}>
+        <span style={{ opacity: 0.8 }}>
           {index + 1} / {files.length}
         </span>
         <button

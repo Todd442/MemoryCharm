@@ -1,0 +1,272 @@
+/* ── Nebula: living gas-cloud background with starfield ── */
+
+.nebula {
+  position: absolute;
+  /* Overflow past edges so parallax doesn't reveal gaps */
+  inset: -40px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+
+  /* Smooth out the parallax movement */
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+
+  /* Deep space base */
+  background: radial-gradient(
+    ellipse 120% 100% at 50% 50%,
+    #0d0a12 0%,
+    #070510 60%,
+    #020108 100%
+  );
+}
+
+/* ── Starfield ──
+   Three layers at different scales/opacities for depth.
+   Each layer uses box-shadow on a 1×1px element to paint stars.
+   Layers drift at different speeds for parallax. */
+
+.nebula-stars {
+  position: absolute;
+  inset: 0;
+}
+
+.nebula-stars__layer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+/* Layer 1: Distant — many tiny dim stars */
+.nebula-stars__layer--1 {
+  box-shadow:
+     42vw  8vh 0 0.3px rgba(255,255,255,0.25),
+     91vw 14vh 0 0.4px rgba(255,255,255,0.3),
+     17vw 23vh 0 0.3px rgba(255,255,255,0.2),
+     63vw 31vh 0 0.3px rgba(255,255,255,0.25),
+      5vw 42vh 0 0.4px rgba(255,255,255,0.22),
+     78vw 47vh 0 0.3px rgba(255,255,255,0.28),
+     34vw 55vh 0 0.3px rgba(255,255,255,0.2),
+     88vw 61vh 0 0.4px rgba(255,255,255,0.25),
+     12vw 68vh 0 0.3px rgba(255,255,255,0.22),
+     56vw 74vh 0 0.3px rgba(255,255,255,0.3),
+     71vw 82vh 0 0.4px rgba(255,255,255,0.2),
+     25vw 88vh 0 0.3px rgba(255,255,255,0.25),
+     47vw 93vh 0 0.3px rgba(255,255,255,0.22),
+     83vw 96vh 0 0.4px rgba(255,255,255,0.28),
+      8vw  3vh 0 0.3px rgba(255,255,255,0.2),
+     95vw 37vh 0 0.3px rgba(255,255,255,0.25),
+     29vw 16vh 0 0.4px rgba(255,255,255,0.22),
+     51vw 49vh 0 0.3px rgba(255,255,255,0.3),
+     67vw  6vh 0 0.3px rgba(255,255,255,0.2),
+      3vw 79vh 0 0.4px rgba(255,255,255,0.25),
+     38vw 35vh 0 0.3px rgba(255,255,255,0.22),
+     74vw 58vh 0 0.3px rgba(255,255,255,0.28),
+     19vw 91vh 0 0.4px rgba(255,255,255,0.2),
+     82vw 25vh 0 0.3px rgba(255,255,255,0.25),
+     60vw 85vh 0 0.3px rgba(255,255,255,0.22);
+  animation: stars-drift-1 80s linear infinite;
+}
+
+/* Layer 2: Mid-field — moderate stars */
+.nebula-stars__layer--2 {
+  box-shadow:
+     22vw 12vh 0 0.5px rgba(255,255,255,0.4),
+     73vw 28vh 0 0.6px rgba(255,255,255,0.45),
+     45vw 41vh 0 0.5px rgba(255,255,255,0.35),
+      9vw 56vh 0 0.6px rgba(255,255,255,0.4),
+     87vw 69vh 0 0.5px rgba(255,255,255,0.38),
+     31vw 78vh 0 0.6px rgba(255,255,255,0.42),
+     58vw 92vh 0 0.5px rgba(255,255,255,0.35),
+     14vw 34vh 0 0.6px rgba(255,255,255,0.4),
+     66vw 17vh 0 0.5px rgba(255,255,255,0.38),
+     40vw 63vh 0 0.6px rgba(255,255,255,0.45),
+     93vw 85vh 0 0.5px rgba(255,255,255,0.35),
+      4vw 21vh 0 0.6px rgba(255,255,255,0.4),
+     76vw 50vh 0 0.5px rgba(255,255,255,0.42),
+     52vw  4vh 0 0.6px rgba(255,255,255,0.38),
+     18vw 47vh 0 0.5px rgba(255,255,255,0.4);
+  animation: stars-drift-2 55s linear infinite;
+}
+
+/* Layer 3: Near — fewer brighter stars with twinkle */
+.nebula-stars__layer--3 {
+  box-shadow:
+     35vw 19vh 0 0.8px rgba(255,255,255,0.6),
+     68vw 44vh 0 1.0px rgba(255,248,230,0.65),
+     12vw 67vh 0 0.8px rgba(255,255,255,0.55),
+     81vw 83vh 0 0.9px rgba(230,220,255,0.6),
+     50vw 31vh 0 0.8px rgba(255,255,255,0.5),
+     24vw 89vh 0 1.0px rgba(255,248,230,0.6),
+     90vw 52vh 0 0.8px rgba(255,255,255,0.55),
+      7vw 11vh 0 0.9px rgba(230,220,255,0.6),
+     59vw 73vh 0 0.8px rgba(255,255,255,0.5),
+     43vw  7vh 0 1.0px rgba(255,248,230,0.65);
+  animation: stars-drift-3 40s linear infinite, stars-twinkle 5s ease-in-out infinite;
+}
+
+/* Star drift keyframes — noticeable but smooth pan */
+@keyframes stars-drift-1 {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-12px, 8px); }
+  50%  { transform: translate(-6px, 14px); }
+  75%  { transform: translate(8px, 4px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes stars-drift-2 {
+  0%   { transform: translate(0, 0); }
+  33%  { transform: translate(18px, -12px); }
+  66%  { transform: translate(-10px, -18px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes stars-drift-3 {
+  0%   { transform: translate(0, 0); }
+  30%  { transform: translate(-14px, -10px); }
+  60%  { transform: translate(10px, 12px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes stars-twinkle {
+  0%, 100% { opacity: 1; }
+  40%      { opacity: 0.45; }
+  60%      { opacity: 0.9; }
+  80%      { opacity: 0.5; }
+}
+
+
+/* ── Shared blob properties ── */
+
+.nebula-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(min(80px, 8vmax));
+  opacity: 0;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+/* ── Individual blobs ──
+   Viewport-relative sizing so they fill space in any orientation. */
+
+/* Blob 1: Warm gold — upper-left */
+.nebula-blob--1 {
+  width: 45vmax;
+  height: 38vmax;
+  top: 5%;
+  left: -5%;
+  background: radial-gradient(
+    circle,
+    rgba(210, 170, 110, 0.45) 0%,
+    rgba(180, 130, 70, 0.15) 50%,
+    transparent 80%
+  );
+  animation: nebula-drift-1 34s ease-in-out infinite;
+}
+
+/* Blob 2: Deep purple — centre-right */
+.nebula-blob--2 {
+  width: 50vmax;
+  height: 42vmax;
+  top: 25%;
+  right: -10%;
+  background: radial-gradient(
+    circle,
+    rgba(120, 60, 180, 0.4) 0%,
+    rgba(80, 30, 140, 0.12) 55%,
+    transparent 80%
+  );
+  animation: nebula-drift-2 43s ease-in-out infinite;
+}
+
+/* Blob 3: Teal / cyan — lower-left */
+.nebula-blob--3 {
+  width: 48vmax;
+  height: 40vmax;
+  bottom: 15%;
+  left: -8%;
+  background: radial-gradient(
+    circle,
+    rgba(60, 160, 170, 0.35) 0%,
+    rgba(30, 100, 120, 0.1) 55%,
+    transparent 80%
+  );
+  animation: nebula-drift-3 37s ease-in-out infinite;
+}
+
+/* Blob 4: Rose / magenta — upper-right */
+.nebula-blob--4 {
+  width: 35vmax;
+  height: 32vmax;
+  top: 10%;
+  right: 5%;
+  background: radial-gradient(
+    circle,
+    rgba(180, 70, 120, 0.3) 0%,
+    rgba(140, 40, 90, 0.08) 55%,
+    transparent 80%
+  );
+  animation: nebula-drift-4 47s ease-in-out infinite;
+}
+
+/* Blob 5: Faint warm white — centre, subtle glow */
+.nebula-blob--5 {
+  width: 55vmax;
+  height: 48vmax;
+  top: 30%;
+  left: 15%;
+  background: radial-gradient(
+    circle,
+    rgba(230, 210, 180, 0.18) 0%,
+    rgba(200, 180, 140, 0.05) 50%,
+    transparent 75%
+  );
+  animation: nebula-drift-5 53s ease-in-out infinite;
+}
+
+/* ── Blob keyframes ──
+   More active drift — wider paths, stronger opacity swings. */
+
+@keyframes nebula-drift-1 {
+  0%   { opacity: 0.55; transform: translate(0, 0) scale(1); }
+  20%  { opacity: 0.8;  transform: translate(6vw, 4vh) scale(1.12); }
+  45%  { opacity: 0.5;  transform: translate(-4vw, 8vh) scale(0.9); }
+  70%  { opacity: 0.75; transform: translate(5vw, -3vh) scale(1.08); }
+  100% { opacity: 0.55; transform: translate(0, 0) scale(1); }
+}
+
+@keyframes nebula-drift-2 {
+  0%   { opacity: 0.45; transform: translate(0, 0) scale(1); }
+  25%  { opacity: 0.7;  transform: translate(-7vw, 5vh) scale(1.15); }
+  55%  { opacity: 0.4;  transform: translate(5vw, -4vh) scale(0.88); }
+  80%  { opacity: 0.65; transform: translate(-3vw, 6vh) scale(1.05); }
+  100% { opacity: 0.45; transform: translate(0, 0) scale(1); }
+}
+
+@keyframes nebula-drift-3 {
+  0%   { opacity: 0.4;  transform: translate(0, 0) scale(1); }
+  15%  { opacity: 0.6;  transform: translate(5vw, -4vh) scale(1.1); }
+  40%  { opacity: 0.35; transform: translate(-6vw, 5vh) scale(0.9); }
+  65%  { opacity: 0.65; transform: translate(3vw, 3vh) scale(1.06); }
+  85%  { opacity: 0.4;  transform: translate(-2vw, -2vh) scale(0.95); }
+  100% { opacity: 0.4;  transform: translate(0, 0) scale(1); }
+}
+
+@keyframes nebula-drift-4 {
+  0%   { opacity: 0.35; transform: translate(0, 0) scale(1); }
+  30%  { opacity: 0.6;  transform: translate(-5vw, 7vh) scale(1.18); }
+  60%  { opacity: 0.3;  transform: translate(6vw, -3vh) scale(0.85); }
+  85%  { opacity: 0.55; transform: translate(-2vw, 2vh) scale(1.1); }
+  100% { opacity: 0.35; transform: translate(0, 0) scale(1); }
+}
+
+@keyframes nebula-drift-5 {
+  0%   { opacity: 0.2;  transform: translate(0, 0) scale(1); }
+  35%  { opacity: 0.4;  transform: translate(-4vw, -4vh) scale(1.1); }
+  60%  { opacity: 0.18; transform: translate(3vw, 5vh) scale(0.92); }
+  85%  { opacity: 0.35; transform: translate(-2vw, -1vh) scale(1.05); }
+  100% { opacity: 0.2;  transform: translate(0, 0) scale(1); }
+}

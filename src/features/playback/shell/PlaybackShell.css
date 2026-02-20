@@ -1,0 +1,125 @@
+/* ── Playback shell: immersive viewport-filling stage ── */
+
+.pb-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #020108;
+
+  color: #f3e7cf;
+  font-family: "Cinzel", serif;
+  font-size: clamp(14px, 2.2vmin, 28px);
+  line-height: 1.35;
+
+  --fs-title:   clamp(28px, 4.5vmin, 54px);
+  --fs-section: clamp(22px, 3.2vmin, 38px);
+  --fs-heading: clamp(20px, 2.8vmin, 32px);
+  --fs-body:    clamp(14px, 2.2vmin, 28px);
+  --fs-label:   clamp(13px, 2.0vmin, 26px);
+  --fs-meta:    clamp(12px, 1.8vmin, 24px);
+  --fs-small:   clamp(11px, 1.6vmin, 22px);
+  --fs-xs:      clamp(10px, 1.4vmin, 20px);
+
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: auto;
+}
+
+/* Centre everything in the viewport */
+.pb-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(16px, 3vmin, 40px);
+  box-sizing: border-box;
+}
+
+/* ── Frame: wraps tightly around the media ── */
+
+.pb-frame {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: calc(100vw - clamp(32px, 6vmin, 80px));
+  max-height: calc(100vh - clamp(32px, 6vmin, 80px));
+  max-height: calc(100dvh - clamp(32px, 6vmin, 80px));
+
+  background: rgba(32, 18, 10, 0.55);
+  border: 1px solid rgba(210, 170, 110, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.40);
+  backdrop-filter: blur(2px);
+  overflow: hidden;
+}
+
+/* Brand strip at top */
+.pb-brand {
+  flex-shrink: 0;
+  width: 100%;
+  padding: clamp(6px, 1.2vmin, 14px) clamp(12px, 2vmin, 24px);
+  box-sizing: border-box;
+
+  font-size: clamp(10px, 1.6vmin, 18px);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgba(210, 170, 110, 0.85);
+
+  /* Thin gold divider below */
+  border-bottom: 1px solid rgba(210, 170, 110, 0.2);
+}
+
+/* Media element — the hero. Sizes itself, frame wraps around it. */
+.pb-media {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - clamp(80px, 12vmin, 160px));
+  max-height: calc(100dvh - clamp(80px, 12vmin, 160px));
+  object-fit: contain;
+}
+
+/* Slideshow controls strip */
+.pb-controls {
+  flex-shrink: 0;
+  width: 100%;
+  padding: clamp(4px, 0.8vmin, 10px) clamp(12px, 2vmin, 24px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.2vmin, 12px);
+
+  border-top: 1px solid rgba(210, 170, 110, 0.15);
+  font-size: var(--fs-small);
+}
+
+/* Status / message states (loading, error, not found, etc.) */
+.pb-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 5vmin, 60px) clamp(20px, 4vmin, 50px);
+  text-align: center;
+}
+
+.pb-status-title {
+  font-size: var(--fs-section);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 0.85);
+  margin-bottom: clamp(8px, 1.5vmin, 16px);
+}
+
+/* Links */
+.pb-shell a,
+.pb-shell a:visited {
+  color: #f3e7cf;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: inherit;
+}
