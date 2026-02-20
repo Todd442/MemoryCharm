@@ -368,6 +368,16 @@
   text-transform: none;
 }
 
+.tePillSpec {
+  font-size: var(--fs-xs);
+  opacity: 0.45;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  border-top: 1px solid rgba(210, 170, 110, 0.12);
+  padding-top: 4px;
+  margin-top: 2px;
+}
+
 /* Rail input */
 .teRail {
   display: grid;

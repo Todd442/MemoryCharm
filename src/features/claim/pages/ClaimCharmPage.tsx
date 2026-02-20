@@ -14,6 +14,7 @@ import { ALL_GLYPHS } from "../../../app/data/glyphs";
 
 import "./ClaimCharmPage.css";
 import { ThemedInput } from "../../../components/ThemedInput";
+import { InfoPanel } from "../../../components/InfoPanel";
 
 type Step = "loading" | "profile" | "memoryType" | "protection" | "glyphSelect" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
@@ -30,52 +31,52 @@ type StepMeta = {
 const STEP_META: Record<Step, StepMeta> = {
   loading: {
     cardTitle: "\u2026",
-    statusText: "Bind the Charm",
-    statusSubtitle: "Bind thy name to the ledger, and the Mechanism shall remember.",
+    statusText: "Prepare Your Charm",
+    statusSubtitle: "We’re checking your account before you bind a memory.",
     stickyTitle: "",
     stickyDesc: "",
   },
   profile: {
     cardTitle: "REGISTRATION",
     statusText: "Keeper Registration",
-    statusSubtitle: "Inscribe your details upon the ledger.",
+    statusSubtitle: "Tell us who you are so this charm can be claimed.",
     stickyTitle: "Register as Keeper",
-    stickyDesc: "Inscribe your name and details upon the Mechanism\u2019s ledger. Only registered Keepers may bind memories to a charm.",
+    stickyDesc: "Every charm has a Keeper — that's you. Share your details so we can link this charm to your account.",
   },
   memoryType: {
-    cardTitle: "MEMORY FORM",
-    statusText: "Bind the Charm",
-    statusSubtitle: "Choose the form this memory shall take.",
-    stickyTitle: "What form shall this memory take?",
-    stickyDesc: "Each charm holds a single memory. Choose whether it will be a moving picture, a still image, or a spoken word.",
+    cardTitle: "MEMORY TYPE",
+    statusText: "Choose a Memory Type",
+    statusSubtitle: "Pick the kind of memory this charm will hold.",
+    stickyTitle: "What kind of memory is this?",
+    stickyDesc: "Each charm holds one memory — a video, a photo, or an audio clip.",
   },
   protection: {
     cardTitle: "CHARM PROTECTION",
-    statusText: "Bind the Charm",
-    statusSubtitle: "Choose how this charm shall be guarded.",
-    stickyTitle: "Choose how this charm shall be guarded",
-    stickyDesc: "An open charm reveals its memory to anyone who touches it. A glyph-locked charm demands a secret sign before it will yield.",
+    statusText: "Choose Access",
+    statusSubtitle: "Decide who can open this charm.",
+    stickyTitle: "Choose how this charm is protected",
+    stickyDesc: "Open charms play immediately. Glyph-locked charms require a secret symbol to view.",
   },
   glyphSelect: {
     cardTitle: "SECRET GLYPH",
-    statusText: "Bind the Charm",
-    statusSubtitle: "Select the glyph that will unseal this memory.",
-    stickyTitle: "Select the secret glyph",
-    stickyDesc: "This glyph will be the key to unseal your charm\u2019s memory. Choose wisely \u2014 only those who know the sign may unlock it.",
+    statusText: "Choose a Glyph",
+    statusSubtitle: "Pick the symbol that unlocks the charm.",
+    stickyTitle: "Select a secret glyph",
+    stickyDesc: "This glyph is the key. Only people who know it can open the memory.",
   },
   upload: {
     cardTitle: "MEMORY UPLOAD",
-    statusText: "Bind the Charm",
-    statusSubtitle: "Select the memory to seal within the charm.",
+    statusText: "Upload Your Memory",
+    statusSubtitle: "Choose the file you want to bind to this charm.",
     stickyTitle: "Select your memory",
-    stickyDesc: "Choose the file that holds the memory you wish to bind. You\u2019ll secure and seal the charm in the next step.",
+    stickyDesc: "Pick the video, image, or audio you want to seal into the charm.",
   },
   done: {
     cardTitle: "SEALED",
     statusText: "Charm Sealed",
-    statusSubtitle: "The Mechanism shall remember.",
+    statusSubtitle: "Your memory is now bound to the charm.",
     stickyTitle: "Your charm is sealed",
-    stickyDesc: "The memory is bound and the Mechanism stands ready. Your charm now lives.",
+    stickyDesc: "The memory is secure and ready to be shared.",
   },
 };
 
@@ -267,14 +268,6 @@ export function ClaimCharmPage() {
     }
   }
 
-  async function doEditProfile() {
-    setErr(null);
-    try {
-      await instance.loginRedirect(loginRequest);
-    } catch (e: any) {
-      setErr(e?.message ?? "Unable to open profile editor.");
-    }
-  }
 
   async function doSaveProfile() {
     setErr(null);
@@ -289,31 +282,40 @@ export function ClaimCharmPage() {
     }
   }
 
-  async function doSaveDraft() {
-    setErr(null);
-    setBusy(true);
-    try {
-      await saveProfile(profileData);
-    } catch (e: any) {
-      setErr(e?.message ?? "Failed to save draft.");
-    } finally {
-      setBusy(false);
-    }
-  }
 
-  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 150;
+  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 200;
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
+  const MAX_IMAGE_FILES = 5;
+  const [fileErr, setFileErr] = useState<string | null>(null);
+
+  function handleFileSelect(selected: FileList | null) {
+    setFileErr(null);
+    if (!selected || selected.length === 0) {
+      setFiles([]);
+      return;
+    }
+    let picked = Array.from(selected);
+
+    if (memoryType === "image" && picked.length > MAX_IMAGE_FILES) {
+      picked = picked.slice(0, MAX_IMAGE_FILES);
+      setFileErr(`You can include up to ${MAX_IMAGE_FILES} photos. We kept the first ${MAX_IMAGE_FILES}.`);
+    }
+
+    const totalBytes = picked.reduce((s, f) => s + f.size, 0);
+    if (totalBytes > MAX_CHARM_BYTES) {
+      setFileErr(`Total file size exceeds ${maxCharmMB} MB (${(totalBytes / 1024 / 1024).toFixed(1)} MB selected). Try a shorter clip or smaller file.`);
+      setFiles([]);
+      return;
+    }
+
+    setFiles(picked);
+  }
 
   async function doSealCharm() {
     if (!code) return;
     setErr(null);
     if (files.length === 0) {
       setErr("Please go back and select a file first.");
-      return;
-    }
-    const totalBytes = files.reduce((s, f) => s + f.size, 0);
-    if (totalBytes > MAX_CHARM_BYTES) {
-      setErr(`Total file size exceeds ${maxCharmMB} MB limit (${(totalBytes / 1024 / 1024).toFixed(1)} MB selected).`);
       return;
     }
     const filesKey = files.map(f => `${f.name}:${f.size}:${f.lastModified}`).join("|");
@@ -375,7 +377,7 @@ export function ClaimCharmPage() {
           <div className="teStatusPill" role="status" aria-live="polite">
             <span className={"teStatusDot " + (busy ? "isBusy" : "isReady")} />
             <span className="teStatusText">
-              {busy ? "Working" : "Seal Engaged"}
+              {busy ? "Working" : "Ready"}
             </span>
           </div>
         </div>
@@ -435,11 +437,11 @@ export function ClaimCharmPage() {
               <div className="teCardBody">
                 <div className="teGrid">
                   {([
-                    { key: "firstName"  as const, label: "Given Name",            placeholder: "e.g., Elowen",              hint: "" },
-                    { key: "lastName"   as const, label: "Family Name",           placeholder: "e.g., Blackthorne",         hint: "" },
-                    { key: "address"    as const, label: "Dwelling Place",        placeholder: "e.g., 12 Hollow Lane",     hint: "" },
-                    { key: "email"      as const, label: "Signal Address (Email)",placeholder: "captain@trianglesend.com",  hint: "We'll send a seal-confirmation missive to this address." },
-                    { key: "cellNumber" as const, label: "Cipher Line",           placeholder: "e.g., +1 555 012 3456",    hint: "" },
+                    { key: "firstName"  as const, label: "First Name",            placeholder: "e.g., Elowen",              hint: "" },
+                    { key: "lastName"   as const, label: "Last Name",             placeholder: "e.g., Blackthorne",         hint: "" },
+                    { key: "address"    as const, label: "Mailing Address",       placeholder: "e.g., 123 Main Street",     hint: "" },
+                    { key: "email"      as const, label: "Email",                 placeholder: "e.g., you@email.com",       hint: "We'll send a confirmation to this address." },
+                    { key: "cellNumber" as const, label: "Phone",                 placeholder: "e.g., +1 555 012 3456",    hint: "" },
                   ] as const).map(({ key, label, placeholder, hint }) => (
                     <ThemedInput
                       key={key}
@@ -462,27 +464,18 @@ export function ClaimCharmPage() {
                       disabled={busy}
                     />
                     <span className="teTermsText">
-                      I accept the <a href="#" onClick={(e) => e.preventDefault()}>Code of Conduct</a> and the <a href="#" onClick={(e) => e.preventDefault()}>Terms of Passage</a>.
+                      I accept the <a href="#" onClick={(e) => e.preventDefault()}>Code of Conduct</a> and the <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a>.
                     </span>
                   </label>
 
-                  {/* Save draft + seal */}
-                  <div className="teBtnsRow">
+                  <div className="teActionsRow">
                     <button
-                      className="teBtn teBtnGhost"
-                      onClick={doSaveDraft}
-                      disabled={busy || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
-                      type="button"
-                    >
-                      {busy ? "Saving…" : "Save Draft"}
-                    </button>
-                    <button
-                      className="teBtn teBtnPrimary"
+                      className="teBtn teBtnPrimary teBtnWide"
                       onClick={doSaveProfile}
                       disabled={busy || !termsAccepted || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
                       type="button"
                     >
-                      {busy ? "Binding…" : "Seal & Continue"}
+                      {busy ? "Saving…" : "Continue"}
                     </button>
                   </div>
                 </div>
@@ -508,9 +501,29 @@ export function ClaimCharmPage() {
                             : t === "image" ? "A still frame, frozen forever."
                             : "A voice or melody, preserved in sound."}
                         </span>
+                        <span className="tePillSpec">
+                          {t === "video" ? "Up to 30 seconds"
+                            : t === "image" ? `Up to ${MAX_IMAGE_FILES} photos`
+                            : "Under a minute"}
+                        </span>
                       </button>
                     ))}
                   </div>
+                  <InfoPanel question="What makes a great memory?">
+                    <p style={{ margin: "0 0 10px" }}>
+                      Short, focused moments have the strongest hold on people.
+                      A quick clip or a few photos will be watched and revisited —
+                      longer content gets skipped.
+                    </p>
+                    <ul style={{ margin: "0 0 10px", paddingLeft: 18 }}>
+                      <li><strong>Video</strong> — 15–30 seconds is the sweet spot</li>
+                      <li><strong>Photos</strong> — {MAX_IMAGE_FILES} or fewer, each one meaningful</li>
+                      <li><strong>Audio</strong> — under a minute keeps listeners engaged</li>
+                    </ul>
+                    <p style={{ margin: 0, fontStyle: "italic", opacity: 0.85 }}>
+                      A little moment keeps its magic the longest.
+                    </p>
+                  </InfoPanel>
 
                   <div className="teActionsRow">
                     <button
@@ -538,7 +551,7 @@ export function ClaimCharmPage() {
                       type="button"
                     >
                       <span className="tePillLabel">OPEN</span>
-                      <span className="tePillDesc">Anyone who touches the charm may view the memory.</span>
+                      <span className="tePillDesc">Anyone with the charm can view the memory instantly.</span>
                     </button>
                     <button
                       className={"tePill tePillLarge " + (authMode === "glyph" ? "isActive" : "")}
@@ -547,9 +560,29 @@ export function ClaimCharmPage() {
                       type="button"
                     >
                       <span className="tePillLabel">GLYPH LOCK</span>
-                      <span className="tePillDesc">A secret glyph must be entered to unseal the memory.</span>
+                      <span className="tePillDesc">A secret symbol must be entered before the memory can be viewed.</span>
                     </button>
                   </div>
+
+                  <InfoPanel question="Which should I choose?">
+                    <p style={{ margin: "0 0 10px" }}>
+                      <strong>Open</strong> is best for memories you want to share freely.
+                      Anyone who holds the charm can tap and instantly experience the
+                      moment — no barriers, no friction. Great for gifts, tributes, or
+                      memories meant to be discovered.
+                    </p>
+                    <p style={{ margin: "0 0 10px" }}>
+                      <strong>Glyph Lock</strong> adds a layer of intention. The viewer
+                      must select the correct symbol before the memory is revealed —
+                      like a secret handshake. Use this when a memory is personal and
+                      you want to control who sees it.
+                    </p>
+                    <p style={{ margin: 0, opacity: 0.85 }}>
+                      Keep in mind: the glyph is a shared secret, not a password.
+                      The charm itself is the key — whoever holds it controls access.
+                      The glyph simply ensures the memory isn't revealed by accident.
+                    </p>
+                  </InfoPanel>
 
                   {busy && sealPhase && (
                     <div>
@@ -650,7 +683,7 @@ export function ClaimCharmPage() {
               <div className="teCardBody">
                 <label className="teField">
                   <div className="teFieldLabel">
-                    Select {memoryType} file{memoryType === "image" ? "(s)" : ""}
+                    Select {memoryType} file{memoryType === "image" ? `(s) — up to ${MAX_IMAGE_FILES}` : ""}
                   </div>
 
                   <div className="teRail">
@@ -660,19 +693,19 @@ export function ClaimCharmPage() {
                       accept={acceptTypes[memoryType]}
                       multiple={memoryType === "image"}
                       disabled={busy}
-                      onChange={(e) => {
-                        const selected = e.target.files;
-                        setFiles(selected ? Array.from(selected) : []);
-                      }}
+                      onChange={(e) => handleFileSelect(e.target.files)}
                       style={{ flex: 1, padding: "6px 0" }}
                     />
                   </div>
-                  {files.length === 1 && (
+                  {fileErr && (
+                    <div className="teClaimError" style={{ marginTop: 4 }}>{fileErr}</div>
+                  )}
+                  {!fileErr && files.length === 1 && (
                     <div className="teHint" style={{ marginTop: 4 }}>
                       {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
                     </div>
                   )}
-                  {files.length > 1 && (
+                  {!fileErr && files.length > 1 && (
                     <div className="teHint" style={{ marginTop: 4 }}>
                       {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
                     </div>
@@ -696,7 +729,7 @@ export function ClaimCharmPage() {
             {step === "done" && (
               <div className="teCardBody">
                 <div className="teHint">
-                  Your charm is sealed. The memory is bound and the Mechanism stands ready.
+                  Your charm is sealed. The memory is bound and ready to share.
                 </div>
 
                 {previewUrls.length > 0 && (
@@ -789,14 +822,7 @@ export function ClaimCharmPage() {
             ← Back
           </button>
         )}
-        <button
-          className="teBtn teBtnSm teBtnGhost"
-          onClick={doEditProfile}
-          disabled={working}
-        >
-          Edit profile
-        </button>
-        <button
+<button
           className="teBtn teBtnSm teBtnGhost"
           onClick={doSignOut}
           disabled={working}
