@@ -27,3 +27,9 @@ dist-ssr
 __azurite_db_*
 .env
 nul
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
