@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
@@ -95,7 +95,9 @@ export function CharmDetailPage() {
     }
   }
 
-  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 150;
+  const maxCharmMB = charm?.memoryType === "image"
+    ? (Number(import.meta.env.VITE_MAX_IMAGE_SIZE_MB) || 40)
+    : (Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 150);
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
 
   const acceptTypes: Record<MemoryType, string> = {

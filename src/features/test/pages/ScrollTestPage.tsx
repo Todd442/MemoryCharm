@@ -1,4 +1,3 @@
-import React from "react";
 
 export function ScrollTestPage() {
   const sections = Array.from({ length: 8 }).map((_, i) => i + 1);

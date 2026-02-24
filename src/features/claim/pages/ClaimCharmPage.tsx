@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
@@ -90,7 +90,6 @@ export function ClaimCharmPage() {
   const isAuthed = accounts.length > 0;
   const me = accounts[0] ?? null;
 
-  const displayName = useMemo(() => me?.name ?? "Keeper", [me]);
   const emailish = useMemo(() => me?.username ?? "", [me]);
 
   const [step, setStep] = useState<Step>("loading");
@@ -283,9 +282,11 @@ export function ClaimCharmPage() {
   }
 
 
-  const maxCharmMB = Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 200;
+  const maxCharmMB = memoryType === "image"
+    ? (Number(import.meta.env.VITE_MAX_IMAGE_SIZE_MB) || 40)
+    : (Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 200);
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
-  const MAX_IMAGE_FILES = 5;
+  const MAX_IMAGE_FILES = 10;
   const [fileErr, setFileErr] = useState<string | null>(null);
 
   function handleFileSelect(selected: FileList | null) {
@@ -517,7 +518,7 @@ export function ClaimCharmPage() {
                     </p>
                     <ul style={{ margin: "0 0 10px", paddingLeft: 18 }}>
                       <li><strong>Video</strong> — 15–30 seconds is the sweet spot</li>
-                      <li><strong>Photos</strong> — {MAX_IMAGE_FILES} or fewer, each one meaningful</li>
+                      <li><strong>Photos</strong> — up to {MAX_IMAGE_FILES}, each one meaningful</li>
                       <li><strong>Audio</strong> — under a minute keeps listeners engaged</li>
                     </ul>
                     <p style={{ margin: 0, fontStyle: "italic", opacity: 0.85 }}>

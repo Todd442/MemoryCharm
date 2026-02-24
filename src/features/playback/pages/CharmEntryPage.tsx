@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
@@ -201,6 +201,9 @@ export function CharmEntryPage() {
     );
   }
 
+  // Unclaimed — shouldn't reach here (effect redirects), but satisfies TS narrowing
+  if (entry.kind === "unclaimed") return null;
+
   // Claimed — not configured
   if (!entry.configured) {
     return (
@@ -251,13 +254,20 @@ export function CharmEntryPage() {
 /** Renders media inside a tight frame. The image/video determines the frame size. */
 function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image" | "audio" }) {
   const { files, type } = props;
+  const nav = useNavigate();
+
+  const brand = (
+    <div className="pb-brand" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
+      Memory Charm
+    </div>
+  );
 
   if (files.length === 0) return null;
 
   if (type === "video") {
     return (
       <div className="pb-frame">
-        <div className="pb-brand">Memory Charm</div>
+        {brand}
         <video src={files[0].url} controls playsInline className="pb-media" />
       </div>
     );
@@ -266,7 +276,9 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
   if (type === "audio") {
     return (
       <div className="pb-frame pb-status">
-        <div className="pb-status-title">Memory Charm</div>
+        <div className="pb-status-title" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
+          Memory Charm
+        </div>
         <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 400 }} />
       </div>
     );
@@ -276,7 +288,7 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
   if (files.length === 1) {
     return (
       <div className="pb-frame">
-        <div className="pb-brand">Memory Charm</div>
+        {brand}
         <img src={files[0].url} alt="Memory" className="pb-media" />
       </div>
     );

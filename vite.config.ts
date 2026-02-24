@@ -295,8 +295,9 @@ export default defineConfig(() => {
       : {
           proxy: {
             "/api": {
-              target: "http://localhost:7040",
+              target: "https://memorycharms-f6ftf7habefudsey.centralus-01.azurewebsites.net",
               changeOrigin: true,
+              secure: true,
             },
             "/azurite": {
               target: "http://127.0.0.1:10000",

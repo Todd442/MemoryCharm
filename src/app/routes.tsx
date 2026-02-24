@@ -1,4 +1,3 @@
-import React from "react";
 import { createBrowserRouter, Link } from "react-router-dom";
 import { AppShell } from "./shell/AppShell";
 import { AuthGuard } from "./auth/AuthGuard";

@@ -22,7 +22,8 @@
       "Bash(pip show:*)",
       "Bash(pip install:*)",
       "Bash(python:*)",
-      "Bash(ren:*)"
+      "Bash(ren:*)",
+      "Bash(xargs:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\source\\repos\\Mnemosyne\\Mnemosyne.API"

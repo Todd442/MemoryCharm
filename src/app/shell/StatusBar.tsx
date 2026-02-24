@@ -1,4 +1,3 @@
-import React from "react";
 import { useStatus } from "../providers/StatusProvider";
 
 export function StatusBar() {

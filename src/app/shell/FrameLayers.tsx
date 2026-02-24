@@ -1,4 +1,3 @@
-import React from "react";
 
 export function FrameLayers() {
   // Later: insert your pipe frame PNG/SVG layers here as absolutely positioned elements

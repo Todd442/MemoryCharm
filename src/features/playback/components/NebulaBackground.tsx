@@ -1,4 +1,3 @@
-import React from "react";
 import { useDeviceOrientation } from "../hooks/useDeviceOrientation";
 import "./NebulaBackground.css";
 

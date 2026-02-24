@@ -1,4 +1,3 @@
-import React from "react";
 import type { MemoryType, ContentFile } from "../features/playback/types";
 
 export function PlayerPanel(props: { files: ContentFile[]; memoryType: MemoryType }) {

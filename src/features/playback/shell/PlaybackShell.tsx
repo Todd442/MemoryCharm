@@ -1,4 +1,3 @@
-import React from "react";
 import { Outlet } from "react-router-dom";
 import { NebulaBackground } from "../components/NebulaBackground";
 import "./PlaybackShell.css";

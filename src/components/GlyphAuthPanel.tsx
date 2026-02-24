@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { selectRandomGlyphs, glyphById, type GlyphInfo } from "../app/data/glyphs";
 
 export function GlyphAuthPanel(props: {
