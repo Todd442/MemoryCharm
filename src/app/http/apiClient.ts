@@ -37,6 +37,9 @@ async function getBearerToken(): Promise<string> {
     aud: claims?.aud,
     scp: claims?.scp,
     roles: claims?.roles,
+    oid: claims?.oid,
+    sub: claims?.sub,
+    tid: claims?.tid,
     exp: claims?.exp ? new Date((claims.exp as number) * 1000).toISOString() : undefined,
   });
 
