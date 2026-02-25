@@ -6,6 +6,18 @@ const API_SCOPES: string[] = import.meta.env.VITE_API_SCOPE
   ? [import.meta.env.VITE_API_SCOPE as string]
   : [];
 
+console.log("[apiClient] API_BASE:", API_BASE || "(empty — using Vite proxy)");
+console.log("[apiClient] API_SCOPES:", API_SCOPES);
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const payload = token.split(".")[1];
+    return JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+  } catch {
+    return null;
+  }
+}
+
 async function getBearerToken(): Promise<string> {
   const devToken = import.meta.env.VITE_DEV_TOKEN as string | undefined;
   if (devToken) return devToken;
@@ -18,6 +30,16 @@ async function getBearerToken(): Promise<string> {
     account,
     scopes: API_SCOPES,
   });
+
+  const claims = decodeJwtPayload(result.accessToken);
+  console.log("[apiClient] Token claims:", {
+    iss: claims?.iss,
+    aud: claims?.aud,
+    scp: claims?.scp,
+    roles: claims?.roles,
+    exp: claims?.exp ? new Date((claims.exp as number) * 1000).toISOString() : undefined,
+  });
+
   return result.accessToken;
 }
 
@@ -37,6 +59,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
     let msg = `${res.status} ${res.statusText}`;
     try {
       const body = await res.json();
+      console.warn("[apiClient] API error response:", res.status, res.url, body);
       const norm = camelKeys<Record<string, unknown>>(body);
       if (norm?.message) msg = String(norm.message);
     } catch {
