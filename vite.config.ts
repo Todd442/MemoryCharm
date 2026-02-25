@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 /**
  * In-memory "database" for the dev server lifetime.
  * Restarting the dev server clears this.
@@ -289,7 +291,7 @@ export default defineConfig(() => {
   const useMock = process.env.VITE_USE_MOCK === "true";
 
   return {
-    plugins: [react(), ...(useMock ? [mockApi()] : [])],
+    plugins: [react(), ...(useMock ? [mockApi()] : []), cloudflare()],
     server: useMock
       ? {}
       : {
