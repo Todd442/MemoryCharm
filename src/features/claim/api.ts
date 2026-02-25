@@ -128,7 +128,9 @@ export function uploadToSignedUrl(
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", url);
     xhr.setRequestHeader("Content-Type", contentType);
-    xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
+    if (url.includes("blob.core.windows.net")) {
+      xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
+    }
 
     if (onProgress) {
       xhr.upload.onprogress = (e) => {
@@ -172,6 +174,7 @@ export async function uploadCharm(
 ): Promise<{ ok: true; code: string }> {
   const urlsResponse = await getUploadUrls(code, contentType, files.length);
   const isDev = !!import.meta.env.VITE_DEV_TOKEN;
+  const skipR2 = !!import.meta.env.VITE_SKIP_R2;
 
   // Track per-file progress and aggregate
   const fileProgress = new Array(files.length).fill(0);
@@ -193,7 +196,7 @@ export async function uploadCharm(
       const azureUpload = uploadToSignedUrl(
         entry.azureUploadUrl, file, contentType, reportProgress(i)
       );
-      const r2Upload = entry.r2UploadUrl
+      const r2Upload = (entry.r2UploadUrl && !skipR2)
         ? uploadToSignedUrl(entry.r2UploadUrl, file, contentType)
         : Promise.resolve();
       return Promise.all([azureUpload, r2Upload]);

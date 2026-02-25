@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
@@ -251,6 +251,112 @@ export function CharmEntryPage() {
   return null;
 }
 
+/** Video player with magical buffering / error overlay.
+ *  While buffering, the display cycles: magical phrase (3.8 s) → twinkle out
+ *  → tech phrase (2.2 s) → twinkle back. After 7 s the magical text upgrades. */
+function VideoPlayer({ url }: { url: string }) {
+  const [buffering, setBuffering]     = useState(false);
+  const [showTech, setShowTech]       = useState(false);
+  const [twinkle, setTwinkle]         = useState(false);
+  const [slowNetwork, setSlowNetwork] = useState(false);
+  const [error, setError]             = useState(false);
+
+  const cycleActive = useRef(false);
+  const slowTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cycleTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAll = () => {
+    if (slowTimer.current)  { clearTimeout(slowTimer.current);  slowTimer.current  = null; }
+    if (cycleTimer.current) { clearTimeout(cycleTimer.current); cycleTimer.current = null; }
+  };
+
+  // Recursive cycle: hold → sparkle out → swap text → fade in → repeat
+  const runCycle = (isTech: boolean) => {
+    if (!cycleActive.current) return;
+    const hold = isTech ? 2200 : 3800;
+    cycleTimer.current = setTimeout(() => {
+      if (!cycleActive.current) return;
+      setTwinkle(true);
+      cycleTimer.current = setTimeout(() => {
+        if (!cycleActive.current) return;
+        setShowTech(prev => !prev);
+        setTwinkle(false);
+        runCycle(!isTech);
+      }, 550);
+    }, hold);
+  };
+
+  const handleWaiting = () => {
+    if (cycleActive.current) return;
+    cycleActive.current = true;
+    setBuffering(true);
+    setShowTech(false);
+    setTwinkle(false);
+    runCycle(false);
+    slowTimer.current = setTimeout(() => setSlowNetwork(true), 7000);
+  };
+
+  const handlePlaying = () => {
+    cycleActive.current = false;
+    clearAll();
+    setBuffering(false);
+    setShowTech(false);
+    setTwinkle(false);
+    setSlowNetwork(false);
+  };
+
+  const handleError = () => {
+    cycleActive.current = false;
+    clearAll();
+    setError(true);
+    setBuffering(false);
+  };
+
+  useEffect(() => () => { cycleActive.current = false; clearAll(); }, []);
+
+  const magicalText = slowNetwork
+    ? "The memory is finding its way to you…"
+    : "Summoning your memory…";
+
+  const techText = slowNetwork
+    ? "Your connection appears slow"
+    : "Buffering";
+
+  return (
+    <div style={{ position: "relative" }}>
+      <video
+        src={url}
+        controls
+        playsInline
+        className="pb-media"
+        onWaiting={handleWaiting}
+        onStalled={handleWaiting}
+        onPlaying={handlePlaying}
+        onError={handleError}
+      />
+      {(buffering || error) && (
+        <div className="pb-buffer-overlay">
+          {error ? (
+            <>
+              <div className="pb-buffer-main pb-buffer-fadein">
+                We can't seem to recall this memory… it's not gone
+              </div>
+              <div className="pb-buffer-sub">Unable to load · most likely a network problem</div>
+            </>
+          ) : (
+            <div
+              key={showTech ? "tech" : "magic"}
+              className={`pb-buffer-main ${twinkle ? "pb-buffer-twinkle" : "pb-buffer-fadein"}`}
+            >
+              {showTech ? techText : magicalText}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Renders media inside a tight frame. The image/video determines the frame size. */
 function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image" | "audio" }) {
   const { files, type } = props;
@@ -268,7 +374,7 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
     return (
       <div className="pb-frame">
         {brand}
-        <video src={files[0].url} controls playsInline className="pb-media" />
+        <VideoPlayer url={files[0].url} />
       </div>
     );
   }

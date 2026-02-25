@@ -24,7 +24,9 @@
       "Bash(python:*)",
       "Bash(ren:*)",
       "Bash(xargs:*)",
-      "Bash(grep -c \"ba1dc3e7-4c7b-49c3-b526-dd06fa667a5b/Charm\" dist/assets/index-*.js)"
+      "Bash(grep -c \"ba1dc3e7-4c7b-49c3-b526-dd06fa667a5b/Charm\" dist/assets/index-*.js)",
+      "Bash(gh run list --limit 5 --repo Todd442/Mnemosyne)",
+      "Bash(gh run view 22407688590 --repo Todd442/Mnemosyne)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\source\\repos\\Mnemosyne\\Mnemosyne.API"

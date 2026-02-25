@@ -115,6 +115,66 @@
   margin-bottom: clamp(8px, 1.5vmin, 16px);
 }
 
+/* ── Buffering / error overlay on video ── */
+
+.pb-buffer-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.2vmin, 12px);
+  background: rgba(2, 1, 8, 0.78);
+  text-align: center;
+  padding: clamp(16px, 3vmin, 32px);
+  pointer-events: none;
+}
+
+.pb-buffer-main {
+  font-family: "Cinzel", serif;
+  font-size: clamp(13px, 2.2vmin, 22px);
+  color: rgba(210, 170, 110, 0.92);
+  letter-spacing: 0.04em;
+}
+
+/* Fade in, then breathe */
+.pb-buffer-fadein {
+  animation:
+    pb-fade-in  0.45s ease-out      forwards,
+    pb-shimmer  2.4s  0.45s ease-in-out infinite;
+}
+
+/* Sparkle flash then dissolve out */
+.pb-buffer-twinkle {
+  animation: pb-twinkle-out 0.55s ease-in-out forwards;
+}
+
+.pb-buffer-sub {
+  font-family: "Cinzel", serif;
+  font-size: clamp(10px, 1.4vmin, 13px);
+  color: rgba(243, 231, 207, 0.38);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@keyframes pb-fade-in {
+  0%   { opacity: 0;    transform: scale(0.95); filter: brightness(2);   }
+  60%  { opacity: 1;    transform: scale(1.01); filter: brightness(1.15); }
+  100% { opacity: 1;    transform: scale(1);    filter: brightness(1);   }
+}
+
+@keyframes pb-twinkle-out {
+  0%   { opacity: 1; transform: scale(1);    filter: brightness(1);   }
+  30%  { opacity: 1; transform: scale(1.04); filter: brightness(2.5); }
+  100% { opacity: 0; transform: scale(0.92); filter: brightness(0.8); }
+}
+
+@keyframes pb-shimmer {
+  0%, 100% { opacity: 0.65; }
+  50%      { opacity: 1;    }
+}
+
 /* Links */
 .pb-shell a,
 .pb-shell a:visited {

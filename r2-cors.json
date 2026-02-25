@@ -1,0 +1,13 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": ["https://memorycharm.todd-ef7.workers.dev", "http://localhost:5173"],
+        "methods": ["GET", "PUT", "HEAD"],
+        "headers": ["*"]
+      },
+      "exposeHeaders": [],
+      "maxAgeSeconds": 86400
+    }
+  ]
+}
