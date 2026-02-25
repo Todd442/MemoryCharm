@@ -1,5 +1,7 @@
 import { msalInstance } from "../auth/msalInstance";
 
+export const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
+
 const API_SCOPES: string[] = import.meta.env.VITE_API_SCOPE
   ? [import.meta.env.VITE_API_SCOPE as string]
   : [];
@@ -49,14 +51,14 @@ async function handleResponse<T>(res: Response): Promise<T> {
 // -- Public (no auth) --------------------------------------------------------
 
 export async function publicGet<T>(path: string): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(API_BASE + path, {
     headers: { Accept: "application/json" },
   });
   return handleResponse<T>(res);
 }
 
 export async function publicPost<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(API_BASE + path, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify(body),
@@ -69,7 +71,7 @@ export async function publicPost<T>(path: string, body: unknown): Promise<T> {
  * before deciding how to parse the body (e.g. 404 vs 200).
  */
 export async function publicGetRaw(path: string): Promise<Response> {
-  return fetch(path, {
+  return fetch(API_BASE + path, {
     headers: { Accept: "application/json" },
   });
 }
@@ -81,7 +83,7 @@ export async function publicPostRaw(
   path: string,
   body: unknown
 ): Promise<Response> {
-  return fetch(path, {
+  return fetch(API_BASE + path, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify(body),
@@ -92,7 +94,7 @@ export async function publicPostRaw(
 
 export async function authGet<T>(path: string): Promise<T> {
   const token = await getBearerToken();
-  const res = await fetch(path, {
+  const res = await fetch(API_BASE + path, {
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
@@ -103,7 +105,7 @@ export async function authGet<T>(path: string): Promise<T> {
 
 export async function authPost<T>(path: string, body: unknown): Promise<T> {
   const token = await getBearerToken();
-  const res = await fetch(path, {
+  const res = await fetch(API_BASE + path, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -117,7 +119,7 @@ export async function authPost<T>(path: string, body: unknown): Promise<T> {
 
 export async function authPut<T>(path: string, body: unknown): Promise<T> {
   const token = await getBearerToken();
-  const res = await fetch(path, {
+  const res = await fetch(API_BASE + path, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

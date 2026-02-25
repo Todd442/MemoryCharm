@@ -6,6 +6,7 @@ import {
   toGlyphVerifyResult,
   type CharmStatusApiResponse,
 } from "./apiAdapters";
+import { API_BASE } from "../../app/http/apiClient";
 
 /** Safely parse JSON and normalize PascalCase keys to camelCase. */
 async function safeJsonNormalized(res: Response): Promise<CharmStatusApiResponse | null> {
@@ -31,7 +32,7 @@ export function entryByToken(token: string): Promise<EntryResponse> {
  * Entry by charm code. GET /api/charm/{code}
  */
 export async function entryByCode(code: string): Promise<EntryResponse> {
-  const res = await fetch(`/api/charm/${encodeURIComponent(code)}`, {
+  const res = await fetch(`${API_BASE}/api/charm/${encodeURIComponent(code)}`, {
     headers: { Accept: "application/json" },
   });
 
@@ -53,7 +54,7 @@ export type PlaybackResponse = PlaybackUrlResponse;
  * The GET /api/charm/{code} response includes Files[] when status="ready".
  */
 export async function getPlaybackUrls(code: string): Promise<PlaybackResponse> {
-  const res = await fetch(`/api/charm/${encodeURIComponent(code)}`, {
+  const res = await fetch(`${API_BASE}/api/charm/${encodeURIComponent(code)}`, {
     headers: { Accept: "application/json" },
   });
 
@@ -87,7 +88,7 @@ export async function verifyGlyph(
   attemptsLeft: number;
   playback: PlaybackResponse | null;
 }> {
-  const res = await fetch(`/api/charm/${encodeURIComponent(code)}`, {
+  const res = await fetch(`${API_BASE}/api/charm/${encodeURIComponent(code)}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
