@@ -23,7 +23,8 @@
       "Bash(pip install:*)",
       "Bash(python:*)",
       "Bash(ren:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(grep -c \"ba1dc3e7-4c7b-49c3-b526-dd06fa667a5b/Charm\" dist/assets/index-*.js)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\source\\repos\\Mnemosyne\\Mnemosyne.API"
