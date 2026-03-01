@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ContentFile } from "../types";
+import { FullscreenButton } from "./FullscreenButton";
 import "./MemoryGallery.css";
 
 /**
@@ -50,19 +51,22 @@ export function MemoryGallery(props: { files: ContentFile[] }) {
       {isOpen && (
         <div className="mg-focus" onClick={handleDismiss}>
           <div className="mg-focus__frame" onClick={(e) => e.stopPropagation()}>
-            <div className="pb-brand" onClick={() => nav("/")} style={{ cursor: "pointer" }}>Memory Charm</div>
+            <div className="pb-brand">
+              <button
+                className="mg-focus__close"
+                onClick={handleDismiss}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              <span onClick={() => nav("/")} style={{ cursor: "pointer" }}>Memory Charm</span>
+              <FullscreenButton />
+            </div>
             <img
               src={files[selected!].url}
               alt={`Memory ${selected! + 1} of ${files.length}`}
               className="pb-media"
             />
-            <button
-              className="mg-focus__close"
-              onClick={handleDismiss}
-              aria-label="Close"
-            >
-              &times;
-            </button>
           </div>
         </div>
       )}

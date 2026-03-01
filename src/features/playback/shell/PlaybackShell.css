@@ -89,17 +89,21 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
-  color: rgba(210, 170, 110, 0.5);
+  padding: 6px;
+  color: rgba(210, 170, 110, 0.72);
   line-height: 1;
   display: flex;
   align-items: center;
   -webkit-user-select: none;
   user-select: none;
+  /* Minimum 36 px touch target on mobile */
+  min-width: 36px;
+  min-height: 36px;
+  justify-content: center;
 }
 
 .pb-fs-btn:hover {
-  color: rgba(210, 170, 110, 0.9);
+  color: rgba(210, 170, 110, 1);
 }
 
 /* Media element — the hero. Sizes itself, frame wraps around it. */

@@ -48,6 +48,13 @@ async function bootstrap() {
   );
 }
 
+// Register service worker for PWA installability (requires HTTPS).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {/* non-fatal */});
+  });
+}
+
 bootstrap().catch((err) => {
   console.error("MSAL bootstrap failed", err);
   ReactDOM.createRoot(document.getElementById("root")!).render(

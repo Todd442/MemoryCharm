@@ -267,14 +267,15 @@
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Close button */
+/* Close button — circular, positioned left inside the brand bar */
 .mg-focus__close {
   position: absolute;
-  top: clamp(4px, 1vmin, 10px);
-  right: clamp(4px, 1vmin, 10px);
+  left: clamp(6px, 1vmin, 12px);
+  top: 50%;
+  transform: translateY(-50%);
+
   width: clamp(28px, 4vmin, 40px);
   height: clamp(28px, 4vmin, 40px);
-
   display: flex;
   align-items: center;
   justify-content: center;
@@ -295,3 +296,4 @@
   background: rgba(0, 0, 0, 0.7);
   border-color: rgba(210, 170, 110, 0.5);
 }
+
