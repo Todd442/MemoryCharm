@@ -3,7 +3,7 @@
   "short_name": "MemCharm",
   "description": "Unlock memories captured in physical charms",
   "display": "standalone",
-  "orientation": "portrait",
+
   "start_url": "/",
   "scope": "/",
   "theme_color": "#0b0a08",
