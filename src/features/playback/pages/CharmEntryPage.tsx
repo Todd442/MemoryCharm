@@ -4,6 +4,7 @@ import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api"
 import type { EntryResponse, ContentFile } from "../types";
 import { GlyphAuthPanel } from "../../../components/GlyphAuthPanel";
 import { MemoryGallery } from "../components/MemoryGallery";
+import { usePwaInstall } from "../../../app/hooks/usePwaInstall";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill styles
 
 type UiState =
@@ -409,6 +410,50 @@ function FullscreenButton() {
   );
 }
 
+/** Slide-up toast offering PWA installation. Appears 4 s after playback starts. */
+function PwaInstallToast() {
+  const { canInstall, isIos, triggerInstall } = usePwaInstall();
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (dismissed) return;
+    const t = setTimeout(() => setVisible(true), 4000);
+    return () => clearTimeout(t);
+  }, [dismissed]);
+
+  if (dismissed || !visible || (!canInstall && !isIos)) return null;
+
+  return (
+    <div className="pb-install-toast" role="status">
+      <div className="pb-install-toast-body">
+        <div className="pb-install-toast-title">Keep this memory close</div>
+        <div className="pb-install-toast-sub">
+          {isIos
+            ? "Tap Share \u2192 Add to Home Screen"
+            : "Add Memory Charm to your home screen"}
+        </div>
+      </div>
+      {canInstall && (
+        <button className="pb-install-toast-action" onClick={triggerInstall} type="button">
+          Install
+        </button>
+      )}
+      <button
+        className="pb-install-toast-dismiss"
+        onClick={() => setDismissed(true)}
+        aria-label="Dismiss"
+        type="button"
+      >
+        <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <line x1="1" y1="1" x2="9" y2="9" />
+          <line x1="9" y1="1" x2="1" y2="9" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 /** Renders media inside a tight frame. The image/video determines the frame size. */
 function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image" | "audio" }) {
   const { files, type } = props;
@@ -425,31 +470,40 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
 
   if (type === "video") {
     return (
-      <div className="pb-frame">
-        {brand}
-        <VideoPlayer url={files[0].url} />
-      </div>
+      <>
+        <div className="pb-frame">
+          {brand}
+          <VideoPlayer url={files[0].url} />
+        </div>
+        <PwaInstallToast />
+      </>
     );
   }
 
   if (type === "audio") {
     return (
-      <div className="pb-frame pb-status">
-        <div className="pb-status-title" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
-          Memory Charm
+      <>
+        <div className="pb-frame pb-status">
+          <div className="pb-status-title" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
+            Memory Charm
+          </div>
+          <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 400 }} />
         </div>
-        <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 400 }} />
-      </div>
+        <PwaInstallToast />
+      </>
     );
   }
 
   // Single image
   if (files.length === 1) {
     return (
-      <div className="pb-frame">
-        {brand}
-        <img src={files[0].url} alt="Memory" className="pb-media" />
-      </div>
+      <>
+        <div className="pb-frame">
+          {brand}
+          <img src={files[0].url} alt="Memory" className="pb-media" />
+        </div>
+        <PwaInstallToast />
+      </>
     );
   }
 

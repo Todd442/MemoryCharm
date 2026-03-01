@@ -204,6 +204,89 @@
   50%      { opacity: 1;    }
 }
 
+/* ── PWA Install Toast ─────────────────────────────────────────────────────── */
+
+.pb-install-toast {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100vw - 32px), 420px);
+
+  background: rgba(20, 12, 6, 0.94);
+  border: 1px solid rgba(210, 170, 110, 0.35);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(12px);
+
+  padding: clamp(10px, 1.8vmin, 16px) clamp(14px, 2.5vmin, 20px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-family: "Cinzel", serif;
+  color: rgba(210, 170, 110, 0.9);
+  z-index: 100;
+
+  animation: pb-toast-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pb-install-toast-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pb-install-toast-title {
+  font-size: var(--fs-small);
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.pb-install-toast-sub {
+  font-size: var(--fs-xs);
+  opacity: 0.65;
+  line-height: 1.4;
+}
+
+.pb-install-toast-action {
+  flex-shrink: 0;
+  background: rgba(210, 170, 110, 0.14);
+  border: 1px solid rgba(210, 170, 110, 0.38);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-family: "Cinzel", serif;
+  font-size: var(--fs-xs);
+  color: rgba(210, 170, 110, 0.95);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.pb-install-toast-action:hover {
+  background: rgba(210, 170, 110, 0.26);
+}
+
+.pb-install-toast-dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: rgba(210, 170, 110, 0.35);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.pb-install-toast-dismiss:hover {
+  color: rgba(210, 170, 110, 0.75);
+}
+
+@keyframes pb-toast-up {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0);    }
+}
+
 /* Links */
 .pb-shell a,
 .pb-shell a:visited {

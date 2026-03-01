@@ -8,6 +8,7 @@ import { getUserMe, saveProfile, getUserCharms } from "../api";
 import type { UserProfile, UserCharmSummary } from "../api";
 import { useStatus } from "../../../app/providers/StatusProvider";
 import { ThemedInput } from "../../../components/ThemedInput";
+import { usePwaInstall } from "../../../app/hooks/usePwaInstall";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .teBtn styles
 import "./AccountPage.css";
 
@@ -17,6 +18,8 @@ export function AccountPage() {
   const { setStatus } = useStatus();
 
   const working = inProgress !== InteractionStatus.None;
+  const { canInstall, isIos, triggerInstall } = usePwaInstall();
+  const [showIosTip, setShowIosTip] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -260,22 +263,46 @@ export function AccountPage() {
 
       {/* Footer actions */}
       {footerEl && createPortal(
-        <div className="te-footerActions">
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={() => nav("/")}
-            type="button"
-          >
-            Home
-          </button>
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={doSignOut}
-            disabled={working}
-            type="button"
-          >
-            Sign out
-          </button>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 6, width: "100%" }}>
+          {showIosTip && (
+            <div style={{
+              textAlign: "center",
+              fontSize: "var(--fs-meta, 12px)",
+              color: "rgba(210,170,110,0.8)",
+              padding: "6px 12px",
+              background: "rgba(20,12,6,0.7)",
+              borderRadius: 8,
+              border: "1px solid rgba(210,170,110,0.25)",
+            }}>
+              Tap the Share button in Safari, then &ldquo;Add to Home Screen&rdquo;
+            </div>
+          )}
+          <div className="te-footerActions">
+            <button
+              className="teBtn teBtnSm teBtnGhost"
+              onClick={() => nav("/")}
+              type="button"
+            >
+              Home
+            </button>
+            {(canInstall || isIos) && (
+              <button
+                className="teBtn teBtnSm teBtnGhost"
+                onClick={isIos ? () => setShowIosTip((v) => !v) : triggerInstall}
+                type="button"
+              >
+                Install App
+              </button>
+            )}
+            <button
+              className="teBtn teBtnSm teBtnGhost"
+              onClick={doSignOut}
+              disabled={working}
+              type="button"
+            >
+              Sign out
+            </button>
+          </div>
         </div>,
         footerEl
       )}
