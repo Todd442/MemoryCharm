@@ -255,7 +255,8 @@ export function CharmEntryPage() {
  *  While buffering, the display cycles: magical phrase (3.8 s) → twinkle out
  *  → tech phrase (2.2 s) → twinkle back. After 7 s the magical text upgrades. */
 function VideoPlayer({ url }: { url: string }) {
-  const [buffering, setBuffering]     = useState(false);
+  const [loading, setLoading]         = useState(true);   // initial load until canPlay
+  const [buffering, setBuffering]     = useState(false);  // mid-playback stall
   const [showTech, setShowTech]       = useState(false);
   const [twinkle, setTwinkle]         = useState(false);
   const [slowNetwork, setSlowNetwork] = useState(false);
@@ -286,6 +287,11 @@ function VideoPlayer({ url }: { url: string }) {
     }, hold);
   };
 
+  // Initial load complete — hide the overlay and start playback
+  const handleCanPlay = () => {
+    setLoading(false);
+  };
+
   const handleWaiting = () => {
     if (cycleActive.current) return;
     cycleActive.current = true;
@@ -297,6 +303,7 @@ function VideoPlayer({ url }: { url: string }) {
   };
 
   const handlePlaying = () => {
+    setLoading(false);
     cycleActive.current = false;
     clearAll();
     setBuffering(false);
@@ -308,6 +315,7 @@ function VideoPlayer({ url }: { url: string }) {
   const handleError = () => {
     cycleActive.current = false;
     clearAll();
+    setLoading(false);
     setError(true);
     setBuffering(false);
   };
@@ -322,6 +330,8 @@ function VideoPlayer({ url }: { url: string }) {
     ? "Your connection appears slow"
     : "Buffering";
 
+  const showOverlay = loading || buffering || error;
+
   return (
     <div style={{ position: "relative" }}>
       <video
@@ -329,12 +339,13 @@ function VideoPlayer({ url }: { url: string }) {
         controls
         playsInline
         className="pb-media"
+        onCanPlay={handleCanPlay}
         onWaiting={handleWaiting}
         onStalled={handleWaiting}
         onPlaying={handlePlaying}
         onError={handleError}
       />
-      {(buffering || error) && (
+      {showOverlay && (
         <div className="pb-buffer-overlay">
           {error ? (
             <>
@@ -357,14 +368,56 @@ function VideoPlayer({ url }: { url: string }) {
   );
 }
 
+/** Fullscreen toggle button — hidden on browsers that don't support the API (e.g. iOS Safari). */
+function FullscreenButton() {
+  const [isFs, setIsFs] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFs(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  if (!document.fullscreenEnabled) return null;
+
+  function toggle() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  }
+
+  return (
+    <button className="pb-fs-btn" onClick={toggle} aria-label={isFs ? "Exit fullscreen" : "Enter fullscreen"}>
+      {isFs ? (
+        <svg viewBox="0 0 10 10" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <polyline points="4,1 4,4 1,4" />
+          <polyline points="9,4 6,4 6,1" />
+          <polyline points="6,9 6,6 9,6" />
+          <polyline points="1,6 4,6 4,9" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 10 10" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <polyline points="1,4 1,1 4,1" />
+          <polyline points="6,1 9,1 9,4" />
+          <polyline points="9,6 9,9 6,9" />
+          <polyline points="4,9 1,9 1,6" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 /** Renders media inside a tight frame. The image/video determines the frame size. */
 function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image" | "audio" }) {
   const { files, type } = props;
   const nav = useNavigate();
 
   const brand = (
-    <div className="pb-brand" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
-      Memory Charm
+    <div className="pb-brand">
+      <span onClick={() => nav("/")} style={{ cursor: "pointer" }}>Memory Charm</span>
+      <FullscreenButton />
     </div>
   );
 

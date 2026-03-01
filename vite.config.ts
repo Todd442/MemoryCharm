@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import basicSsl from "@vitejs/plugin-basic-ssl";
 
 import { cloudflare } from "@cloudflare/vite-plugin";
 
@@ -291,7 +292,7 @@ export default defineConfig(() => {
   const useMock = process.env.VITE_USE_MOCK === "true";
 
   return {
-    plugins: [react(), ...(useMock ? [mockApi()] : []), cloudflare()],
+    plugins: [react(), ...(useMock ? [mockApi()] : []), basicSsl(), cloudflare()],
     server: useMock
       ? {}
       : {
