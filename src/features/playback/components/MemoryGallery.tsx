@@ -4,67 +4,121 @@ import type { ContentFile } from "../types";
 import { FullscreenButton } from "./FullscreenButton";
 import "./MemoryGallery.css";
 
-// Spiral constants
-const TURNS = 2.5;    // rotations from center to edge
-const MAX_R = 42;     // max radius in vmin
-const SPEED = 0.04;   // full-cycle rev/sec → 25 s per loop
-const DRIFT = 1.5;    // drift amplitude in vmin
+// ── Helix animation constants ─────────────────────────────────────────────────
+const HELIX_TURNS = 3;        // coil rotations across the full screen height
+const HELIX_SPEED = 0.0000058; // t-units per millisecond (~172 s full cycle)
+const CARD_COUNT  = 12;       // cards in flight (repeats files if count < 12)
 
-function getVmin() {
-  return Math.min(window.innerWidth, window.innerHeight) / 100;
+// Truncate to a maximum number of words, appending "…" when clipped
+function truncateWords(text: string, max: number): string {
+  const words = text.trim().split(/\s+/);
+  return words.length <= max ? text : words.slice(0, max).join(" ") + "…";
 }
 
-/**
- * Compute inline style for card i in a spiral of n cards.
- * t ∈ [0,1): 0 = center, 1 = outer edge.
- * Cards fade in as they emerge from center, fade out before wrapping back.
- */
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+interface CardState {
+  id: number;
+  t: number;           // position in [0,1), drives Y position & coil angle
+  phaseOffset: number; // unique offset per card for X/Z variety
+}
+
+interface Dims {
+  W: number; H: number;
+  RADIUS_X: number; RADIUS_Z: number; FOCAL: number;
+  CARD_W: number; CARD_H: number; TEXT_HALF_H: number;
+}
+
+function computeDims(): Dims {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const vmin = Math.min(W, H);
+  return {
+    W, H,
+    RADIUS_X:    W    * 0.30,
+    RADIUS_Z:    vmin * 0.30,
+    FOCAL:       vmin * 1.20,
+    CARD_W:      vmin * 0.28,
+    CARD_H:      vmin * 0.17,
+    // Scale dead-zone to H so the ratio is consistent in portrait & landscape
+    TEXT_HALF_H: H * 0.07,
+  };
+}
+
+// Golden-angle phase distribution — even spread around the coil
+const GOLDEN_ANGLE = 2.399963; // radians ≈ 2π × (1 − 1/φ)
+
+function initCards(n: number): CardState[] {
+  return Array.from({ length: n }, (_, i) => ({
+    id: i,
+    t: i / n,
+    phaseOffset: (i * GOLDEN_ANGLE) % (Math.PI * 2),
+  }));
+}
+
 function getCardStyle(
-  i: number,
-  n: number,
-  phase: number,
-  time: number,
-) {
-  const t = ((i / n + phase) % 1 + 1) % 1;
-  const vm = getVmin();
+  card: CardState,
+  dims: Dims,
+  aspectRatio?: number,
+): React.CSSProperties | null {
+  const { W, H, RADIUS_X, RADIUS_Z, FOCAL, CARD_W, CARD_H, TEXT_HALF_H } = dims;
 
-  // Archimedean spiral position
-  const r = t * MAX_R * vm;
-  const theta = t * TURNS * 2 * Math.PI;
-  const cx = r * Math.cos(theta);
-  const cy = r * Math.sin(theta);
+  // ── 3-D helix position ────────────────────────────────────────────────────
+  const angle    = card.t * HELIX_TURNS * Math.PI * 2 + card.phaseOffset;
+  const y        = card.t * H;
+  const x        = W / 2 + Math.sin(angle) * RADIUS_X;
+  const z        = Math.cos(angle) * RADIUS_Z;
+  const zShifted = z + RADIUS_Z + 1; // always positive
+  const scale    = FOCAL / (FOCAL + zShifted);
 
-  // Per-card drift (seeded by index so each card moves independently)
-  const seed = i * 1.7;
-  const dx = Math.sin(time * 0.4 + seed) * DRIFT * vm;
-  const dy = Math.cos(time * 0.3 + seed * 0.7) * DRIFT * vm;
+  // Long side = CARD_W; portrait/landscape tiles match the image's aspect ratio
+  const r = aspectRatio ?? (CARD_W / CARD_H);
+  const w = (r >= 1 ? CARD_W     : CARD_W * r) * scale;
+  const h = (r >= 1 ? CARD_W / r : CARD_W    ) * scale;
 
-  // Size: 30 vmin near center → 18 vmin at outer edge
-  const size = (18 + (1 - t) * 12) * vm;
+  // ── Alpha (all fade sources combined) ─────────────────────────────────────
+  // 1. Wrap fade — wide 15% zones at top & bottom so the wrap is invisible
+  let alpha = smoothstep(0, 0.15, card.t) * smoothstep(1, 0.85, card.t);
+  // 2. Logo dead-zone — cards fade when overlapping the central brand text
+  alpha *= smoothstep(TEXT_HALF_H * 0.8, TEXT_HALF_H * 2.5, Math.abs(y - H / 2));
+  // 3. Screen-edge fade — one card-width margin left & right
+  const margin = CARD_W * 0.9;
+  alpha *= smoothstep(0, margin, x) * smoothstep(W, W - margin, x);
+  // 4. Depth fade — back of the coil gently dims
+  const maxZ  = RADIUS_Z * 2 + 1;
+  const depth = zShifted / maxZ;
+  alpha *= smoothstep(1, 0.65, depth);
 
-  // Opacity: fade in during first 5%, fade out during last 15%
-  const opacity =
-    t < 0.05 ? t / 0.05 :
-    t > 0.85 ? 1 - (t - 0.85) / 0.15 :
-    1;
+  if (alpha <= 0.015) return null;
+
+  // ── Depth-based border glow (closer = brighter gold ring) ─────────────────
+  const borderA   = (0.15 + (1 - depth) * 0.55).toFixed(2);
+  const shadowBlur = Math.round(16 * scale);
+  const shadowOff  = Math.round(4  * scale);
+  const borderW    = Math.max(1, Math.round(1.5 * scale));
 
   return {
-    position: "absolute" as const,
-    left: "50%",
-    top: "50%",
-    width: `${size}px`,
-    height: `${size * 0.75}px`,
-    transform: `translate(calc(-50% + ${cx + dx}px), calc(-50% + ${cy + dy}px))`,
-    opacity,
-    zIndex: Math.floor((1 - t) * 100),
-    willChange: "transform" as const,
+    position:   "absolute",
+    left:       0,
+    top:        0,
+    width:      `${w}px`,
+    height:     `${h}px`,
+    transform:  `translate(${(x - w / 2).toFixed(1)}px,${(y - h / 2).toFixed(1)}px)`,
+    opacity:    Math.min(1, Math.max(0, alpha)),
+    zIndex:     Math.floor((1 - depth) * 100),
+    willChange: "transform, opacity",
+    boxShadow:  `0 ${shadowOff}px ${shadowBlur}px rgba(0,0,0,0.65),` +
+                `0 0 0 ${borderW}px rgba(210,170,110,${borderA})`,
   };
 }
 
 /**
- * Animated spiral gallery — images flow outward from the central logo,
- * larger near center and smaller at the edge, wrapping back continuously.
- * Tap any card to zoom it into a framed view; tap × or backdrop to dismiss.
+ * Helix gallery — images flow through a 3D coil that scrolls continuously
+ * down the screen. The nebula background shows through each faded-edge card.
+ * Tap any card to zoom it into the framed detail view.
  */
 export function MemoryGallery(props: {
   files: ContentFile[];
@@ -72,34 +126,53 @@ export function MemoryGallery(props: {
   memoryDescription?: string;
 }) {
   const { files, memoryName, memoryDescription } = props;
-  const nav = useNavigate();
+  const nav  = useNavigate();
   const [selected, setSelected] = useState<number | null>(null);
   const [, setTick] = useState(0);
 
-  // Mutable refs updated by rAF loop — read at render time via setTick
-  const phaseRef = useRef(0);
-  const timeRef = useRef(0);
-  const rafRef = useRef<number | null>(null);
+  const dimsRef        = useRef<Dims>(computeDims());
+  const cardsRef       = useRef<CardState[]>(initCards(CARD_COUNT));
+  const pausedRef      = useRef(false);
+  const rafRef         = useRef<number | null>(null);
+  const aspectRatioRef = useRef<Map<number, number>>(new Map());
 
-  const handleSelect = useCallback((i: number) => setSelected(i), []);
-  const handleDismiss = useCallback(() => setSelected(null), []);
-  const isOpen = selected !== null;
+  const handleImageLoad = useCallback((fileIdx: number, e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.naturalWidth && img.naturalHeight) {
+      aspectRatioRef.current.set(fileIdx, img.naturalWidth / img.naturalHeight);
+    }
+  }, []);
 
-  // Animation loop: physics run every frame, renders throttled to ~30 fps
+  const handleSelect = useCallback((fileIdx: number) => {
+    setSelected(fileIdx);
+    pausedRef.current = true;
+  }, []);
+
+  const handleDismiss = useCallback(() => {
+    setSelected(null);
+    pausedRef.current = false;
+  }, []);
+
   useEffect(() => {
-    let lastTs = 0;
+    function onResize() { dimsRef.current = computeDims(); }
+    window.addEventListener("resize", onResize);
+
+    let lastTs     = 0;
     let lastRender = 0;
 
     function loop(ts: number) {
-      const dt = lastTs ? (ts - lastTs) / 1000 : 0;
+      const dt = lastTs ? ts - lastTs : 0;
       lastTs = ts;
 
-      phaseRef.current = (phaseRef.current + SPEED * dt) % 1;
-      timeRef.current += dt;
+      if (!pausedRef.current) {
+        for (const card of cardsRef.current) {
+          card.t = (card.t + HELIX_SPEED * dt) % 1;
+        }
+      }
 
       if (ts - lastRender >= 1000 / 30) {
         lastRender = ts;
-        setTick((c) => c + 1);
+        setTick(c => c + 1);
       }
 
       rafRef.current = requestAnimationFrame(loop);
@@ -107,42 +180,55 @@ export function MemoryGallery(props: {
 
     rafRef.current = requestAnimationFrame(loop);
     return () => {
+      window.removeEventListener("resize", onResize);
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
-  const n = files.length;
-  const phase = phaseRef.current;
-  const time = timeRef.current;
+  const isOpen = selected !== null;
+  const dims   = dimsRef.current;
+  const n      = files.length;
 
   return (
     <div className="mg-scene">
-      {/* Spiral space with logo + flowing images */}
       <div className={`mg-space ${isOpen ? "mg-space--dimmed" : ""}`}>
 
         {/* Central brand anchor */}
         <button className="mg-logo" onClick={() => nav("/")}>
-          {memoryName && <div className="mg-logo__name">{memoryName}</div>}
+          {memoryName && <div className="mg-logo__name">{truncateWords(memoryName, 5)}</div>}
           <div className="mg-logo__text">Memory</div>
           <div className="mg-logo__sub">Charm</div>
           {memoryDescription && (
-            <div className="mg-logo__desc">{memoryDescription}</div>
+            <div className="mg-logo__desc">{truncateWords(memoryDescription, 15)}</div>
           )}
         </button>
 
-        {/* Spiralling image cards */}
-        {files.map((file, i) => (
-          <button
-            key={i}
-            className="mg-card"
-            style={getCardStyle(i, n, phase, time)}
-            onClick={() => !isOpen && handleSelect(i)}
-            tabIndex={isOpen ? -1 : 0}
-            aria-label={`Memory ${i + 1} of ${files.length}`}
-          >
-            <img src={file.url} alt="" className="mg-card__img" draggable={false} />
-          </button>
-        ))}
+        {/* Helix image cards */}
+        {cardsRef.current.map((card) => {
+          const fileIdx     = card.id % n;
+          const aspectRatio = aspectRatioRef.current.get(fileIdx);
+          const style       = getCardStyle(card, dims, aspectRatio);
+          if (!style) return null;
+          const file = files[fileIdx];
+          return (
+            <button
+              key={card.id}
+              className="mg-card"
+              style={style}
+              onClick={() => !isOpen && handleSelect(fileIdx)}
+              tabIndex={isOpen ? -1 : 0}
+              aria-label={`Memory ${fileIdx + 1} of ${n}`}
+            >
+              <img
+                src={file.url}
+                alt=""
+                className="mg-card__img"
+                draggable={false}
+                onLoad={(e) => handleImageLoad(fileIdx, e)}
+              />
+            </button>
+          );
+        })}
       </div>
 
       {/* Zoomed-in framed view */}
@@ -164,7 +250,7 @@ export function MemoryGallery(props: {
             </div>
             <img
               src={files[selected!].url}
-              alt={`Memory ${selected! + 1} of ${files.length}`}
+              alt={`Memory ${selected! + 1} of ${n}`}
               className="pb-media"
             />
           </div>

@@ -5,6 +5,7 @@ import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
 import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta } from "../api";
+import { configureCharm } from "../../claim/api";
 import type { UserCharmDetail } from "../api";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
 import { useStatus } from "../../../app/providers/StatusProvider";
@@ -44,6 +45,10 @@ export function CharmDetailPage() {
   const [uploadPct, setUploadPct] = useState(0);
   const [carouselIdx, setCarouselIdx] = useState(0);
 
+  // Memory type editing state
+  const [editMemoryType, setEditMemoryType] = useState<MemoryType | null>(null);
+  const [typeChangePending, setTypeChangePending] = useState<MemoryType | null>(null);
+
   useEffect(() => {
     setFooterEl(document.getElementById("te-footer"));
   }, []);
@@ -64,6 +69,8 @@ export function CharmDetailPage() {
         if (detail.glyphId) setEditGlyphId(detail.glyphId);
         setEditMemoryName(detail.memoryName ?? "");
         setEditMemoryDescription(detail.memoryDescription ?? "");
+        setEditMemoryType(detail.memoryType as MemoryType | null);
+        setTypeChangePending(null);
         setMetaDirty(false);
       } catch (e: any) {
         setErr(e?.message ?? "Failed to load charm.");
@@ -126,7 +133,7 @@ export function CharmDetailPage() {
     }
   }
 
-  const maxCharmMB = charm?.memoryType === "image"
+  const maxCharmMB = (editMemoryType ?? charm?.memoryType) === "image"
     ? (Number(import.meta.env.VITE_MAX_IMAGE_SIZE_MB) || 40)
     : (Number(import.meta.env.VITE_MAX_CHARM_SIZE_MB) || 150);
   const MAX_CHARM_BYTES = maxCharmMB * 1024 * 1024;
@@ -138,7 +145,7 @@ export function CharmDetailPage() {
   };
 
   async function handleUpload() {
-    if (!code || !charm?.memoryType || files.length === 0) return;
+    if (!code || !editMemoryType || files.length === 0) return;
     const totalBytes = files.reduce((s, f) => s + f.size, 0);
     if (totalBytes > MAX_CHARM_BYTES) {
       setErr(`Total file size exceeds ${maxCharmMB} MB limit.`);
@@ -149,12 +156,23 @@ export function CharmDetailPage() {
     setBusy(true);
     setUploadPct(0);
     try {
+      if (editMemoryType !== charm.memoryType) {
+        await configureCharm(
+          code,
+          editMemoryType,
+          charm.authMode as "none" | "glyph",
+          charm.glyphId ?? undefined,
+          editMemoryName.trim() || undefined,
+          editMemoryDescription.trim() || undefined
+        );
+      }
       await uploadCharm(code, files, files[0].type, setUploadPct);
       setMsg("Content updated successfully.");
       setFiles([]);
       // Refresh charm data
       const detail = await getCharmDetail(code);
       setCharm(detail);
+      setEditMemoryType(detail.memoryType as MemoryType | null);
     } catch (e: any) {
       const errMsg = (e?.message ?? "").toLowerCase();
       if (errMsg.includes("content_settled") || errMsg.includes("settled")) {
@@ -255,53 +273,6 @@ export function CharmDetailPage() {
             </div>
           )}
 
-          {/* Charm Info */}
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Charm Info</div>
-            <div className="teCharmInfo">
-              <ThemedInput readOnly label="Charm ID" value={charm.charmId} />
-              <ThemedInput readOnly label="Status" value={charm.isExpired ? "Expired" : charm.isSettled ? "Settled" : charm.status} />
-              <ThemedInput readOnly label="Charm Tier" value={charm.charmTier === "retail" ? "Retail" : charm.charmTier ? `${charm.charmTier.replace("-", "-Year ").replace(/^\w/, (c) => c.toUpperCase()).replace(/ $/, "")}` : ""} />
-              <ThemedInput readOnly label="Expires" value={charm.expiresAt ? fmtDate(charm.expiresAt) : "Never"} />
-              <ThemedInput readOnly label="Memory Type" value={charm.memoryType ?? ""} />
-              <ThemedInput readOnly label="Protection" value={charm.authMode === "glyph" ? "Glyph Lock" : "Open"} />
-              <ThemedInput readOnly label="Claimed" value={fmtDate(charm.claimedAt)} />
-              <ThemedInput readOnly label="Configured" value={fmtDate(charm.configuredAt)} />
-            </div>
-
-            {/* Settling progress */}
-            {charm.firstFinalizedAt && (
-              <div className="teCharmSettleBar">
-                <div className="teCharmSettleLabel">
-                  {charm.isSettled
-                    ? "This memory has settled."
-                    : `Settles in ${daysUntilSettled} day${daysUntilSettled === 1 ? "" : "s"}`}
-                </div>
-                <div className="teCharmSettleTrack">
-                  <div
-                    className="teCharmSettleFill"
-                    style={{ width: `${settleProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Fading warning */}
-            {charm.isFading && (
-              <div className="teCharmFadingBar">
-                This memory will begin to fade in {charm.fadingInDays} day{charm.fadingInDays === 1 ? "" : "s"}.
-                Visit the Arcane Emporium to extend its life.
-              </div>
-            )}
-
-            {/* Expired notice */}
-            {charm.isExpired && (
-              <div className="teCharmFadingBar teCharmFadingBar--expired">
-                This memory has faded beyond recall.
-              </div>
-            )}
-          </div>
-
           {/* Memory Details (name + description) */}
           <div className="teCharmSection">
             <div className="teCharmSectionTitle">Memory Details</div>
@@ -386,7 +357,7 @@ export function CharmDetailPage() {
                   disabled={busy || working || !glyphDirty || (editAuthMode === "glyph" && !editGlyphId)}
                   type="button"
                 >
-                  {busy ? "Saving\u2026" : "Save Glyph"}
+                  {busy ? "Saving\u2026" : "Save Protection Mode"}
                 </button>
               </div>
             </div>
@@ -463,32 +434,99 @@ export function CharmDetailPage() {
               </div>
             ) : charm.canEditContent && charm.memoryType ? (
               <div className="teCharmUploadArea">
+                {/* Memory type selector */}
                 <div>
-                  <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>
-                    Replace {charm.memoryType} content
+                  <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>Memory Type</div>
+                  <div className="tePills">
+                    {(["video", "image", "audio"] as MemoryType[]).map((t) => (
+                      <button
+                        key={t}
+                        className={"tePill " + (editMemoryType === t ? "isActive" : "")}
+                        onClick={() => {
+                          if (t === editMemoryType) return;
+                          const hasContent = charm.files && charm.files.length > 0;
+                          if (hasContent && t !== charm.memoryType) {
+                            setTypeChangePending(t);
+                          } else {
+                            setEditMemoryType(t);
+                            setFiles([]);
+                          }
+                        }}
+                        disabled={busy || !!typeChangePending}
+                        type="button"
+                      >
+                        {t.toUpperCase()}
+                      </button>
+                    ))}
                   </div>
-                  <input
-                    type="file"
-                    accept={acceptTypes[charm.memoryType as MemoryType] ?? "*/*"}
-                    multiple={charm.memoryType === "image"}
-                    disabled={busy}
-                    onChange={(e) => {
-                      const selected = e.target.files;
-                      setFiles(selected ? Array.from(selected) : []);
-                    }}
-                    style={{ padding: "6px 0" }}
-                  />
-                  {files.length === 1 && (
-                    <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
-                      {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
-                    </div>
-                  )}
-                  {files.length > 1 && (
-                    <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
-                      {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
+
+                  {/* Type change warning */}
+                  {typeChangePending && (
+                    <div style={{
+                      marginTop: 12,
+                      padding: "12px 14px",
+                      borderRadius: 10,
+                      background: "rgba(220,120,0,0.08)",
+                      border: "1px solid rgba(220,120,0,0.28)",
+                      fontSize: "var(--fs-meta)",
+                    }}>
+                      <div style={{ color: "#f5c842", marginBottom: 8 }}>
+                        Changing to <strong>{typeChangePending.toUpperCase()}</strong> will permanently replace all existing content on this charm. This cannot be undone.
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          className="teBtn teBtnSm teBtnGhost"
+                          onClick={() => setTypeChangePending(null)}
+                          type="button"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="teBtn teBtnSm teBtnPrimary"
+                          onClick={() => {
+                            setEditMemoryType(typeChangePending);
+                            setTypeChangePending(null);
+                            setFiles([]);
+                          }}
+                          type="button"
+                        >
+                          Confirm Change
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
+
+                {/* File picker */}
+                {!typeChangePending && editMemoryType && (
+                  <div>
+                    <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>
+                      Replace {editMemoryType} content
+                    </div>
+                    <input
+                      key={editMemoryType}
+                      type="file"
+                      accept={acceptTypes[editMemoryType] ?? "*/*"}
+                      multiple={editMemoryType === "image"}
+                      disabled={busy}
+                      onChange={(e) => {
+                        const selected = e.target.files;
+                        setFiles(selected ? Array.from(selected) : []);
+                      }}
+                      style={{ padding: "6px 0" }}
+                    />
+                    {files.length === 1 && (
+                      <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
+                        {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
+                      </div>
+                    )}
+                    {files.length > 1 && (
+                      <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
+                        {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {busy && (
                   <div className="teCharmProgress">
@@ -503,7 +541,7 @@ export function CharmDetailPage() {
                   <button
                     className="teBtn teBtnPrimary"
                     onClick={handleUpload}
-                    disabled={busy || working || files.length === 0}
+                    disabled={busy || working || files.length === 0 || !!typeChangePending}
                     type="button"
                   >
                     {busy ? "Uploading\u2026" : "Upload"}
@@ -515,6 +553,53 @@ export function CharmDetailPage() {
                 {charm.status === "configured"
                   ? "Complete the initial setup via the claim flow to enable content management."
                   : "Content management is not available for this charm."}
+              </div>
+            )}
+          </div>
+
+          {/* Charm Info */}
+          <div className="teCharmSection">
+            <div className="teCharmSectionTitle">Charm Info</div>
+            <div className="teCharmInfo">
+              <ThemedInput readOnly label="Charm ID" value={charm.charmId} />
+              <ThemedInput readOnly label="Status" value={charm.isExpired ? "Expired" : charm.isSettled ? "Settled" : charm.status} />
+              <ThemedInput readOnly label="Charm Tier" value={charm.charmTier === "retail" ? "Retail" : charm.charmTier ? `${charm.charmTier.replace("-", "-Year ").replace(/^\w/, (c) => c.toUpperCase()).replace(/ $/, "")}` : ""} />
+              <ThemedInput readOnly label="Expires" value={charm.expiresAt ? fmtDate(charm.expiresAt) : "Never"} />
+              <ThemedInput readOnly label="Memory Type" value={charm.memoryType ?? ""} />
+              <ThemedInput readOnly label="Protection" value={charm.authMode === "glyph" ? "Glyph Lock" : "Open"} />
+              <ThemedInput readOnly label="Claimed" value={fmtDate(charm.claimedAt)} />
+              <ThemedInput readOnly label="Configured" value={fmtDate(charm.configuredAt)} />
+            </div>
+
+            {/* Settling progress */}
+            {charm.firstFinalizedAt && (
+              <div className="teCharmSettleBar">
+                <div className="teCharmSettleLabel">
+                  {charm.isSettled
+                    ? "This memory has settled."
+                    : `Settles in ${daysUntilSettled} day${daysUntilSettled === 1 ? "" : "s"}`}
+                </div>
+                <div className="teCharmSettleTrack">
+                  <div
+                    className="teCharmSettleFill"
+                    style={{ width: `${settleProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Fading warning */}
+            {charm.isFading && (
+              <div className="teCharmFadingBar">
+                This memory will begin to fade in {charm.fadingInDays} day{charm.fadingInDays === 1 ? "" : "s"}.
+                Visit the Arcane Emporium to extend its life.
+              </div>
+            )}
+
+            {/* Expired notice */}
+            {charm.isExpired && (
+              <div className="teCharmFadingBar teCharmFadingBar--expired">
+                This memory has faded beyond recall.
               </div>
             )}
           </div>

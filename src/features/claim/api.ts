@@ -132,9 +132,7 @@ export function uploadToSignedUrl(
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", url);
     xhr.setRequestHeader("Content-Type", contentType);
-    if (url.includes("blob.core.windows.net")) {
-      xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
-    }
+    xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
 
     if (onProgress) {
       xhr.upload.onprogress = (e) => {

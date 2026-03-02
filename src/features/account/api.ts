@@ -12,6 +12,7 @@ export { uploadCharm } from "../claim/api";
 export type UserCharmSummary = {
   charmId: string;
   nickname: string | null;
+  memoryName: string | null;
   status: string;
   memoryType: string | null;
   authMode: string;

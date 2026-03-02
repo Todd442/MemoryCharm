@@ -229,7 +229,7 @@ export function AccountPage() {
                   >
                     <div>
                       <div className="teAcctCharmName">
-                        {charm.nickname || charm.charmId}
+                        {charm.memoryName || charm.charmId}
                       </div>
                       <div className="teAcctCharmMeta">
                         <span className={statusBadgeClass(charm)}>
