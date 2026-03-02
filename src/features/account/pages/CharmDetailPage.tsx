@@ -145,7 +145,7 @@ export function CharmDetailPage() {
   };
 
   async function handleUpload() {
-    if (!code || !editMemoryType || files.length === 0) return;
+    if (!code || !charm || !editMemoryType || files.length === 0) return;
     const totalBytes = files.reduce((s, f) => s + f.size, 0);
     if (totalBytes > MAX_CHARM_BYTES) {
       setErr(`Total file size exceeds ${maxCharmMB} MB limit.`);
