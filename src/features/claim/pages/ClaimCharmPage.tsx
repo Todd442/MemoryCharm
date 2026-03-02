@@ -16,7 +16,75 @@ import "./ClaimCharmPage.css";
 import { ThemedInput } from "../../../components/ThemedInput";
 import { InfoPanel } from "../../../components/InfoPanel";
 
-type Step = "loading" | "profile" | "memoryType" | "protection" | "glyphSelect" | "upload" | "done";
+// ---------------------------------------------------------------------------
+// Shared helper: counts words in a string
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+const MAX_DESC_WORDS = 25;
+const MAX_NAME_CHARS = 100;
+
+// Memory name + description fields reused in ClaimCharmPage and CharmDetailPage
+export function MemoryDetailsFields({
+  memoryName,
+  memoryDescription,
+  onNameChange,
+  onDescChange,
+  disabled,
+}: {
+  memoryName: string;
+  memoryDescription: string;
+  onNameChange: (v: string) => void;
+  onDescChange: (v: string) => void;
+  disabled?: boolean;
+}) {
+  const wordCount = countWords(memoryDescription);
+  const descColor =
+    wordCount > MAX_DESC_WORDS ? "#ff6a6a"
+    : wordCount > 20 ? "#f5c842"
+    : wordCount > 15 ? "#f5a623"
+    : undefined;
+
+  return (
+    <>
+      <ThemedInput
+        label="Memory Name"
+        value={memoryName}
+        onChange={(v) => onNameChange(v.slice(0, MAX_NAME_CHARS))}
+        disabled={disabled}
+        placeholder="e.g., Summer Wedding 2023"
+        hint={`${memoryName.length}/${MAX_NAME_CHARS} characters — optional`}
+      />
+
+      <div className="teField">
+        <div className="teFieldLabel">Memory Description</div>
+        <textarea
+          className="teTextarea"
+          value={memoryDescription}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (countWords(val) <= MAX_DESC_WORDS || val.length < memoryDescription.length) {
+              onDescChange(val);
+            }
+          }}
+          disabled={disabled}
+          placeholder="e.g., The moment they said yes, right by the water…"
+          rows={3}
+          style={{ resize: "vertical" }}
+        />
+        <div
+          className="teFieldHint"
+          style={descColor ? { color: descColor } : undefined}
+        >
+          {wordCount} / {MAX_DESC_WORDS} words — keep it brief, optional
+        </div>
+      </div>
+    </>
+  );
+}
+// ---------------------------------------------------------------------------
+
+type Step = "loading" | "profile" | "memoryType" | "details" | "protection" | "glyphSelect" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
 
@@ -35,6 +103,13 @@ const STEP_META: Record<Step, StepMeta> = {
     statusSubtitle: "We’re checking your account before you bind a memory.",
     stickyTitle: "",
     stickyDesc: "",
+  },
+  details: {
+    cardTitle: "MEMORY DETAILS",
+    statusText: "Name Your Memory",
+    statusSubtitle: "Give this memory a name and a brief description.",
+    stickyTitle: "Name your memory",
+    stickyDesc: "A name and description appear when someone views the charm. Both are optional.",
   },
   profile: {
     cardTitle: "REGISTRATION",
@@ -99,6 +174,8 @@ export function ClaimCharmPage() {
 
   const [memoryType, setMemoryType] = useState<MemoryType>("video");
   const [authMode, setAuthMode] = useState<AuthMode>("none");
+  const [memoryName, setMemoryName] = useState("");
+  const [memoryDescription, setMemoryDescription] = useState("");
 
   const [selectedGlyph, setSelectedGlyph] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -112,7 +189,7 @@ export function ClaimCharmPage() {
 
   // Dynamic step counter — adjusts when glyphSelect is included/excluded
   const orderedSteps = useMemo<Step[]>(() => {
-    const base: Step[] = ["profile", "memoryType", "upload", "protection"];
+    const base: Step[] = ["profile", "memoryType", "details", "upload", "protection"];
     if (authMode === "glyph") base.push("glyphSelect");
     base.push("done");
     return base;
@@ -332,7 +409,11 @@ export function ClaimCharmPage() {
       }
 
       setSealPhase("configure");
-      await configureCharm(code, memoryType, authMode, selectedGlyph ?? undefined);
+      await configureCharm(
+        code, memoryType, authMode, selectedGlyph ?? undefined,
+        memoryName.trim() || undefined,
+        memoryDescription.trim() || undefined
+      );
 
       if (needsUpload) {
         setSealPhase("upload");
@@ -526,6 +607,31 @@ export function ClaimCharmPage() {
                     </p>
                   </InfoPanel>
 
+                  <div className="teActionsRow">
+                    <button
+                      className="teBtn teBtnPrimary teBtnWide"
+                      onClick={() => advanceTo("details")}
+                      disabled={busy}
+                      type="button"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP: MEMORY DETAILS */}
+            {step === "details" && (
+              <div className="teCardBody">
+                <div className="teGrid">
+                  <MemoryDetailsFields
+                    memoryName={memoryName}
+                    memoryDescription={memoryDescription}
+                    onNameChange={setMemoryName}
+                    onDescChange={setMemoryDescription}
+                    disabled={busy}
+                  />
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"

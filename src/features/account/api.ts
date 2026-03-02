@@ -46,6 +46,8 @@ export type UserCharmDetail = {
   isExpired: boolean;
   isFading: boolean;
   fadingInDays: number | null;
+  memoryName: string | null;
+  memoryDescription: string | null;
   files: ContentFile[] | null;
 };
 
@@ -93,5 +95,19 @@ export async function updateGlyph(
   return authPut<UpdateGlyphApiResponse>(
     `/api/charm/${encodeURIComponent(code)}/glyph`,
     body
+  );
+}
+
+/**
+ * Update the memory name and description for a charm (lightweight patch, no status change).
+ */
+export async function updateCharmMeta(
+  code: string,
+  memoryName: string | null,
+  memoryDescription: string | null
+): Promise<{ charmId: string; memoryName: string | null; memoryDescription: string | null }> {
+  return authPut(
+    `/api/charm/${encodeURIComponent(code)}/meta`,
+    { memoryName, memoryDescription }
   );
 }

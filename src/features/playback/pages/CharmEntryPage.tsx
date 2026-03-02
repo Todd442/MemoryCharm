@@ -222,7 +222,14 @@ export function CharmEntryPage() {
   if (entry.authMode === "glyph" && !playback) {
     return (
       <div className="pb-frame pb-status">
-        <div className="pb-status-title">Memory Charm</div>
+        <div className="pb-status-title">
+          {entry.memoryName ? entry.memoryName : "Memory Charm"}
+        </div>
+        {entry.memoryName && (
+          <div style={{ fontSize: "var(--fs-meta)", opacity: 0.55, letterSpacing: "0.15em", marginBottom: 6 }}>
+            Memory Charm
+          </div>
+        )}
         <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
 
         {blocked ? (
@@ -246,7 +253,14 @@ export function CharmEntryPage() {
 
   // Playback — media is the hero
   if (playback) {
-    return <PlaybackRenderer files={playback.files} type={playback.type} />;
+    return (
+      <PlaybackRenderer
+        files={playback.files}
+        type={playback.type}
+        memoryName={entry.memoryName}
+        memoryDescription={entry.memoryDescription}
+      />
+    );
   }
 
   // Fallback
@@ -415,13 +429,27 @@ function PwaInstallToast() {
 }
 
 /** Renders media inside a tight frame. The image/video determines the frame size. */
-function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image" | "audio" }) {
-  const { files, type } = props;
+function PlaybackRenderer(props: {
+  files: ContentFile[];
+  type: "video" | "image" | "audio";
+  memoryName?: string;
+  memoryDescription?: string;
+}) {
+  const { files, type, memoryName, memoryDescription } = props;
   const nav = useNavigate();
 
   const brand = (
     <div className="pb-brand">
-      <span onClick={() => nav("/")} style={{ cursor: "pointer" }}>Memory Charm</span>
+      <div className="pb-brand__title" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
+        {memoryName ? (
+          <>
+            <span className="pb-brand__name">{memoryName}</span>
+            <span className="pb-brand__sub">Memory Charm</span>
+          </>
+        ) : (
+          <span>Memory Charm</span>
+        )}
+      </div>
       <FullscreenButton />
     </div>
   );
@@ -434,6 +462,9 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
         <div className="pb-frame">
           {brand}
           <VideoPlayer url={files[0].url} />
+          {memoryDescription && (
+            <div className="pb-memory-desc">{memoryDescription}</div>
+          )}
         </div>
         <PwaInstallToast />
       </>
@@ -444,10 +475,24 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
     return (
       <>
         <div className="pb-frame pb-status">
-          <div className="pb-status-title" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
-            Memory Charm
+          <div
+            className={memoryName ? "pb-status-title pb-status-title--named" : "pb-status-title"}
+            onClick={() => nav("/")}
+            style={{ cursor: "pointer" }}
+          >
+            {memoryName ? memoryName : "Memory Charm"}
           </div>
+          {memoryName && (
+            <div style={{ fontSize: "var(--fs-meta)", opacity: 0.5, letterSpacing: "0.15em", marginBottom: 10 }}>
+              Memory Charm
+            </div>
+          )}
           <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 400 }} />
+          {memoryDescription && (
+            <div className="pb-memory-desc pb-memory-desc--static" style={{ marginTop: 16 }}>
+              {memoryDescription}
+            </div>
+          )}
         </div>
         <PwaInstallToast />
       </>
@@ -461,6 +506,9 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
         <div className="pb-frame">
           {brand}
           <img src={files[0].url} alt="Memory" className="pb-media" />
+          {memoryDescription && (
+            <div className="pb-memory-desc">{memoryDescription}</div>
+          )}
         </div>
         <PwaInstallToast />
       </>
@@ -468,5 +516,11 @@ function PlaybackRenderer(props: { files: ContentFile[]; type: "video" | "image"
   }
 
   // Multiple images — 3D gallery
-  return <MemoryGallery files={files} />;
+  return (
+    <MemoryGallery
+      files={files}
+      memoryName={memoryName}
+      memoryDescription={memoryDescription}
+    />
+  );
 }

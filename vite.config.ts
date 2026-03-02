@@ -288,8 +288,13 @@ function mockApi() {
   };
 }
 
+const CLOUD_API = "https://memorycharms-f6ftf7habefudsey.centralus-01.azurewebsites.net";
+const LOCAL_API = "http://localhost:7040";
+
 export default defineConfig(() => {
   const useMock = process.env.VITE_USE_MOCK === "true";
+  const useLocal = process.env.VITE_LOCAL_API === "true";
+  const apiTarget = useLocal ? LOCAL_API : CLOUD_API;
 
   return {
     plugins: [react(), ...(useMock ? [mockApi()] : []), basicSsl(), cloudflare()],
@@ -298,9 +303,9 @@ export default defineConfig(() => {
       : {
           proxy: {
             "/api": {
-              target: "https://memorycharms-f6ftf7habefudsey.centralus-01.azurewebsites.net",
+              target: apiTarget,
               changeOrigin: true,
-              secure: true,
+              secure: !useLocal,
             },
             "/azurite": {
               target: "http://127.0.0.1:10000",

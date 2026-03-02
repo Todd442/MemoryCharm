@@ -11,6 +11,8 @@ export type CharmStatusApiResponse = {
   attemptsLeft?: number;
   message?: string;
   glyphs?: { id: string; name: string }[];
+  memoryName?: string;
+  memoryDescription?: string;
 };
 
 /**
@@ -74,6 +76,8 @@ export function toEntryResponse(
       authMode: "glyph",
       attemptsLeft: api.attemptsLeft ?? 3,
       glyphs: api.glyphs,
+      memoryName: api.memoryName || undefined,
+      memoryDescription: api.memoryDescription || undefined,
     };
   }
 
@@ -84,6 +88,8 @@ export function toEntryResponse(
       configured: true,
       authMode: "none",
       memoryType: (api.memoryType as MemoryType) ?? "video",
+      memoryName: api.memoryName || undefined,
+      memoryDescription: api.memoryDescription || undefined,
     };
   }
 

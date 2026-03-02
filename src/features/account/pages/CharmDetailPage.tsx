@@ -4,12 +4,13 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
-import { getCharmDetail, updateGlyph, uploadCharm } from "../api";
+import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta } from "../api";
 import type { UserCharmDetail } from "../api";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
 import { useStatus } from "../../../app/providers/StatusProvider";
 import { ThemedInput } from "../../../components/ThemedInput";
-import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill, .teBtn styles
+import { MemoryDetailsFields } from "../../claim/pages/ClaimCharmPage";
+import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill, .teBtn styles + .teTextarea
 import "./CharmDetailPage.css";
 
 type MemoryType = "video" | "image" | "audio";
@@ -32,6 +33,11 @@ export function CharmDetailPage() {
   const [editAuthMode, setEditAuthMode] = useState<"none" | "glyph">("none");
   const [editGlyphId, setEditGlyphId] = useState<string | null>(null);
   const [glyphDirty, setGlyphDirty] = useState(false);
+
+  // Memory meta editing state
+  const [editMemoryName, setEditMemoryName] = useState("");
+  const [editMemoryDescription, setEditMemoryDescription] = useState("");
+  const [metaDirty, setMetaDirty] = useState(false);
 
   // Upload state
   const [files, setFiles] = useState<File[]>([]);
@@ -56,6 +62,9 @@ export function CharmDetailPage() {
         setCarouselIdx(0);
         setEditAuthMode(detail.authMode as "none" | "glyph");
         if (detail.glyphId) setEditGlyphId(detail.glyphId);
+        setEditMemoryName(detail.memoryName ?? "");
+        setEditMemoryDescription(detail.memoryDescription ?? "");
+        setMetaDirty(false);
       } catch (e: any) {
         setErr(e?.message ?? "Failed to load charm.");
       } finally {
@@ -90,6 +99,28 @@ export function CharmDetailPage() {
       setCharm(detail);
     } catch (e: any) {
       setErr(e?.message ?? "Failed to update glyph.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSaveMeta() {
+    if (!code) return;
+    setErr(null);
+    setMsg(null);
+    setBusy(true);
+    try {
+      await updateCharmMeta(
+        code,
+        editMemoryName.trim() || null,
+        editMemoryDescription.trim() || null
+      );
+      setMsg("Memory details updated.");
+      setMetaDirty(false);
+      const detail = await getCharmDetail(code);
+      setCharm(detail);
+    } catch (e: any) {
+      setErr(e?.message ?? "Failed to update memory details.");
     } finally {
       setBusy(false);
     }
@@ -269,6 +300,30 @@ export function CharmDetailPage() {
                 This memory has faded beyond recall.
               </div>
             )}
+          </div>
+
+          {/* Memory Details (name + description) */}
+          <div className="teCharmSection">
+            <div className="teCharmSectionTitle">Memory Details</div>
+            <div style={{ display: "grid", gap: 12 }}>
+              <MemoryDetailsFields
+                memoryName={editMemoryName}
+                memoryDescription={editMemoryDescription}
+                onNameChange={(v) => { setEditMemoryName(v); setMetaDirty(true); }}
+                onDescChange={(v) => { setEditMemoryDescription(v); setMetaDirty(true); }}
+                disabled={busy}
+              />
+              <div>
+                <button
+                  className="teBtn teBtnPrimary"
+                  onClick={handleSaveMeta}
+                  disabled={busy || working || !metaDirty}
+                  type="button"
+                >
+                  {busy ? "Saving\u2026" : "Save Details"}
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Glyph Management (always available) */}

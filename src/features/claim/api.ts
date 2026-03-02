@@ -73,12 +73,16 @@ export async function configureCharm(
   code: string,
   memoryType: MemoryType,
   authMode: AuthMode,
-  glyphId?: string
+  glyphId?: string,
+  memoryName?: string,
+  memoryDescription?: string
 ): Promise<{ ok: true; code: string }> {
   const body: Record<string, unknown> = { memoryType, authMode };
   if (authMode === "glyph" && glyphId) {
     body.glyphId = glyphId;
   }
+  if (memoryName !== undefined) body.memoryName = memoryName;
+  if (memoryDescription !== undefined) body.memoryDescription = memoryDescription;
 
   await authPut<ConfigureCharmApiResponse>(
     `/api/charm/${encodeURIComponent(code)}/configure`,
