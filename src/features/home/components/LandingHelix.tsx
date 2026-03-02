@@ -71,6 +71,7 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
     let calGamma: number | null = null;
 
     function resize() {
+      if (!canvas) return;
       W = canvas.width  = canvas.clientWidth;
       H = canvas.height = canvas.clientHeight;
       const min = Math.min(W, H);
@@ -236,7 +237,7 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
     // Double-tap to recalibrate tilt
     let lastTap = 0;
-    function onTouchEnd(e: TouchEvent) {
+    function onTouchEnd(_e: TouchEvent) {
       const now = Date.now();
       if (now - lastTap < 300) { calBeta = null; calGamma = null; }
       lastTap = now;
