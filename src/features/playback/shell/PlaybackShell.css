@@ -109,18 +109,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: clamp(12px, 2vmin, 20px) clamp(16px, 3vmin, 28px);
-  background: linear-gradient(transparent, rgba(10, 5, 2, 0.75));
-  color: rgba(240, 220, 185, 0.82);
-  font-size: clamp(10px, 1.5vmin, 14px);
-  font-family: "Cinzel", serif;
-  letter-spacing: 0.05em;
-  line-height: 1.55;
+  padding: clamp(16px, 2.5vmin, 28px) clamp(16px, 3vmin, 28px) clamp(12px, 2vmin, 20px);
+  background: linear-gradient(transparent, rgba(10, 5, 2, 0.82));
+  color: rgba(240, 220, 185, 0.88);
+  font-size: clamp(14px, 2.2vmin, 20px);
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
   text-align: center;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
   pointer-events: none;
 }
 
@@ -128,9 +125,17 @@
 .pb-memory-desc--static {
   position: static;
   background: none;
-  opacity: 0.7;
-  max-width: 340px;
+  opacity: 0.75;
+  max-width: 380px;
   text-align: center;
+}
+
+/* Body / explanatory text — Cormorant Garamond for readability */
+.pb-explain {
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
 }
 
 /* Fullscreen toggle button */
@@ -340,6 +345,16 @@
 @keyframes pb-toast-up {
   from { opacity: 0; transform: translateX(-50%) translateY(16px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0);    }
+}
+
+/* Image fade-in on load — video overlay handles its own loading state */
+img.pb-media {
+  opacity: 0;
+  transition: opacity 0.55s ease;
+}
+
+img.pb-media.pb-media--ready {
+  opacity: 1;
 }
 
 /* Links */

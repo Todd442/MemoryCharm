@@ -21,7 +21,7 @@ import { InfoPanel } from "../../../components/InfoPanel";
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
-const MAX_DESC_WORDS = 25;
+const MAX_DESC_WORDS = 35;
 const MAX_NAME_CHARS = 100;
 
 // Memory name + description fields reused in ClaimCharmPage and CharmDetailPage
@@ -41,8 +41,8 @@ export function MemoryDetailsFields({
   const wordCount = countWords(memoryDescription);
   const descColor =
     wordCount > MAX_DESC_WORDS ? "#ff6a6a"
-    : wordCount > 20 ? "#f5c842"
-    : wordCount > 15 ? "#f5a623"
+    : wordCount > 28 ? "#f5c842"
+    : wordCount > 21 ? "#f5a623"
     : undefined;
 
   return (

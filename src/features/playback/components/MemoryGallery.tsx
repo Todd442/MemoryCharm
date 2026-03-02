@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ContentFile } from "../types";
 import { FullscreenButton } from "./FullscreenButton";
@@ -128,6 +128,7 @@ export function MemoryGallery(props: {
   const { files, memoryName, memoryDescription } = props;
   const nav  = useNavigate();
   const [selected, setSelected] = useState<number | null>(null);
+  const [focusImgReady, setFocusImgReady] = useState(false);
   const [, setTick] = useState(0);
 
   const dimsRef        = useRef<Dims>(computeDims());
@@ -152,6 +153,11 @@ export function MemoryGallery(props: {
     setSelected(null);
     pausedRef.current = false;
   }, []);
+
+  // Reset focused image fade-in whenever a new image is selected
+  useLayoutEffect(() => {
+    setFocusImgReady(false);
+  }, [selected]);
 
   useEffect(() => {
     function onResize() { dimsRef.current = computeDims(); }
@@ -199,7 +205,7 @@ export function MemoryGallery(props: {
           <div className="mg-logo__text">Memory</div>
           <div className="mg-logo__sub">Charm</div>
           {memoryDescription && (
-            <div className="mg-logo__desc">{truncateWords(memoryDescription, 15)}</div>
+            <div className="mg-logo__desc">{memoryDescription}</div>
           )}
         </button>
 
@@ -251,7 +257,8 @@ export function MemoryGallery(props: {
             <img
               src={files[selected!].url}
               alt={`Memory ${selected! + 1} of ${n}`}
-              className="pb-media"
+              className={`pb-media${focusImgReady ? " pb-media--ready" : ""}`}
+              onLoad={() => setFocusImgReady(true)}
             />
           </div>
         </div>

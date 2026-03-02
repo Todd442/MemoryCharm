@@ -174,39 +174,6 @@ export function AccountPage() {
             </div>
           )}
 
-          {/* Profile Section */}
-          <div className="teAcctSection">
-            <div className="teAcctSectionTitle">Profile</div>
-            <div className="teAcctForm">
-              {([
-                { key: "firstName" as const, label: "Given Name", placeholder: "e.g., Elowen" },
-                { key: "lastName" as const, label: "Family Name", placeholder: "e.g., Blackthorne" },
-                { key: "address" as const, label: "Dwelling Place", placeholder: "e.g., 12 Hollow Lane" },
-                { key: "email" as const, label: "Signal Address (Email)", placeholder: "captain@trianglesend.com" },
-                { key: "cellNumber" as const, label: "Cipher Line", placeholder: "e.g., +1 555 012 3456" },
-              ]).map(({ key, label, placeholder }) => (
-                <ThemedInput
-                  key={key}
-                  label={label}
-                  value={profile[key]}
-                  onChange={(v) => setProfile((p) => ({ ...p, [key]: v }))}
-                  disabled={busy}
-                  placeholder={placeholder}
-                />
-              ))}
-              <div>
-                <button
-                  className="teBtn teBtnPrimary"
-                  onClick={handleSaveProfile}
-                  disabled={busy || !profile.firstName.trim() || !profile.lastName.trim() || !profile.email.trim()}
-                  type="button"
-                >
-                  {busy ? "Saving\u2026" : "Save Profile"}
-                </button>
-              </div>
-            </div>
-          </div>
-
           {/* Charms Section */}
           <div className="teAcctSection">
             <div className="teAcctSectionTitle">Your Charms</div>
@@ -253,6 +220,39 @@ export function AccountPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Profile Section */}
+          <div className="teAcctSection">
+            <div className="teAcctSectionTitle">Profile</div>
+            <div className="teAcctForm">
+              {([
+                { key: "firstName" as const, label: "Given Name", placeholder: "e.g., Elowen" },
+                { key: "lastName" as const, label: "Family Name", placeholder: "e.g., Blackthorne" },
+                { key: "address" as const, label: "Dwelling Place", placeholder: "e.g., 12 Hollow Lane" },
+                { key: "email" as const, label: "Signal Address (Email)", placeholder: "captain@trianglesend.com" },
+                { key: "cellNumber" as const, label: "Cipher Line", placeholder: "e.g., +1 555 012 3456" },
+              ]).map(({ key, label, placeholder }) => (
+                <ThemedInput
+                  key={key}
+                  label={label}
+                  value={profile[key]}
+                  onChange={(v) => setProfile((p) => ({ ...p, [key]: v }))}
+                  disabled={busy}
+                  placeholder={placeholder}
+                />
+              ))}
+              <div>
+                <button
+                  className="teBtn teBtnPrimary"
+                  onClick={handleSaveProfile}
+                  disabled={busy || !profile.firstName.trim() || !profile.lastName.trim() || !profile.email.trim()}
+                  type="button"
+                >
+                  {busy ? "Saving\u2026" : "Save Profile"}
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="teAcctFooter">

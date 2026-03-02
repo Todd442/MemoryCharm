@@ -1,4 +1,6 @@
 :root{
+  --font-body: "Cormorant Garamond", Georgia, serif;
+
   --engrave-dark:#1f140b;
   --engrave-mid:#4a3321;
   --engrave-light:#cbb18a;

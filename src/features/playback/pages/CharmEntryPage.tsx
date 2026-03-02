@@ -172,7 +172,7 @@ export function CharmEntryPage() {
     return (
       <div className="pb-frame pb-status">
         <div className="pb-status-title">Memory Charm</div>
-        <div style={{ marginTop: 8, color: "#ff6a6a" }}>{ui.message}</div>
+        <div className="pb-explain" style={{ marginTop: 8, color: "#ff6a6a" }}>{ui.message}</div>
       </div>
     );
   }
@@ -184,7 +184,7 @@ export function CharmEntryPage() {
     return (
       <div className="pb-frame pb-status">
         <div className="pb-status-title">Memory Charm</div>
-        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
+        <div className="pb-explain" style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
           This charm can't be found.
         </div>
       </div>
@@ -196,7 +196,7 @@ export function CharmEntryPage() {
     return (
       <div className="pb-frame pb-status">
         <div className="pb-status-title">Memory Charm</div>
-        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
+        <div className="pb-explain" style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
           This charm's memory has faded.
         </div>
       </div>
@@ -211,7 +211,7 @@ export function CharmEntryPage() {
     return (
       <div className="pb-frame pb-status">
         <div className="pb-status-title">Memory Charm</div>
-        <div style={{ opacity: 0.9, fontSize: "var(--fs-label)" }}>
+        <div className="pb-explain" style={{ opacity: 0.9, fontSize: "var(--fs-label)" }}>
           This charm has not yet been awakened by its keeper.
         </div>
       </div>
@@ -230,10 +230,10 @@ export function CharmEntryPage() {
             Memory Charm
           </div>
         )}
-        <div style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
+        <div className="pb-explain" style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
 
         {blocked ? (
-          <div style={{
+          <div className="pb-explain" style={{
             marginTop: 14,
             padding: 12,
             borderRadius: 10,
@@ -437,6 +437,7 @@ function PlaybackRenderer(props: {
 }) {
   const { files, type, memoryName, memoryDescription } = props;
   const nav = useNavigate();
+  const [imgReady, setImgReady] = useState(false);
 
   const brand = (
     <div className="pb-brand">
@@ -505,7 +506,12 @@ function PlaybackRenderer(props: {
       <>
         <div className="pb-frame">
           {brand}
-          <img src={files[0].url} alt="Memory" className="pb-media" />
+          <img
+            src={files[0].url}
+            alt="Memory"
+            className={`pb-media${imgReady ? " pb-media--ready" : ""}`}
+            onLoad={() => setImgReady(true)}
+          />
           {memoryDescription && (
             <div className="pb-memory-desc">{memoryDescription}</div>
           )}
