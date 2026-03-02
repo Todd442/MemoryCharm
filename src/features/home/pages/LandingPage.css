@@ -1,0 +1,266 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   LandingPage — full-viewport, native-scroll, no shell frame
+   Responsive from 320px mobile up to wide desktop via clamp()
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Root ------------------------------------------------------------------ */
+.lp-root {
+  position: relative;
+  min-height: 100vh;
+  background: #050200;
+  color: #f3e7cf;
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+/* Fixed backdrop — nebula + helix canvas ------------------------------ */
+.lp-canvas-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden; /* clips nebula's -40px parallax bleed */
+}
+
+/* Scrollable layer — above canvas -------------------------------------- */
+.lp-scroll {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────── */
+.lp-hero {
+  position: relative;
+  height: 100dvh;
+  min-height: 480px;
+  /* Bottom gradient: transparent hero bleeds into first section */
+  background: linear-gradient(
+    to bottom,
+    transparent 55%,
+    rgba(3, 1, 0, 0.55) 82%,
+    rgba(5, 2, 0, 0.96) 100%
+  );
+}
+
+/* Subtitle — sits just below the canvas-drawn "Charm" word.
+   top offset mirrors the canvas: 50% + (fs * 0.52 + fs * 0.5) ≈ min(9.5vw, 95px) */
+.lp-hero-sub {
+  position: absolute;
+  top: calc(50% + min(9.5vw, 95px));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  white-space: nowrap;
+  font-family: "Cinzel", serif;
+  font-size: clamp(10px, 1.4vw, 15px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(200, 160, 100, 0.65);
+  text-align: center;
+  transition: opacity 0.1s linear;
+}
+
+/* Animated scroll cue -------------------------------------------------- */
+.lp-scroll-cue {
+  position: absolute;
+  bottom: clamp(32px, 7vh, 64px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  animation: lp-cue-drop 2.8s ease-in-out infinite;
+}
+
+.lp-scroll-cue-line {
+  display: block;
+  width: 1px;
+  height: clamp(28px, 5vh, 52px);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(210, 170, 110, 0.75)
+  );
+}
+
+@keyframes lp-cue-drop {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50%       { opacity: 0.55; transform: translateY(7px); }
+}
+
+/* ── Sections ──────────────────────────────────────────────────────────── */
+.lp-section {
+  position: relative;
+  background: #050200;
+  padding: clamp(64px, 11vh, 128px) clamp(24px, 6vw, 48px);
+}
+
+/* First section gets a subtle top fade from hero */
+.lp-section--first {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 2, 0, 0.96) 0,
+    #050200 72px
+  );
+}
+
+.lp-section--problem {
+  background: #040100;
+}
+
+.lp-section--charm {
+  background: #050201;
+  border-top: 1px solid rgba(210, 170, 110, 0.08);
+}
+
+.lp-section--maker {
+  background: #040100;
+  border-top: 1px solid rgba(210, 170, 110, 0.08);
+}
+
+.lp-section--cta {
+  background: #030100;
+  border-top: 1px solid rgba(210, 170, 110, 0.12);
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(80px, 15vh, 160px) clamp(24px, 6vw, 48px);
+}
+
+/* ── Prose column ───────────────────────────────────────────────────────── */
+.lp-prose {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.lp-section-title {
+  font-family: "Cinzel", serif;
+  font-size: clamp(14px, 2vw, 22px);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 0.75);
+  text-align: center;
+  margin: 0 0 clamp(36px, 6vh, 64px);
+}
+
+/* Verse — centred, spacious, poetic ------------------------------------ */
+.lp-verse {
+  text-align: center;
+  font-size: clamp(19px, 2.4vw, 28px);
+  line-height: 1.9;
+  color: rgba(243, 231, 207, 0.92);
+  margin-bottom: clamp(40px, 7vh, 72px);
+}
+
+.lp-verse p { margin: 0; }
+.lp-verse p + p { margin-top: clamp(24px, 4vh, 44px); }
+
+/* Body prose ----------------------------------------------------------- */
+.lp-body {
+  font-size: clamp(17px, 2vw, 23px);
+  line-height: 1.88;
+  color: rgba(243, 231, 207, 0.78);
+}
+
+.lp-body p { margin: 0 0 clamp(22px, 3.5vh, 40px); }
+.lp-body p:last-child { margin-bottom: 0; }
+
+/* Placeholder copy — dimmed, italic, until real copy arrives */
+.lp-placeholder {
+  opacity: 0.44;
+  font-style: italic;
+}
+
+/* ── CTA block ──────────────────────────────────────────────────────────── */
+.lp-cta {
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+}
+
+.lp-cta-title {
+  font-family: "Cinzel", serif;
+  font-size: clamp(34px, 5.5vw, 64px);
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(243, 231, 207, 0.94);
+  margin: 0 0 clamp(18px, 3vh, 30px);
+  text-shadow:
+    0 0 48px rgba(150, 80, 255, 0.25),
+    0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.lp-cta-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: rgba(243, 231, 207, 0.58);
+  line-height: 1.7;
+  margin: 0 0 clamp(32px, 5vh, 52px);
+}
+
+.lp-cta-btn {
+  display: inline-block;
+  background: linear-gradient(
+    180deg,
+    rgba(230, 190, 120, 0.65),
+    rgba(120, 70, 22, 0.88)
+  );
+  border: 1px solid rgba(230, 190, 120, 0.5);
+  border-radius: 40px;
+  color: rgba(30, 16, 6, 0.94);
+  font-family: "Cinzel", serif;
+  font-size: clamp(13px, 1.6vw, 17px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: clamp(13px, 2vh, 18px) clamp(36px, 7vw, 64px);
+  cursor: pointer;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+  transition: box-shadow 0.2s ease, transform 0.12s ease;
+}
+
+.lp-cta-btn:hover {
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.65),
+    0 0 22px rgba(210, 170, 110, 0.18);
+  transform: translateY(-2px);
+}
+
+.lp-cta-btn:active  { transform: translateY(0); }
+.lp-cta-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.lp-cta-footer {
+  margin-top: clamp(28px, 4.5vh, 48px);
+  font-size: clamp(13px, 1.5vw, 16px);
+  color: rgba(243, 231, 207, 0.44);
+}
+
+.lp-cta-footer a {
+  color: rgba(140, 230, 205, 0.75);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(140, 230, 205, 0.28);
+  transition: border-color 0.15s;
+}
+
+.lp-cta-footer a:hover {
+  border-bottom-color: rgba(140, 230, 205, 0.65);
+}
+
+/* ── Responsive tweaks ──────────────────────────────────────────────────── */
+@media (min-width: 900px) {
+  /* On wide screens, verse can be slightly larger */
+  .lp-verse { font-size: clamp(22px, 2vw, 28px); }
+
+  /* Slightly wider prose column */
+  .lp-prose { max-width: 760px; }
+}
+
+@media (max-width: 420px) {
+  /* Tight mobile: pull section padding in */
+  .lp-section { padding-left: 20px; padding-right: 20px; }
+  .lp-section--cta { padding-left: 20px; padding-right: 20px; }
+}

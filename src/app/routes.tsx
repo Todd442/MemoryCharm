@@ -4,7 +4,7 @@ import { AuthGuard } from "./auth/AuthGuard";
 import { CharmEntryPage } from "../features/playback/pages/CharmEntryPage";
 import { PlaybackShell } from "../features/playback/shell/PlaybackShell";
 import { ClaimCharmPage } from "../features/claim/pages/ClaimCharmPage";
-import { HomePage } from "../features/home/pages/HomePage";
+import { LandingPage } from "../features/home/pages/LandingPage";
 import { AccountPage } from "../features/account/pages/AccountPage";
 import { CharmDetailPage } from "../features/account/pages/CharmDetailPage";
 import { PurchasePage } from "../features/account/pages/PurchasePage";
@@ -25,6 +25,16 @@ function NotFound() {
 }
 
 export const router = createBrowserRouter([
+  // Landing page — full-viewport, no shell frame
+  {
+    path: "/",
+    element: (
+      <AuthGuard>
+        <LandingPage />
+      </AuthGuard>
+    ),
+  },
+
   // Playback routes — immersive nebula shell, no frame
   {
     element: (
@@ -48,8 +58,6 @@ export const router = createBrowserRouter([
       </AuthGuard>
     ),
     children: [
-      { path: "/", element: <HomePage /> },
-
       // Account (protected)
       {
         path: "/account",

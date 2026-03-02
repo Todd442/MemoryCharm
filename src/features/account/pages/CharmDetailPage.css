@@ -47,6 +47,26 @@
   );
 }
 
+/* Collapsible section behaviour */
+details.teCharmSection > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+details.teCharmSection > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.teCharmSection[open] > summary {
+  margin-bottom: 14px;
+}
+
+details.teCharmSection > summary:hover {
+  color: rgba(255, 230, 185, 1);
+}
+
 /* Info grid */
 .teCharmInfo {
   display: grid;

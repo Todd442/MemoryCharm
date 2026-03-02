@@ -274,8 +274,8 @@ export function CharmDetailPage() {
           )}
 
           {/* Memory Details (name + description) */}
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Memory Details</div>
+          <details className="teCharmSection" open>
+            <summary className="teCharmSectionTitle">Memory Details</summary>
             <div style={{ display: "grid", gap: 12 }}>
               <MemoryDetailsFields
                 memoryName={editMemoryName}
@@ -295,11 +295,11 @@ export function CharmDetailPage() {
                 </button>
               </div>
             </div>
-          </div>
+          </details>
 
           {/* Glyph Management (always available) */}
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Glyph Protection</div>
+          <details className="teCharmSection">
+            <summary className="teCharmSectionTitle">Glyph Protection</summary>
             <div style={{ display: "grid", gap: 12 }}>
               <div>
                 <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>Playback Protection</div>
@@ -361,11 +361,11 @@ export function CharmDetailPage() {
                 </button>
               </div>
             </div>
-          </div>
+          </details>
 
           {/* Content Management */}
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Content</div>
+          <details className="teCharmSection">
+            <summary className="teCharmSectionTitle">Content</summary>
 
             {/* Content preview — owner always sees their stored media */}
             {charm.files && charm.files.length > 0 && charm.memoryType && (
@@ -555,11 +555,11 @@ export function CharmDetailPage() {
                   : "Content management is not available for this charm."}
               </div>
             )}
-          </div>
+          </details>
 
           {/* Charm Info */}
-          <div className="teCharmSection">
-            <div className="teCharmSectionTitle">Charm Info</div>
+          <details className="teCharmSection">
+            <summary className="teCharmSectionTitle">Charm Info</summary>
             <div className="teCharmInfo">
               <ThemedInput readOnly label="Charm ID" value={charm.charmId} />
               <ThemedInput readOnly label="Status" value={charm.isExpired ? "Expired" : charm.isSettled ? "Settled" : charm.status} />
@@ -602,7 +602,7 @@ export function CharmDetailPage() {
                 This memory has faded beyond recall.
               </div>
             )}
-          </div>
+          </details>
 
           {/* Manage / Purchase */}
           <div className="teCharmSection" style={{ textAlign: "center" }}>
