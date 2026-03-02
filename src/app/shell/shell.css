@@ -11,22 +11,23 @@
   /* Base typography inside the frame */
   color: #f3e7cf;
   font-family: "Cinzel", serif;
-  font-size: 28px;
+  font-size: 34px;
   line-height: 1.35;
 
   /*
    * Type scale — all page CSS references these.
    * Tune the whole app from this one block.
    * Canvas is 900x1600, scaled ~0.6-0.7× on a typical laptop.
+   * Bumped ~20% for 50+ audience legibility.
    */
-  --fs-title:   54px;  /* hero / page titles                    */
-  --fs-section: 38px;  /* section headers, card header titles    */
-  --fs-heading: 32px;  /* step titles, feature titles, sub-heads */
-  --fs-body:    28px;  /* body text, inputs, buttons, taglines   */
-  --fs-label:   26px;  /* field labels, nav/footer links, pills  */
-  --fs-meta:    24px;  /* meta text, hints, terms, info labels   */
-  --fs-small:   22px;  /* badges, status text, small hints       */
-  --fs-xs:      20px;  /* tiny meta, glyph pill text             */
+  --fs-title:   66px;  /* hero / page titles                    */
+  --fs-section: 46px;  /* section headers, card header titles    */
+  --fs-heading: 38px;  /* step titles, feature titles, sub-heads */
+  --fs-body:    34px;  /* body text, inputs, buttons, taglines   */
+  --fs-label:   32px;  /* field labels, nav/footer links, pills  */
+  --fs-meta:    29px;  /* meta text, hints, terms, info labels   */
+  --fs-small:   26px;  /* badges, status text, small hints       */
+  --fs-xs:      24px;  /* tiny meta, glyph pill text             */
 }
 
 /* Background image */
@@ -76,7 +77,7 @@
   line-height: 1.25;
 
   font-family: "Cinzel", serif;
-  font-size: 28px;
+  font-size: 34px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 
@@ -94,7 +95,7 @@
 .te-status .te-statusSub {
   margin-top: 4px;
   font-family: "Cinzel", serif;
-  font-size: 18px;
+  font-size: 22px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #1a1a1a;
