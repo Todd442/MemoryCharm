@@ -47,10 +47,15 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
       phase: (i * GOLDEN_ANGLE) % (Math.PI * 2),
     }));
 
-    // Preload images
+    // Preload images — record natural aspect ratio on load
+    const aspectRatios = new Map<string, number>();
     state.forEach(c => {
       if (!c.imageSrc || imagesRef.current.has(c.imageSrc)) return;
       const img = new Image();
+      img.onload = () => {
+        if (img.naturalWidth && img.naturalHeight)
+          aspectRatios.set(c.imageSrc!, img.naturalWidth / img.naturalHeight);
+      };
       img.src = c.imageSrc;
       imagesRef.current.set(c.imageSrc, img);
     });
@@ -106,8 +111,10 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
     function drawCard(pos: ReturnType<typeof getPos>, card: typeof state[0]) {
       const { x, y, zs, scale } = pos;
-      const w = CW * scale;
-      const h = CH * scale;
+      // CW is the long-side constraint; card shape matches the image orientation
+      const ar = card.imageSrc ? (aspectRatios.get(card.imageSrc) ?? CW / CH) : CW / CH;
+      const w = (ar >= 1 ? CW      : CW * ar) * scale;
+      const h = (ar >= 1 ? CW / ar : CW     ) * scale;
       const r = Math.max(4, 8 * scale);
 
       const wf = 0.15;

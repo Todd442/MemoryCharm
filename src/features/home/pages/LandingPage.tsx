@@ -7,40 +7,50 @@ import { loginRequest } from "../../../app/auth/msalConfig";
 import { LandingHelix, type HelixCard } from "../components/LandingHelix";
 import { NebulaBackground } from "../../playback/components/NebulaBackground";
 
-import img00 from "../../../assets/gx_a3f8c21b.png";
-import img01 from "../../../assets/gx_7d4e9f06.png";
-import img02 from "../../../assets/gx_r6j3b5ht.png";
-import img03 from "../../../assets/gx_w1c9g4ms.png";
-import img04 from "../../../assets/gx_t8f2l6yn.png";
-import img05 from "../../../assets/gx_h3q7x0kz.png";
-import img06 from "../../../assets/gx_b5w9r2jp.png";
-import img07 from "../../../assets/gx_n7d4v8fc.png";
-import img08 from "../../../assets/gx_g2m6t1xq.png";
-import img09 from "../../../assets/gx_y9k3h5bw.png";
-import img10 from "../../../assets/gx_f4p8n0rd.png";
-import img11 from "../../../assets/gx_x1j6c9mt.png";
+import splash00 from "../../../assets/SplashScreenImages/IMG_1085.JPG";
+import splash01 from "../../../assets/SplashScreenImages/IMG_1087.JPG";
+import splash02 from "../../../assets/SplashScreenImages/IMG_1193.JPG";
+import splash03 from "../../../assets/SplashScreenImages/IMG_1298.JPG";
+import splash04 from "../../../assets/SplashScreenImages/IMG_1736.JPG";
+import splash05 from "../../../assets/SplashScreenImages/IMG_2250.JPG";
+import splash06 from "../../../assets/SplashScreenImages/IMG_2395.JPG";
+import splash07 from "../../../assets/SplashScreenImages/IMG_2421.JPG";
+import splash08 from "../../../assets/SplashScreenImages/IMG_3180.JPG";
+import splash09 from "../../../assets/SplashScreenImages/20161014_191509.jpg";
+import splash10 from "../../../assets/SplashScreenImages/20180123_132650.jpg";
+import splash11 from "../../../assets/SplashScreenImages/20180123_080450.jpg";
+import splash12 from "../../../assets/SplashScreenImages/20161215_195101.jpg";
+import splash13 from "../../../assets/SplashScreenImages/20230825_140417.jpg";
+import splash14 from "../../../assets/SplashScreenImages/20201007_170723.jpg";
+import splash15 from "../../../assets/SplashScreenImages/20180610_122720.jpg";
 
 import "./LandingPage.css";
 
+// Fallback colour shown while each image loads
 const CARD_PALETTE = [
-  "#5a3a1a", "#1a3a2e", "#1a2a4a", "#3a1a5a",
-  "#5a1a2e", "#1a3a1a", "#3a1a1a", "#4a3a1a",
-  "#1a3a3a", "#5a1a1a", "#3a4a1a", "#1a2a3a",
+  "#3a2a14", "#142a22", "#141e36", "#2a1440",
+  "#3a1420", "#143a28", "#2a1414", "#362a14",
+  "#143a3a", "#3a1414", "#283614", "#141e2a",
+  "#2e1e0e", "#0e2e22", "#1a1a30", "#2a1028",
 ];
 
 const HELIX_CARDS: HelixCard[] = [
-  { id:  0, color: CARD_PALETTE[0],  imageSrc: img00 },
-  { id:  1, color: CARD_PALETTE[1],  imageSrc: img01 },
-  { id:  2, color: CARD_PALETTE[2],  imageSrc: img02 },
-  { id:  3, color: CARD_PALETTE[3],  imageSrc: img03 },
-  { id:  4, color: CARD_PALETTE[4],  imageSrc: img04 },
-  { id:  5, color: CARD_PALETTE[5],  imageSrc: img05 },
-  { id:  6, color: CARD_PALETTE[6],  imageSrc: img06 },
-  { id:  7, color: CARD_PALETTE[7],  imageSrc: img07 },
-  { id:  8, color: CARD_PALETTE[8],  imageSrc: img08 },
-  { id:  9, color: CARD_PALETTE[9],  imageSrc: img09 },
-  { id: 10, color: CARD_PALETTE[10], imageSrc: img10 },
-  { id: 11, color: CARD_PALETTE[11], imageSrc: img11 },
+  { id:  0, color: CARD_PALETTE[0],  imageSrc: splash00 },
+  { id:  1, color: CARD_PALETTE[1],  imageSrc: splash01 },
+  { id:  2, color: CARD_PALETTE[2],  imageSrc: splash02 },
+  { id:  3, color: CARD_PALETTE[3],  imageSrc: splash03 },
+  { id:  4, color: CARD_PALETTE[4],  imageSrc: splash04 },
+  { id:  5, color: CARD_PALETTE[5],  imageSrc: splash05 },
+  { id:  6, color: CARD_PALETTE[6],  imageSrc: splash06 },
+  { id:  7, color: CARD_PALETTE[7],  imageSrc: splash07 },
+  { id:  8, color: CARD_PALETTE[8],  imageSrc: splash08 },
+  { id:  9, color: CARD_PALETTE[9],  imageSrc: splash09 },
+  { id: 10, color: CARD_PALETTE[10], imageSrc: splash10 },
+  { id: 11, color: CARD_PALETTE[11], imageSrc: splash11 },
+  { id: 12, color: CARD_PALETTE[12], imageSrc: splash12 },
+  { id: 13, color: CARD_PALETTE[13], imageSrc: splash13 },
+  { id: 14, color: CARD_PALETTE[14], imageSrc: splash14 },
+  { id: 15, color: CARD_PALETTE[15], imageSrc: splash15 },
 ];
 
 export function LandingPage() {
