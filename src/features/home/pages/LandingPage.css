@@ -53,9 +53,16 @@
   font-size: clamp(10px, 1.4vw, 15px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(200, 160, 100, 0.65);
+  color: rgba(220, 175, 110, 0.92);
   text-align: center;
   transition: opacity 0.1s linear;
+  /* Frosted pill — gives the subtitle a clear surface over the canvas */
+  background: rgba(4, 1, 0, 0.52);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(210, 170, 110, 0.14);
+  border-radius: 24px;
+  padding: 6px 22px;
 }
 
 /* Animated scroll cue -------------------------------------------------- */
@@ -139,9 +146,10 @@
   font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(210, 170, 110, 0.75);
+  color: rgba(210, 170, 110, 0.88);
   text-align: center;
   margin: 0 0 clamp(36px, 6vh, 64px);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
 }
 
 /* Verse — centred, spacious, poetic ------------------------------------ */
@@ -149,8 +157,9 @@
   text-align: center;
   font-size: clamp(19px, 2.4vw, 28px);
   line-height: 1.9;
-  color: rgba(243, 231, 207, 0.92);
+  color: rgba(243, 231, 207, 0.95);
   margin-bottom: clamp(40px, 7vh, 72px);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
 .lp-verse p { margin: 0; }
@@ -160,7 +169,8 @@
 .lp-body {
   font-size: clamp(17px, 2vw, 23px);
   line-height: 1.88;
-  color: rgba(243, 231, 207, 0.78);
+  color: rgba(243, 231, 207, 0.93);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
 .lp-body p { margin: 0 0 clamp(22px, 3.5vh, 40px); }
@@ -194,19 +204,20 @@
 
 .lp-cta-sub {
   font-size: clamp(16px, 2vw, 20px);
-  color: rgba(243, 231, 207, 0.58);
+  color: rgba(243, 231, 207, 0.78);
   line-height: 1.7;
   margin: 0 0 clamp(32px, 5vh, 52px);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
 .lp-cta-btn {
   display: inline-block;
   background: linear-gradient(
     180deg,
-    rgba(230, 190, 120, 0.65),
-    rgba(120, 70, 22, 0.88)
+    rgba(230, 190, 120, 1.0),
+    rgba(140, 82, 28, 1.0)
   );
-  border: 1px solid rgba(230, 190, 120, 0.5);
+  border: 1px solid rgba(230, 190, 120, 0.7);
   border-radius: 40px;
   color: rgba(30, 16, 6, 0.94);
   font-family: "Cinzel", serif;
@@ -236,7 +247,7 @@
 .lp-cta-footer {
   margin-top: clamp(28px, 4.5vh, 48px);
   font-size: clamp(13px, 1.5vw, 16px);
-  color: rgba(243, 231, 207, 0.44);
+  color: rgba(243, 231, 207, 0.62);
 }
 
 .lp-cta-footer a {
