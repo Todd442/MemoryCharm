@@ -11,6 +11,8 @@ import { PurchasePage } from "../features/account/pages/PurchasePage";
 import { RequireAuth } from "../app/auth/RequireAuth";
 import { ScrollTestPage } from "../features/test/pages/ScrollTestPage.tsx";
 import { NfcCheckPage } from "../features/nfc-check/pages/NfcCheckPage";
+import { TermsPage } from "../features/legal/pages/TermsPage";
+import { PlainTermsPage } from "../features/legal/pages/PlainTermsPage";
 
 function NotFound() {
   return (
@@ -34,6 +36,10 @@ export const router = createBrowserRouter([
       </AuthGuard>
     ),
   },
+
+  // Legal pages — standalone, no shell
+  { path: "/terms", element: <TermsPage /> },
+  { path: "/terms/plain", element: <PlainTermsPage /> },
 
   // Playback routes — immersive nebula shell, no frame
   {

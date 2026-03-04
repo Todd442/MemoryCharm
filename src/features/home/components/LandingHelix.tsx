@@ -133,6 +133,13 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
       if (alpha <= 0.015) return null;
 
+      // Don't show the placeholder colour while the image is still loading
+      if (card.imageSrc) {
+        const img = imagesRef.current.get(card.imageSrc);
+        if (!img?.complete || img.naturalWidth === 0) return null;
+      }
+
+
       ctx.save();
       ctx.translate(x, y);
       ctx.transform(1, tiltY * TILT_STRENGTH, -tiltX * TILT_STRENGTH, 1, 0, 0);

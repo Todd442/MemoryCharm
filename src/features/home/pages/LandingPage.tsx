@@ -95,7 +95,7 @@ export function LandingPage() {
 
       {/* Fixed context label — anchored to viewport bottom, fades on scroll */}
       <p className="lp-hero-context" style={{ opacity: (1 - dimFactor) * 0.55 }}>
-        Real memories.<br />Each one bound to its charm.
+        Real Memories bound to a charm.
       </p>
 
       {/* Floating nav — fades in once hero scrolls away */}
@@ -280,6 +280,17 @@ export function LandingPage() {
             </p>
           </div>
         </section>
+
+        {/* ── Site footer ───────────────────────────────────────────────── */}
+        <footer className="lp-footer">
+          <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>
+            Terms &amp; Conditions
+          </a>
+          <span className="lp-footer-sep" aria-hidden="true">·</span>
+          <a href="/terms/plain" onClick={e => { e.preventDefault(); nav("/terms/plain"); }}>
+            Plain English
+          </a>
+        </footer>
 
       </div>
     </div>

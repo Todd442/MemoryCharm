@@ -546,7 +546,10 @@ export function ClaimCharmPage() {
                       disabled={busy}
                     />
                     <span className="teTermsText">
-                      I accept the <a href="#" onClick={(e) => e.preventDefault()}>Code of Conduct</a> and the <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a>.
+                      I accept the{" "}
+                      <a href="/terms/plain" onClick={(e) => { e.preventDefault(); nav("/terms/plain"); }}>Plain English Terms</a>
+                      {" "}and the{" "}
+                      <a href="/terms" onClick={(e) => { e.preventDefault(); nav("/terms"); }}>Terms &amp; Conditions</a>.
                     </span>
                   </label>
 

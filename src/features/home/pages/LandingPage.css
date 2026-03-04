@@ -496,3 +496,28 @@
   .lp-section { padding-left: 20px; padding-right: 20px; }
   .lp-section--cta { padding-left: 20px; padding-right: 20px; }
 }
+
+/* ── Site footer ─────────────────────────────────────────────────────── */
+.lp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: clamp(24px, 4vh, 40px) 24px clamp(32px, 5vh, 56px);
+}
+
+.lp-footer a {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: clamp(10px, 1.1vw, 12px);
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 0.38);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.lp-footer a:hover { color: rgba(210, 170, 110, 0.72); }
+
+.lp-footer-sep {
+  color: rgba(210, 170, 110, 0.20);
+  font-size: 14px;
+}
