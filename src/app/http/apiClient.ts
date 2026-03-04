@@ -1,4 +1,5 @@
 import { msalInstance } from "../auth/msalInstance";
+import { loginRequest } from "../auth/msalConfig";
 
 export const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
 
@@ -10,16 +11,36 @@ async function getBearerToken(): Promise<string> {
   const devToken = import.meta.env.VITE_DEV_TOKEN as string | undefined;
   if (devToken) return devToken;
 
-  
   const account =
     msalInstance.getActiveAccount() ?? msalInstance.getAllAccounts()[0];
   if (!account) throw new Error("Not signed in.");
 
-  const result = await msalInstance.acquireTokenSilent({
-    account,
-    scopes: API_SCOPES,
-  });
-  return result.accessToken;
+  try {
+    const result = await msalInstance.acquireTokenSilent({
+      account,
+      scopes: API_SCOPES,
+    });
+    return result.accessToken;
+  } catch (e: any) {
+    // If the token can't be acquired silently (expired, interaction required,
+    // or MSAL interaction lock timed out), save the current path and redirect
+    // to re-authenticate rather than surfacing a raw MSAL error in the UI.
+    const msg = String(e?.message ?? e?.errorCode ?? "").toLowerCase();
+    const needsInteraction =
+      e?.name === "InteractionRequiredAuthError" ||
+      msg.includes("interaction_required") ||
+      msg.includes("login_required") ||
+      msg.includes("timed_out") ||
+      msg.includes("token_renewal_operationfailed");
+
+    if (needsInteraction) {
+      sessionStorage.setItem("mc.returnTo", window.location.pathname);
+      localStorage.setItem("mc.returnTo", window.location.pathname);
+      await msalInstance.loginRedirect(loginRequest);
+      // loginRedirect navigates away — this line is never reached
+    }
+    throw e;
+  }
 }
 
 /** Recursively lowercase the first character of each key (PascalCase → camelCase). */

@@ -186,7 +186,7 @@
   font-size: var(--fs-small);
 }
 
-/* Status / message states (loading, error, not found, etc.) */
+/* Status / message states (loading, error, not found, glyph gate, etc.) */
 .pb-status {
   display: flex;
   flex-direction: column;
@@ -194,6 +194,9 @@
   justify-content: center;
   padding: clamp(24px, 5vmin, 60px) clamp(20px, 4vmin, 50px);
   text-align: center;
+  /* Allow content to scroll if taller than the frame (e.g. glyph grid) */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .pb-status-title {
@@ -203,6 +206,7 @@
   color: rgba(210, 170, 110, 0.85);
   margin-bottom: clamp(8px, 1.5vmin, 16px);
 }
+
 
 /* ── Buffering / error overlay on video ── */
 

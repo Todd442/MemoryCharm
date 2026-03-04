@@ -238,6 +238,12 @@ export function ClaimCharmPage() {
   // Sync browser back-button with step state
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
+      // If this charm was already sealed this session, don't let back navigate
+      // into the claim flow — redirect straight to the playback page.
+      if (code && sessionStorage.getItem(`mc.sealed.${code}`) === "true") {
+        nav(`/c/${encodeURIComponent(code)}`, { replace: true });
+        return;
+      }
       if (e.state?.step) {
         setStep(e.state.step as Step);
       } else {
@@ -246,7 +252,7 @@ export function ClaimCharmPage() {
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [nav]);
+  }, [nav, code]);
   // ---------------------------------------------------------------------------
 
   const [profileData, setProfileData] = useState<UserProfile>({
@@ -261,6 +267,12 @@ export function ClaimCharmPage() {
   // and whether this account already has a profile (skip profile step if so).
   useEffect(() => {
     if (!isAuthed || !code) return;
+
+    // Fast-path: charm was already sealed this session — skip API round-trip
+    if (sessionStorage.getItem(`mc.sealed.${code}`) === "true") {
+      nav(`/c/${encodeURIComponent(code)}`, { replace: true });
+      return;
+    }
 
     // Pre-fill email from the MSAL account
     setProfileData((prev) => ({ ...prev, email: emailish }));
@@ -422,6 +434,7 @@ export function ClaimCharmPage() {
       }
 
       advanceTo("done");
+      if (code) sessionStorage.setItem(`mc.sealed.${code}`, "true");
     } catch (e: any) {
       setErr(e?.message ?? "Seal failed.");
     } finally {
@@ -901,7 +914,7 @@ export function ClaimCharmPage() {
                 <div className="tePills tePillsWrap" style={{ marginTop: 14 }}>
                   <button
                     className="tePill"
-                    onClick={() => nav(`/c/${encodeURIComponent(code)}`)}
+                    onClick={() => nav(`/c/${encodeURIComponent(code)}`, { replace: true })}
                     type="button"
                   >
                     View Charm

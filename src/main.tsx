@@ -5,6 +5,7 @@ import { MsalProvider } from "@azure/msal-react";
 
 import { router } from "./app/routes";
 import { msalInstance } from "./app/auth/msalInstance";
+import { msalConfig } from "./app/auth/msalConfig";
 import { debugLog } from "./app/auth/debugLog";
 
 import "./styles/base.css";
@@ -19,7 +20,44 @@ async function bootstrap() {
   
   await msalInstance.initialize();
   debugLog("bootstrap", "MSAL initialized");
-  
+
+  // If an auth code is in the URL but MSAL's interaction flag was lost (common
+  // intermittent issue — see MEMORY.md), handleRedirectPromise returns null and
+  // leaves a stale interaction lock that causes subsequent acquireTokenSilent
+  // calls to TIMED_OUT.  Clear any MSAL session-storage state and reload without
+  // the hash so MSAL can start a clean redirect from scratch.
+  const hasAuthCode =
+    window.location.hash.includes("code=") ||
+    window.location.search.includes("code=");
+  if (hasAuthCode) {
+    // Attempt to process the code first — only clear+reload if MSAL can't handle it.
+    const preCheck = await msalInstance.handleRedirectPromise().catch(() => null);
+    debugLog("bootstrap", `pre-check handleRedirectPromise: ${preCheck ? "SUCCESS" : "null"}`);
+    if (!preCheck) {
+      debugLog("bootstrap", "Auth code present but unprocessable — clearing stale MSAL session state and reloading");
+      Object.keys(sessionStorage)
+        .filter(k => k.includes(msalConfig.auth.clientId) || k.toLowerCase().includes("msal"))
+        .forEach(k => sessionStorage.removeItem(k));
+      window.location.replace(window.location.origin + window.location.pathname);
+      return; // stop — page will reload and re-enter bootstrap without the code
+    }
+    // preCheck succeeded — skip the second handleRedirectPromise call below
+    debugLog("bootstrap", `handleRedirectPromise result: SUCCESS (pre-check)`);
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) msalInstance.setActiveAccount(accounts[0]);
+    const allAccountsEarly = msalInstance.getAllAccounts();
+    debugLog("bootstrap", `After redirect: allAccounts.length=${allAccountsEarly.length}`);
+    if (allAccountsEarly.length > 0) debugLog("bootstrap", `First account username: ${allAccountsEarly[0].username}`);
+    ReactDOM.createRoot(document.getElementById("root")!).render(
+      <React.StrictMode>
+        <MsalProvider instance={msalInstance}>
+          <RouterProvider router={router} />
+        </MsalProvider>
+      </React.StrictMode>
+    );
+    return;
+  }
+
   const redirectResult = await msalInstance.handleRedirectPromise();
   debugLog("bootstrap", `handleRedirectPromise result: ${redirectResult ? "SUCCESS" : "null"}`);
   if (redirectResult) {

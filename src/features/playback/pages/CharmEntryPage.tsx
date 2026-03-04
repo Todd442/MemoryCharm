@@ -222,19 +222,8 @@ export function CharmEntryPage() {
   if (entry.authMode === "glyph" && !playback) {
     return (
       <div className="pb-frame pb-status">
-        <div className="pb-status-title">
-          {entry.memoryName ? entry.memoryName : "Memory Charm"}
-        </div>
-        {entry.memoryName && (
-          <div style={{ fontSize: "var(--fs-meta)", opacity: 0.55, letterSpacing: "0.15em", marginBottom: 6 }}>
-            Memory Charm
-          </div>
-        )}
-        <div className="pb-explain" style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>This charm is locked.</div>
-
         {blocked ? (
           <div className="pb-explain" style={{
-            marginTop: 14,
             padding: 12,
             borderRadius: 10,
             background: "rgba(220,0,0,0.08)",

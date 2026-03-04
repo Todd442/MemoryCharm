@@ -1,4 +1,4 @@
-import { createBrowserRouter, Link } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { AppShell } from "./shell/AppShell";
 import { AuthGuard } from "./auth/AuthGuard";
 import { CharmEntryPage } from "../features/playback/pages/CharmEntryPage";
@@ -13,18 +13,8 @@ import { ScrollTestPage } from "../features/test/pages/ScrollTestPage.tsx";
 import { NfcCheckPage } from "../features/nfc-check/pages/NfcCheckPage";
 import { TermsPage } from "../features/legal/pages/TermsPage";
 import { PlainTermsPage } from "../features/legal/pages/PlainTermsPage";
+import { NotFoundPage } from "../features/home/pages/NotFoundPage";
 
-function NotFound() {
-  return (
-    <div style={{ padding: 24 }}>
-      <div style={{ fontSize: "var(--fs-section)" }}>404</div>
-      <div style={{ marginTop: 12 }}>That page doesn't exist.</div>
-      <p style={{ marginTop: 12 }}>
-        <Link to="/">Go Home</Link>
-      </p>
-    </div>
-  );
-}
 
 export const router = createBrowserRouter([
   // Landing page — full-viewport, no shell frame
@@ -103,7 +93,9 @@ export const router = createBrowserRouter([
       { path: "/nfc-check", element: <NfcCheckPage /> },
 
       { path: "/test/scroll", element: <ScrollTestPage /> },
-      { path: "*", element: <NotFound /> },
     ],
   },
+
+  // Catch-all — standalone branded 404 page (no shell)
+  { path: "*", element: <NotFoundPage /> },
 ]);
