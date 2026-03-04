@@ -65,6 +65,24 @@
   padding: 6px 22px;
 }
 
+/* Context label — fixed to viewport bottom, fades as user scrolls ----- */
+.lp-hero-context {
+  position: fixed;
+  bottom: clamp(48px, 9vh, 80px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  margin: 0;
+  font-family: "Cinzel", serif;
+  font-size: clamp(9px, 1vw, 12px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 1);
+  text-align: center;
+  transition: opacity 0.1s linear;
+  pointer-events: none; /* never intercepts clicks */
+}
+
 /* Animated scroll cue -------------------------------------------------- */
 .lp-scroll-cue {
   position: absolute;
@@ -98,7 +116,7 @@
 .lp-section {
   position: relative;
   background: #050200;
-  padding: clamp(64px, 11vh, 128px) clamp(24px, 6vw, 48px);
+  padding: clamp(40px, 7vh, 80px) clamp(24px, 6vw, 48px);
 }
 
 /* First section gets a subtle top fade from hero */
@@ -119,6 +137,50 @@
   border-top: 1px solid rgba(210, 170, 110, 0.08);
 }
 
+.lp-section--flagship {
+  background: #040100;
+  border-top: 1px solid rgba(210, 170, 110, 0.08);
+  padding-top: clamp(48px, 8vh, 96px);
+  padding-bottom: clamp(48px, 8vh, 96px);
+}
+
+.lp-flagship {
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Placeholder frame — replace src with <img> when photo is ready */
+.lp-flagship-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px solid rgba(210, 170, 110, 0.18);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(210, 170, 110, 0.03);
+  margin-bottom: clamp(18px, 3vh, 28px);
+}
+
+.lp-flagship-placeholder {
+  font-family: "Cinzel", serif;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: rgba(210, 170, 110, 0.25);
+  text-transform: uppercase;
+}
+
+.lp-flagship-caption {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(14px, 1.6vw, 17px);
+  font-style: italic;
+  line-height: 1.6;
+  color: rgba(243, 231, 207, 0.55);
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
 .lp-section--maker {
   background: #040100;
   border-top: 1px solid rgba(210, 170, 110, 0.08);
@@ -131,12 +193,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(80px, 15vh, 160px) clamp(24px, 6vw, 48px);
+  padding: clamp(56px, 10vh, 112px) clamp(24px, 6vw, 48px);
 }
 
 /* ── Prose column ───────────────────────────────────────────────────────── */
 .lp-prose {
-  max-width: 680px;
+  max-width: 780px;
   margin: 0 auto;
 }
 
@@ -163,7 +225,7 @@
 }
 
 .lp-verse p { margin: 0; }
-.lp-verse p + p { margin-top: clamp(24px, 4vh, 44px); }
+.lp-verse p + p { margin-top: clamp(16px, 2.5vh, 28px); }
 
 /* Body prose ----------------------------------------------------------- */
 .lp-body {
@@ -173,7 +235,7 @@
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
-.lp-body p { margin: 0 0 clamp(22px, 3.5vh, 40px); }
+.lp-body p { margin: 0 0 clamp(13px, 2vh, 24px); }
 .lp-body p:last-child { margin-bottom: 0; }
 
 /* Placeholder copy — dimmed, italic, until real copy arrives */
@@ -261,13 +323,172 @@
   border-bottom-color: rgba(140, 230, 205, 0.65);
 }
 
+/* ── Floating nav ───────────────────────────────────────────────────────── */
+/* Base: ghost state — always visible, blends over hero canvas */
+.lp-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 5vw, 48px);
+  height: 52px;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background 0.45s ease, border-color 0.45s ease;
+}
+
+/* Frosted state — kicks in once hero scrolls away */
+.lp-nav--visible {
+  background: rgba(4, 1, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: rgba(210, 170, 110, 0.08);
+}
+
+.lp-nav-brand {
+  font-family: "Cinzel", serif;
+  font-size: clamp(11px, 1.2vw, 14px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 0.28);
+  transition: color 0.45s ease;
+}
+
+.lp-nav--visible .lp-nav-brand {
+  color: rgba(210, 170, 110, 0.85);
+}
+
+.lp-nav-btn {
+  background: none;
+  border: 1px solid rgba(210, 170, 110, 0.12);
+  border-radius: 20px;
+  color: rgba(220, 175, 110, 0.28);
+  font-family: "Cinzel", serif;
+  font-size: clamp(10px, 1vw, 12px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 5px 18px;
+  cursor: pointer;
+  transition: border-color 0.45s ease, color 0.45s ease;
+}
+
+.lp-nav--visible .lp-nav-btn {
+  border-color: rgba(210, 170, 110, 0.35);
+  color: rgba(220, 175, 110, 0.88);
+}
+
+.lp-nav-btn:hover {
+  border-color: rgba(210, 170, 110, 0.65);
+  color: rgba(230, 190, 130, 1);
+}
+
+.lp-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Pull quote ──────────────────────────────────────────────────────────── */
+.lp-pullquote {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(24px, 3.5vw, 42px);
+  font-style: italic;
+  line-height: 1.55;
+  color: rgba(243, 231, 207, 0.94);
+  text-align: center;
+  margin: clamp(40px, 7vh, 72px) 0;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* ── Charm product reveal ────────────────────────────────────────────────── */
+.lp-charm-reveal {
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.lp-charm-name {
+  font-family: "Cinzel", serif;
+  font-size: clamp(28px, 5vw, 56px);
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 0.92);
+  margin: 0 0 clamp(20px, 3vh, 32px);
+  text-shadow:
+    0 0 32px rgba(210, 140, 50, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.lp-charm-rule {
+  width: clamp(80px, 20vw, 160px);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(210, 170, 110, 0.55),
+    transparent
+  );
+  margin: 0 auto clamp(36px, 6vh, 60px);
+}
+
+.lp-charm-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 4vw, 56px);
+  text-align: left;
+}
+
+.lp-charm-col-title {
+  font-family: "Cinzel", serif;
+  font-size: clamp(11px, 1.3vw, 15px);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 0.85);
+  margin: 0 0 12px;
+}
+
+.lp-charm-col-rule {
+  width: 100%;
+  height: 1px;
+  background: rgba(210, 170, 110, 0.2);
+  margin-bottom: clamp(14px, 2.5vh, 24px);
+}
+
+.lp-charm-col-body {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(16px, 1.8vw, 21px);
+  line-height: 1.9;
+  color: rgba(243, 231, 207, 0.88);
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
 /* ── Responsive tweaks ──────────────────────────────────────────────────── */
 @media (min-width: 900px) {
   /* On wide screens, verse can be slightly larger */
   .lp-verse { font-size: clamp(22px, 2vw, 28px); }
 
   /* Slightly wider prose column */
-  .lp-prose { max-width: 760px; }
+  .lp-prose { max-width: 860px; }
+}
+
+@media (max-width: 600px) {
+  /* Charm columns stack on mobile */
+  .lp-charm-cols {
+    grid-template-columns: 1fr;
+    gap: clamp(32px, 6vh, 48px);
+    text-align: center;
+  }
+  .lp-charm-col-rule {
+    width: 60px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 @media (max-width: 420px) {

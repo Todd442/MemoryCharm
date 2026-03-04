@@ -57,6 +57,7 @@ export function LandingPage() {
   const nav = useNavigate();
   const { accounts, instance, inProgress } = useMsal();
   const [dimFactor, setDimFactor] = useState(0);
+  const [navVisible, setNavVisible] = useState(false);
 
   const isAuthed  = accounts.length > 0;
   const working   = inProgress !== InteractionStatus.None;
@@ -64,11 +65,11 @@ export function LandingPage() {
   useEffect(() => {
     function onScroll() {
       const vh = window.innerHeight;
-      // Begin dimming at 20% into hero scroll, complete by 80%
       const progress = Math.min(1, Math.max(0,
         (window.scrollY - vh * 0.2) / (vh * 0.6)
       ));
       setDimFactor(progress * 0.92);
+      setNavVisible(window.scrollY > vh * 0.75);
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -92,16 +93,31 @@ export function LandingPage() {
         <LandingHelix cards={HELIX_CARDS} dimFactor={dimFactor} />
       </div>
 
+      {/* Fixed context label — anchored to viewport bottom, fades on scroll */}
+      <p className="lp-hero-context" style={{ opacity: (1 - dimFactor) * 0.55 }}>
+        Real memories.<br />Each one bound to its charm.
+      </p>
+
+      {/* Floating nav — fades in once hero scrolls away */}
+      <nav className={`lp-nav${navVisible ? " lp-nav--visible" : ""}`} aria-label="Site navigation">
+        <span className="lp-nav-brand">MemoryCharm</span>
+        {isAuthed ? (
+          <button className="lp-nav-btn" type="button" onClick={() => nav("/account")}>
+            Account
+          </button>
+        ) : (
+          <button className="lp-nav-btn" type="button" onClick={handleSignIn} disabled={working}>
+            {working ? "Working…" : "Sign In"}
+          </button>
+        )}
+      </nav>
+
       {/* Scrollable content — sits above canvas */}
       <div className="lp-scroll">
 
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <section className="lp-hero">
-          {/* Subtitle — absolutely tracked just below canvas "Charm" */}
-          <p
-            className="lp-hero-sub"
-            style={{ opacity: 1 - dimFactor }}
-          >
+          <p className="lp-hero-sub" style={{ opacity: 1 - dimFactor }}>
             A Small Working of Purposeful Magic
           </p>
           <a className="lp-scroll-cue" href="#magic" aria-label="Scroll to learn more">
@@ -122,14 +138,6 @@ export function LandingPage() {
               </p>
               <p>And suddenly something that was distant becomes present.</p>
             </div>
-            <div className="lp-body">
-              <p>If that is magic, then we live surrounded by it.</p>
-              <p>
-                Not the kind found in old books—<br />
-                the kind hidden in plain sight,<br />
-                inside the things we already carry.
-              </p>
-            </div>
           </div>
         </section>
 
@@ -139,8 +147,7 @@ export function LandingPage() {
             <h2 className="lp-section-title">The Unspoken Problem</h2>
             <div className="lp-body">
               <p>We have hundreds—thousands—of photographs and videos.</p>
-              <p>They exist.</p>
-              <p>Somewhere.</p>
+              <p>They exist. Somewhere.</p>
               <p>
                 In a pocket of glass.<br />
                 In a folder with no name.<br />
@@ -154,8 +161,11 @@ export function LandingPage() {
                 a loved one who isn't here anymore,<br />
                 a dog that used to come running at the sound of your voice—
               </p>
-              <p>the memory is there…</p>
-              <p>but it isn't reachable.</p>
+            </div>
+            <p className="lp-pullquote">
+              the memory is there…<br />but it isn't reachable.
+            </p>
+            <div className="lp-body">
               <p>
                 Not easily.<br />
                 Not gently.<br />
@@ -165,21 +175,51 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── The Charm (how it works) — PLACEHOLDER ───────────────────── */}
+        {/* ── The Charm — product reveal ───────────────────────────────── */}
         <section className="lp-section lp-section--charm">
-          <div className="lp-prose">
-            <h2 className="lp-section-title">The Answer</h2>
-            <div className="lp-body lp-placeholder">
-              <p>[How the charm is used — copy coming]</p>
-              <p>
-                A small object. A single tap.<br />
-                The memory appears.
-              </p>
-              <p>
-                No app. No account. No search.<br />
-                Just the charm, and the phone already in your hand.
-              </p>
+          <div className="lp-charm-reveal">
+            <h2 className="lp-charm-name">The Charm</h2>
+            <div className="lp-charm-rule" />
+            <div className="lp-charm-cols">
+              <div className="lp-charm-col">
+                <h3 className="lp-charm-col-title">One Object</h3>
+                <div className="lp-charm-col-rule" />
+                <p className="lp-charm-col-body">
+                  Small enough to keep.<br />
+                  To wear.<br />
+                  To give away.
+                </p>
+              </div>
+              <div className="lp-charm-col">
+                <h3 className="lp-charm-col-title">One Tap</h3>
+                <div className="lp-charm-col-rule" />
+                <p className="lp-charm-col-body">
+                  Hold your phone near it.<br />
+                  Nothing more.
+                </p>
+              </div>
+              <div className="lp-charm-col">
+                <h3 className="lp-charm-col-title">One Memory</h3>
+                <div className="lp-charm-col-rule" />
+                <p className="lp-charm-col-body">
+                  The moment appears.<br />
+                  No search.<br />
+                  No scroll.
+                </p>
+              </div>
             </div>
+          </div>
+        </section>
+
+        {/* ── Flagship charm photo ─────────────────────────────────────── */}
+        <section className="lp-section lp-section--flagship">
+          <div className="lp-flagship">
+            <div className="lp-flagship-img" aria-label="The MemoryCharm — photograph coming">
+              <span className="lp-flagship-placeholder">[ Charm photograph ]</span>
+            </div>
+            <p className="lp-flagship-caption">
+              The Original MemoryCharm — handcrafted, NFC-encoded, yours.
+            </p>
           </div>
         </section>
 

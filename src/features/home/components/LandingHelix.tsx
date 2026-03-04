@@ -77,8 +77,12 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
     function resize() {
       if (!canvas) return;
-      W = canvas.width  = canvas.clientWidth;
-      H = canvas.height = canvas.clientHeight;
+      const dpr = window.devicePixelRatio || 1;
+      W = canvas.clientWidth;
+      H = canvas.clientHeight;
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale once; all draw code uses CSS pixels
       const min = Math.min(W, H);
       RX    = W   * 0.30;
       RZ    = min * 0.30;
