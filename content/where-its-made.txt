@@ -1,0 +1,35 @@
+WHERE IT'S MADE
+───────────────────────────────────────────────────────────────
+
+Central Minnesota. A long way from the places that name themselves the future.
+
+The maker spent three decades as a software architect — from the first web to
+the latest wave, building systems for companies across the world, watching an
+industry mistake complexity for progress and novelty for meaning.
+
+The promise of technology was always larger than what arrived. That it might
+close the distance between people. That it might make the world feel more alive.
+
+That promise, mostly, went unkept.
+
+MemoryCharm is a different kind of working.
+
+The technology is here — but it is meant to disappear. What remains is the
+moment: a tap, a memory, a thing held in the hand.
+
+No trends pursued. No fads chased. No features added for their own sake.
+
+Only the quiet conviction that the world deserves more magic.
+And that we are capable of making it.
+
+───────────────────────────────────────────────────────────────
+NOTES FOR REFINEMENT
+
+- "working" echoes the app's own language ("A Small Working of Purposeful Magic")
+- "A long way from the places that name themselves the future" — Silicon Valley
+  without naming it. Could be made more specific or softened if needed.
+- "That promise, mostly, went unkept." — the "mostly" is intentional. Not
+  cynical, just honest.
+- The closing two lines are meant to feel earned, not proclaimed.
+- Consider whether to name the maker or keep it implied.
+- Location could be expanded (city, region) once decided how specific to be.

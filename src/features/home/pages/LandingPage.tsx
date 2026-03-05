@@ -255,15 +255,43 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── The Makers — PLACEHOLDER ─────────────────────────────────── */}
+        {/* ── Where It's Made ──────────────────────────────────────────── */}
         <section className="lp-section lp-section--maker">
           <div className="lp-prose">
-            <h2 className="lp-section-title">Where It's Made</h2>
-            <div className="lp-body lp-placeholder">
-              <p>[Who makes it and where — copy coming]</p>
+            <h2 className="lp-section-title">Where It&rsquo;s Made</h2>
+            <div className="lp-body">
               <p>
-                Made by hand, with intention.<br />
-                Each charm carries something of the place it came from.
+                Central Minnesota. A long way from the places that name
+                themselves the future.
+              </p>
+              <p>
+                The maker spent three decades as a software architect &mdash;
+                from the first web to the latest wave, building systems for
+                companies across the world, watching an industry mistake
+                complexity for progress and novelty for meaning.
+              </p>
+              <p>
+                The promise of technology was always larger than what arrived.
+                That it might close the distance between people. That it might
+                make the world feel more alive.
+              </p>
+            </div>
+            <p className="lp-pullquote">
+              That promise, mostly, went unkept.
+            </p>
+            <div className="lp-body">
+              <p>
+                MemoryCharm is a different kind of working. The technology is
+                here &mdash; but it is meant to disappear. What remains is the
+                moment: a tap, a memory, a thing held in the hand.
+              </p>
+              <p>
+                No trends pursued. No fads chased. No features added for their
+                own sake.
+              </p>
+              <p>
+                Only the quiet conviction that the world deserves more magic.<br />
+                And that we are capable of making it.
               </p>
             </div>
           </div>
