@@ -4,7 +4,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
-import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta } from "../api";
+import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta, factoryResetCharm } from "../api";
 import { configureCharm } from "../../claim/api";
 import type { UserCharmDetail } from "../api";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
@@ -48,6 +48,9 @@ export function CharmDetailPage() {
   // Memory type editing state
   const [editMemoryType, setEditMemoryType] = useState<MemoryType | null>(null);
   const [typeChangePending, setTypeChangePending] = useState<MemoryType | null>(null);
+
+  // Factory reset state
+  const [resetConfirm, setResetConfirm] = useState(false);
 
   useEffect(() => {
     setFooterEl(document.getElementById("te-footer"));
@@ -129,6 +132,23 @@ export function CharmDetailPage() {
     } catch (e: any) {
       setErr(e?.message ?? "Failed to update memory details.");
     } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleFactoryReset() {
+    if (!code) return;
+    setErr(null);
+    setMsg(null);
+    setBusy(true);
+    try {
+      await factoryResetCharm(code);
+      // Clear the "sealed" session flag so the claim flow isn't short-circuited
+      // back to /c/:code when the user (or a tester) scans the charm again.
+      sessionStorage.removeItem(`mc.sealed.${code}`);
+      nav("/account");
+    } catch (e: any) {
+      setErr(e?.message ?? "Factory reset failed.");
       setBusy(false);
     }
   }
@@ -614,6 +634,65 @@ export function CharmDetailPage() {
               Arcane Emporium
             </button>
           </div>
+
+          {/* Factory Reset (testing only) */}
+          <details className="teCharmSection">
+            <summary className="teCharmSectionTitle" style={{ color: "rgba(255,100,100,0.8)" }}>
+              Danger Zone
+            </summary>
+            {!resetConfirm ? (
+              <div style={{ display: "grid", gap: 10 }}>
+                <div style={{ fontSize: "var(--fs-meta)", opacity: 0.75 }}>
+                  Factory reset wipes all content, ownership, and metadata from this charm.
+                  The charm code will be reusable as if brand new.
+                </div>
+                <div>
+                  <button
+                    className="teBtn"
+                    style={{ background: "rgba(200,40,40,0.15)", border: "1px solid rgba(200,40,40,0.4)", color: "#ff7070" }}
+                    onClick={() => setResetConfirm(true)}
+                    disabled={busy}
+                    type="button"
+                  >
+                    Factory Reset
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                padding: "12px 14px",
+                borderRadius: 10,
+                background: "rgba(220,40,40,0.08)",
+                border: "1px solid rgba(220,40,40,0.35)",
+                display: "grid",
+                gap: 10,
+              }}>
+                <div style={{ color: "#ff7070", fontSize: "var(--fs-meta)" }}>
+                  This will permanently delete all content and unlink this charm from your account.
+                  This cannot be undone.
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    className="teBtn teBtnSm teBtnGhost"
+                    onClick={() => setResetConfirm(false)}
+                    disabled={busy}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="teBtn teBtnSm"
+                    style={{ background: "rgba(200,40,40,0.25)", border: "1px solid rgba(200,40,40,0.5)", color: "#ff7070" }}
+                    onClick={handleFactoryReset}
+                    disabled={busy}
+                    type="button"
+                  >
+                    {busy ? "Resetting\u2026" : "Confirm Reset"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </details>
 
           <div className="teCharmNav">
             <Link to="/account">Back to Account</Link>

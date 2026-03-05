@@ -1,4 +1,4 @@
-import { authGet, authPut } from "../../app/http/apiClient";
+import { authGet, authPut, authPost } from "../../app/http/apiClient";
 
 // Re-export profile API for convenience
 export { getUserMe, saveProfile } from "../../app/api/profileApi";
@@ -97,6 +97,14 @@ export async function updateGlyph(
     `/api/charm/${encodeURIComponent(code)}/glyph`,
     body
   );
+}
+
+/**
+ * Factory-reset a charm the current user owns: wipes all content, ownership,
+ * and metadata, returning the charm to "unconfigured" state.
+ */
+export async function factoryResetCharm(code: string): Promise<void> {
+  await authPost<unknown>(`/api/charm/${encodeURIComponent(code)}/factory-reset`, {});
 }
 
 /**
