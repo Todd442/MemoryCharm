@@ -173,6 +173,13 @@ export function CharmEntryPage() {
       <div className="pb-frame pb-status">
         <div className="pb-status-title">Memory Charm</div>
         <div className="pb-explain" style={{ marginTop: 8, color: "#ff6a6a" }}>{ui.message}</div>
+        <a
+          href="/nfc-check"
+          onClick={e => { e.preventDefault(); nav("/nfc-check"); }}
+          style={{ marginTop: 20, fontSize: "var(--fs-label)", opacity: 0.6, color: "inherit", textDecoration: "underline", textUnderlineOffset: 3 }}
+        >
+          Having trouble with your charm?
+        </a>
       </div>
     );
   }

@@ -150,16 +150,81 @@
   text-align: center;
 }
 
-/* Placeholder frame — replace src with <img> when photo is ready */
-.lp-flagship-img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border: 1px solid rgba(210, 170, 110, 0.18);
-  border-radius: 4px;
+/* ── Help with the magic ──────────────────────────────────────────────── */
+.lp-section--magic {
+  background: #050201;
+  border-top: 1px solid rgba(210, 170, 110, 0.08);
+}
+
+.lp-magic {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.lp-magic-intro {
+  font-size: clamp(15px, 1.7vw, 18px);
+  color: rgba(243, 231, 207, 0.7);
+  margin: 0 0 clamp(28px, 4vh, 44px);
+  line-height: 1.6;
+}
+
+.lp-magic-steps {
+  list-style: none;
+  margin: 0 0 clamp(32px, 5vh, 52px);
+  padding: 0;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lp-magic-step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  font-size: clamp(14px, 1.55vw, 17px);
+  color: rgba(243, 231, 207, 0.78);
+  line-height: 1.6;
+  padding: 18px 20px;
+  border: 1px solid rgba(210, 170, 110, 0.12);
+  border-radius: 8px;
   background: rgba(210, 170, 110, 0.03);
+}
+
+.lp-magic-step strong {
+  color: rgba(243, 231, 207, 0.95);
+}
+
+.lp-magic-step-num {
+  font-family: "Cinzel", serif;
+  font-size: clamp(13px, 1.4vw, 15px);
+  letter-spacing: 0.1em;
+  color: rgba(210, 170, 110, 0.55);
+  min-width: 20px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.lp-magic-cta {
+  text-align: center;
+}
+
+.lp-magic-btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.lp-magic-cta-hint {
+  margin: 14px 0 0;
+  font-size: clamp(12px, 1.3vw, 14px);
+  color: rgba(243, 231, 207, 0.42);
+  line-height: 1.5;
+}
+
+.lp-flagship-img {
+  display: block;
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.65);
   margin-bottom: clamp(18px, 3vh, 28px);
 }
 
@@ -347,6 +412,16 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom-color: rgba(210, 170, 110, 0.08);
+}
+
+.lp-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lp-nav-link {
+  text-decoration: none;
 }
 
 .lp-nav-brand {

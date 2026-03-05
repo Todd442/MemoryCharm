@@ -24,6 +24,7 @@ import splash13 from "../../../assets/SplashScreenImages/20230825_140417.jpg";
 import splash14 from "../../../assets/SplashScreenImages/20201007_170723.jpg";
 import splash15 from "../../../assets/SplashScreenImages/20180610_122720.jpg";
 
+import charmPhoto from "../../../assets/CharmPhoto.png";
 import "./LandingPage.css";
 
 // Fallback colour shown while each image loads
@@ -101,15 +102,24 @@ export function LandingPage() {
       {/* Floating nav — fades in once hero scrolls away */}
       <nav className={`lp-nav${navVisible ? " lp-nav--visible" : ""}`} aria-label="Site navigation">
         <span className="lp-nav-brand">MemoryCharm</span>
-        {isAuthed ? (
-          <button className="lp-nav-btn" type="button" onClick={() => nav("/account")}>
-            Account
-          </button>
-        ) : (
-          <button className="lp-nav-btn" type="button" onClick={handleSignIn} disabled={working}>
-            {working ? "Working…" : "Sign In"}
-          </button>
-        )}
+        <div className="lp-nav-right">
+          <a
+            href="/nfc-check"
+            className="lp-nav-btn lp-nav-link"
+            onClick={e => { e.preventDefault(); nav("/nfc-check"); }}
+          >
+            Charm help
+          </a>
+          {isAuthed ? (
+            <button className="lp-nav-btn" type="button" onClick={() => nav("/account")}>
+              Account
+            </button>
+          ) : (
+            <button className="lp-nav-btn" type="button" onClick={handleSignIn} disabled={working}>
+              {working ? "Working…" : "Sign In"}
+            </button>
+          )}
+        </div>
       </nav>
 
       {/* Scrollable content — sits above canvas */}
@@ -214,12 +224,34 @@ export function LandingPage() {
         {/* ── Flagship charm photo ─────────────────────────────────────── */}
         <section className="lp-section lp-section--flagship">
           <div className="lp-flagship">
-            <div className="lp-flagship-img" aria-label="The MemoryCharm — photograph coming">
-              <span className="lp-flagship-placeholder">[ Charm photograph ]</span>
-            </div>
+            <img src={charmPhoto} alt="The MemoryCharm — a hand holding a golden charm" className="lp-flagship-img" />
             <p className="lp-flagship-caption">
               The Original MemoryCharm — handcrafted, NFC-encoded, yours.
             </p>
+          </div>
+        </section>
+
+        {/* ── Help with the magic ──────────────────────────────────────── */}
+        <section className="lp-section lp-section--magic" id="magic-help">
+          <div className="lp-magic">
+            <h2 className="lp-section-title">Charm not responding?</h2>
+            <p className="lp-magic-intro">
+              Our NFC guide detects your device, shows you exactly where to hold the charm,
+              and runs a live tap test.
+            </p>
+
+            {/* Placeholder for future video -------------------------------- */}
+            {/* <div className="lp-magic-video">[Video guide coming]</div> */}
+
+            <div className="lp-magic-cta">
+              <a
+                href="/nfc-check"
+                className="lp-cta-btn lp-magic-btn"
+                onClick={e => { e.preventDefault(); nav("/nfc-check"); }}
+              >
+                Walk me through it
+              </a>
+            </div>
           </div>
         </section>
 

@@ -14,6 +14,7 @@ import { NfcCheckPage } from "../features/nfc-check/pages/NfcCheckPage";
 import { TermsPage } from "../features/legal/pages/TermsPage";
 import { PlainTermsPage } from "../features/legal/pages/PlainTermsPage";
 import { NotFoundPage } from "../features/home/pages/NotFoundPage";
+import { StatusProvider } from "../app/providers/StatusProvider";
 
 
 export const router = createBrowserRouter([
@@ -30,6 +31,9 @@ export const router = createBrowserRouter([
   // Legal pages — standalone, no shell
   { path: "/terms", element: <TermsPage /> },
   { path: "/terms/plain", element: <PlainTermsPage /> },
+
+  // NFC check — standalone, no shell (public, recipient-facing)
+  { path: "/nfc-check", element: <StatusProvider><NfcCheckPage /></StatusProvider> },
 
   // Playback routes — immersive nebula shell, no frame
   {
@@ -89,9 +93,6 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
-      // NFC Check & Guide (public)
-      { path: "/nfc-check", element: <NfcCheckPage /> },
-
       { path: "/test/scroll", element: <ScrollTestPage /> },
     ],
   },
