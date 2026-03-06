@@ -9,10 +9,12 @@ import { AccountPage } from "../features/account/pages/AccountPage";
 import { CharmDetailPage } from "../features/account/pages/CharmDetailPage";
 import { PurchasePage } from "../features/account/pages/PurchasePage";
 import { RequireAuth } from "../app/auth/RequireAuth";
+import { RequireUla } from "../app/auth/RequireUla";
 import { ScrollTestPage } from "../features/test/pages/ScrollTestPage.tsx";
 import { NfcCheckPage } from "../features/nfc-check/pages/NfcCheckPage";
 import { TermsPage } from "../features/legal/pages/TermsPage";
 import { PlainTermsPage } from "../features/legal/pages/PlainTermsPage";
+import { TermsAcceptPage } from "../features/legal/pages/TermsAcceptPage";
 import { NotFoundPage } from "../features/home/pages/NotFoundPage";
 import { StatusProvider } from "../app/providers/StatusProvider";
 
@@ -31,6 +33,7 @@ export const router = createBrowserRouter([
   // Legal pages — standalone, no shell
   { path: "/terms", element: <TermsPage /> },
   { path: "/terms/plain", element: <PlainTermsPage /> },
+  { path: "/terms/accept", element: <TermsAcceptPage /> },
 
   // NFC check — standalone, no shell (public, recipient-facing)
   { path: "/nfc-check", element: <StatusProvider><NfcCheckPage /></StatusProvider> },
@@ -63,7 +66,9 @@ export const router = createBrowserRouter([
         path: "/account",
         element: (
           <RequireAuth>
-            <AccountPage />
+            <RequireUla>
+              <AccountPage />
+            </RequireUla>
           </RequireAuth>
         ),
       },
@@ -71,7 +76,9 @@ export const router = createBrowserRouter([
         path: "/account/charms/:code",
         element: (
           <RequireAuth>
-            <CharmDetailPage />
+            <RequireUla>
+              <CharmDetailPage />
+            </RequireUla>
           </RequireAuth>
         ),
       },
@@ -79,7 +86,9 @@ export const router = createBrowserRouter([
         path: "/account/charms/:code/purchase",
         element: (
           <RequireAuth>
-            <PurchasePage />
+            <RequireUla>
+              <PurchasePage />
+            </RequireUla>
           </RequireAuth>
         ),
       },
@@ -89,7 +98,9 @@ export const router = createBrowserRouter([
         path: "/claim/:code",
         element: (
           <RequireAuth>
-            <ClaimCharmPage />
+            <RequireUla>
+              <ClaimCharmPage />
+            </RequireUla>
           </RequireAuth>
         ),
       },

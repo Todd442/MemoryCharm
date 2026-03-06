@@ -1,5 +1,8 @@
 import { authGet, authPost } from "../http/apiClient";
 
+export const CURRENT_TERMS_VERSION = "1.0";
+const ULA_CACHE_KEY = "mc.ulaVersion";
+
 export type UserProfile = {
   firstName: string;
   lastName: string;
@@ -18,15 +21,31 @@ type UserProfileApiResponse = {
   totalCharmsOwned: number;
   createdAt: string;
   lastLoginAt?: string;
+  termsVersion?: string;
+  termsAcceptedAt?: string;
 };
 
 /**
+ * Returns true if the locally cached ULA version matches the current version.
+ * Used as a fast-path to skip the API call on subsequent visits.
+ */
+export function isUlaCachedLocally(): boolean {
+  return localStorage.getItem(ULA_CACHE_KEY) === CURRENT_TERMS_VERSION;
+}
+
+/** Writes the accepted version to localStorage after a confirmed API acceptance. */
+export function cacheUlaLocally(): void {
+  localStorage.setItem(ULA_CACHE_KEY, CURRENT_TERMS_VERSION);
+}
+
+/**
  * Get user profile. GET /api/user/profile
- * Returns { hasProfile, profile? } to match existing SPA contract.
+ * Returns { hasProfile, profile?, termsVersion? } to match existing SPA contract.
  */
 export async function getUserMe(): Promise<{
   hasProfile: boolean;
   profile?: UserProfile;
+  termsVersion?: string;
 }> {
   try {
     const res = await authGet<UserProfileApiResponse>("/api/user/profile");
@@ -39,6 +58,7 @@ export async function getUserMe(): Promise<{
         email: res.email,
         cellNumber: res.cellNumber ?? "",
       },
+      termsVersion: res.termsVersion,
     };
   } catch (err: any) {
     const msg = (err?.message ?? "").toLowerCase();
@@ -47,6 +67,15 @@ export async function getUserMe(): Promise<{
     }
     throw err;
   }
+}
+
+/**
+ * Record terms acceptance. POST /api/user/terms/accept
+ * Also writes the accepted version to localStorage as a client-side cache.
+ */
+export async function acceptTerms(): Promise<void> {
+  await authPost("/api/user/terms/accept", { version: CURRENT_TERMS_VERSION });
+  cacheUlaLocally();
 }
 
 /**
