@@ -1,0 +1,308 @@
+Memory Charm™ — User License Agreement (ULA)
+Last Updated: [Insert Date]
+
+================================================================================
+
+Welcome to Memory Charm™.
+This agreement explains how the Memory Charm product and related digital services
+work, what you can expect from us, and what we expect from you.
+
+We've written this in plain English because we believe in clarity. That said,
+this is still a legal agreement.
+
+By activating, scanning, or using a Memory Charm, you agree to these terms.
+
+================================================================================
+
+1. WHAT YOU'RE GETTING
+
+When you purchase a Memory Charm, you are receiving:
+
+  - A physical NFC-enabled charm
+  - Access to associated digital hosting services
+  - The ability to upload and share personal memories (video, image, audio, or text)
+  - A limited license to use the Memory Charm software platform
+
+You are NOT purchasing ownership of the software platform or underlying
+infrastructure.
+
+================================================================================
+
+2. LICENSE GRANT
+
+We grant you a non-exclusive, non-transferable license to use the Memory Charm
+platform solely for personal, non-commercial use.
+
+You may:
+  - Upload your own content
+  - Share your charm with friends and family
+  - Gift a charm to someone else
+
+You may not:
+  - Reverse engineer the software
+  - Resell access to the hosting service
+  - Use the platform for illegal, harmful, or abusive content
+  - Attempt to bypass usage limits or service protections
+
+================================================================================
+
+3. YOUR CONTENT
+
+You retain ownership of the content you upload.
+
+By uploading content, you grant us a limited license to:
+  - Store it
+  - Secure it
+  - Deliver it when the charm is scanned
+  - Back it up for service continuity
+
+We do NOT sell your content.
+We do NOT claim ownership of your memories.
+
+You are responsible for ensuring you have the right to upload any content (e.g.,
+no copyrighted movies, no content you don't have rights to). You must be at
+least 18 years of age to upload or manage media.
+
+================================================================================
+
+4. HOSTING & SERVICE DURATION
+
+Memory Charm includes digital hosting for a defined service period ("Hosting
+Commitment Period") disclosed at activation. This period is the lifespan of the
+memory — it is finite by design.
+
+The Hosting Commitment Period begins on the date the Memory Charm is first
+activated, not the purchase date.
+
+At the end of the Hosting Commitment Period:
+  - Hosted content will expire and may no longer be accessible.
+  - This is the intended behaviour of the product, not a failure of service.
+  - We may offer renewal options to extend the period before it expires.
+
+We will make reasonable efforts to notify you as your service period approaches
+its end so you have the opportunity to renew or download your content.
+
+We reserve the right to discontinue service if the platform becomes technically
+or economically unviable, or if laws or regulations require changes.
+
+================================================================================
+
+5. CONTENT MODIFICATION WINDOW
+
+After activation, you may upload, replace, or modify media content for fourteen
+(14) calendar days. After this period, media becomes fixed and cannot be
+replaced or edited through standard use of the service.
+
+After the window closes, you may still update non-media elements such as memory
+title, text description, and display captions.
+
+You are responsible for reviewing and confirming uploaded media during this
+window. After it closes, we are not responsible for incorrect uploads,
+unintended versions, or formatting errors.
+
+================================================================================
+
+6. PRIVACY & DATA
+
+We collect only the data necessary to operate the service.
+
+We do not:
+  - Sell personal data
+  - Track users beyond what is necessary for security and service reliability
+
+Technical logs (such as scan timestamps or device types) may be collected for
+security and performance monitoring. Full details are in our Privacy Policy.
+
+================================================================================
+
+7. ACCEPTABLE USE
+
+You agree not to upload:
+  - Illegal content
+  - Explicit content involving minors
+  - Malware or harmful code
+  - Content intended to harass or threaten others
+  - Content that infringes intellectual property or privacy rights
+
+We reserve the right to remove content that violates these standards.
+
+================================================================================
+
+8. NFC & DEVICE COMPATIBILITY
+
+Memory Charms rely on NFC-capable devices. We cannot guarantee compatibility
+with every phone or device model. Users are responsible for enabling NFC
+functionality and understanding their device settings. We are not responsible
+for device-specific limitations.
+
+================================================================================
+
+9. WARRANTY DISCLAIMER
+
+Memory Charm is provided "as is" and "as available." While we strive for
+reliability, we do not guarantee uninterrupted service. We recommend keeping
+your own backup of uploaded content.
+
+The physical charm is warranted against manufacturing defects for [X] days
+from purchase.
+
+To the maximum extent permitted by law, Memory Charm and the services are
+provided without warranties of any kind, express or implied.
+
+================================================================================
+
+10. LIMITATION OF LIABILITY
+
+To the maximum extent permitted by law:
+  - We are not liable for indirect, incidental, or consequential damages
+  - Our total liability shall not exceed the purchase price of the charm
+
+This includes lost data, emotional distress, and third-party misuse of
+shared links.
+
+================================================================================
+
+11. TRANSFER & GIFTING
+
+If you gift a charm, the recipient becomes the user of record upon activation.
+The original purchaser no longer retains access rights unless explicitly shared.
+
+Anyone in possession of the charm may be able to access associated content
+unless optional viewing controls are enabled.
+
+================================================================================
+
+12. UPDATES TO THIS AGREEMENT
+
+We may update this agreement over time to improve performance, enhance security,
+or add features. Material changes will be posted with an updated date.
+
+================================================================================
+
+13. SERVICE LIMITS
+
+The following limits apply to content uploaded to a Memory Charm:
+
+  - Video:  Up to 200 MB per charm. We recommend 30 seconds or less for the
+            best viewing experience.
+  - Images: Up to 10 photos per charm, with a combined size of up to 40 MB.
+  - Audio:  Up to 60 seconds recommended. Files should not exceed 50 MB.
+
+These limits reflect current platform capabilities and may be adjusted over
+time. Limits applicable to your specific Charm Plan are disclosed at activation.
+We will not retroactively reduce limits for already-activated charms during
+their Hosting Commitment Period without reasonable notice.
+
+================================================================================
+
+14. UNACTIVATED ACCOUNTS
+
+The expiry of a memory at the end of its Hosting Commitment Period is the
+designed lifecycle of the product and is addressed in Section 4 above.
+
+Separately, accounts that were created but never used to activate any charm
+may be removed after twenty-four (24) months of inactivity. No content will
+be lost in these cases as no memory was ever bound.
+
+================================================================================
+
+15. BUSINESS CONTINUITY — ACQUISITION & SHUTDOWN
+
+We intend to operate Memory Charm for the long term. However, in the event of
+a significant business change, the following commitments apply:
+
+Acquisition or Transfer:
+  Any successor entity that acquires Memory Charm or its assets agrees, as a
+  condition of that acquisition, to honour the Hosting Commitment Periods of all
+  active charms at the time of transfer. Your memories will not be deleted as a
+  result of a change in ownership.
+
+Service Discontinuation:
+  If we determine that the platform must be permanently discontinued, we will:
+
+    1. Provide no less than ninety (90) days advance written notice to all
+       registered users at their email address on file.
+    2. Offer a sixty (60) day window during which you can download or export
+       your uploaded content via your account.
+    3. Permanently delete all hosted content after this window closes.
+
+We cannot guarantee that content exported during this window will be playable
+outside the Memory Charm platform, as playback depends on our application.
+We recommend maintaining your own copies of all uploaded media at all times.
+
+================================================================================
+
+16. COPYRIGHT & DMCA COMPLIANCE
+
+Memory Charm respects intellectual property rights and expects users to do the
+same. We comply with the Digital Millennium Copyright Act (DMCA), 17 U.S.C.
+§ 512, and respond to valid notices of alleged copyright infringement.
+
+Designated DMCA Agent:
+  [DMCA Agent Name]
+  [Company Name]
+  [Mailing Address]
+  Email: dmca@memorycharm.com
+
+  NOTE TO LEGAL: This agent must be registered with the US Copyright Office
+  at https://www.copyright.gov/dmca-directory/ before launch.
+
+To Submit a Takedown Notice:
+  If you believe content hosted on Memory Charm infringes your copyright,
+  send a written notice to our Designated Agent that includes:
+
+    (a) Your physical or electronic signature.
+    (b) Identification of the copyrighted work claimed to be infringed.
+    (c) Identification of the infringing material and its location on our
+        platform (e.g., the charm URL).
+    (d) Your contact information (name, address, phone, email).
+    (e) A statement that you have a good faith belief the use is not authorised.
+    (f) A statement under penalty of perjury that the information is accurate
+        and that you are the copyright owner or authorised to act on their behalf.
+
+Counter-Notice Procedure:
+  If you believe content was removed in error, you may send a counter-notice to
+  our Designated Agent including your signature, identification of the removed
+  material, a statement under penalty of perjury that removal was in error, your
+  contact information, and consent to jurisdiction of the federal court in your
+  district.
+
+Repeat Infringers:
+  We will terminate the accounts of users who are found to be repeat infringers
+  of copyright in appropriate circumstances.
+
+================================================================================
+
+17. GOVERNING LAW
+
+This agreement is governed by the laws of the State of Minnesota, without
+regard to conflict of law principles.
+
+================================================================================
+
+18. A FINAL WORD
+
+Memory Charm exists to preserve moments — not to create legal battles.
+
+We promise:
+  - To safeguard your memories
+  - To respect your privacy
+  - To operate responsibly
+
+You promise:
+  - To use the platform responsibly
+  - To upload only content you have rights to
+  - To keep your own backups
+
+If you have questions, contact: support@memorycharm.com
+
+================================================================================
+
+REMAINING OPEN QUESTION FOR LEGAL REVIEW
+
+  - Arbitration clause: Consider adding a binding arbitration / class action
+    waiver to reduce litigation exposure. This requires legal counsel to draft
+    correctly, particularly for multi-state consumer products. A poorly written
+    clause may be unenforceable, which is worse than none.
+
+================================================================================

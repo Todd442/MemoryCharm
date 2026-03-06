@@ -6,6 +6,8 @@ import { InteractionStatus } from "@azure/msal-browser";
 
 import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
 import type { UserProfile } from "../api";
+import { CURRENT_TERMS_VERSION, isUlaCachedLocally, cacheUlaLocally, acceptTerms } from "../../../app/api/profileApi";
+import { UlaContent } from "../../legal/components/UlaContent";
 import { getUserCharms, getCharmDetail } from "../../account/api";
 import { entryByCode } from "../../playback/api";
 import { loginRequest } from "../../../app/auth/msalConfig";
@@ -84,7 +86,7 @@ export function MemoryDetailsFields({
 }
 // ---------------------------------------------------------------------------
 
-type Step = "loading" | "profile" | "memoryType" | "details" | "protection" | "glyphSelect" | "upload" | "done";
+type Step = "loading" | "welcome" | "ula" | "profile" | "memoryType" | "details" | "protection" | "glyphSelect" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
 
@@ -103,6 +105,20 @@ const STEP_META: Record<Step, StepMeta> = {
     statusSubtitle: "We’re checking your account before you bind a memory.",
     stickyTitle: "",
     stickyDesc: "",
+  },
+  welcome: {
+    cardTitle: "CLAIM THIS CHARM",
+    statusText: "Claim this Charm",
+    statusSubtitle: "Sign in to become this charm’s Keeper.",
+    stickyTitle: "What to expect",
+    stickyDesc: "Sign in to get started — it only takes a few minutes.",
+  },
+  ula: {
+    cardTitle: "LICENSE AGREEMENT",
+    statusText: "User License Agreement",
+    statusSubtitle: "A one-time read-and-accept for your account.",
+    stickyTitle: "Review and accept",
+    stickyDesc: "This agreement covers how your memories are hosted and protected.",
   },
   details: {
     cardTitle: "MEMORY DETAILS",
@@ -167,7 +183,14 @@ export function ClaimCharmPage() {
 
   const emailish = useMemo(() => me?.username ?? "", [me]);
 
-  const [step, setStep] = useState<Step>("loading");
+  const [step, setStep] = useState<Step>("welcome");
+  // needsUla / needsProfile: pessimistic defaults so pre-auth step count is accurate for new users.
+  // Updated after API call completes.
+  const [needsUla, setNeedsUla] = useState(!isUlaCachedLocally());
+  const [needsProfile, setNeedsProfile] = useState(true);
+  const [apiChecked, setApiChecked] = useState(false);
+  const [ulaAccepting, setUlaAccepting] = useState(false);
+  const [ulaError, setUlaError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [claimed, setClaimed] = useState<{ charmId: string } | null>(null);
@@ -187,13 +210,16 @@ export function ClaimCharmPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
 
-  // Dynamic step counter — adjusts when glyphSelect is included/excluded
+  // Dynamic step list — always starts with welcome, then ULA/profile only if needed.
   const orderedSteps = useMemo<Step[]>(() => {
-    const base: Step[] = ["profile", "memoryType", "details", "upload", "protection"];
+    const base: Step[] = ["welcome"];
+    if (needsUla) base.push("ula");
+    if (needsProfile) base.push("profile");
+    base.push("memoryType", "details", "upload", "protection");
     if (authMode === "glyph") base.push("glyphSelect");
     base.push("done");
     return base;
-  }, [authMode]);
+  }, [needsUla, needsProfile, authMode]);
 
   const stepNumber = useMemo(() => {
     const idx = orderedSteps.indexOf(step);
@@ -277,6 +303,9 @@ export function ClaimCharmPage() {
     // Pre-fill email from the MSAL account
     setProfileData((prev) => ({ ...prev, email: emailish }));
 
+    // Show loading while we check — prevents a welcome flash for already-authed users
+    setStep("loading");
+
     Promise.all([getUserMe(), entryByCode(code)])
       .then(([profileRes, entry]) => {
         // If charm is already configured with content, go straight to playback
@@ -285,10 +314,25 @@ export function ClaimCharmPage() {
           return;
         }
 
-        if (profileRes.hasProfile) {
-          setInitialStep("memoryType");
-        } else {
+        // Determine what this user still needs to complete
+        const ulaNeeded = !isUlaCachedLocally() && profileRes.termsVersion !== CURRENT_TERMS_VERSION;
+        const profileNeeded = !profileRes.hasProfile;
+
+        if (!ulaNeeded && profileRes.termsVersion === CURRENT_TERMS_VERSION) {
+          cacheUlaLocally(); // server confirmed — warm the local cache
+        }
+
+        setNeedsUla(ulaNeeded);
+        setNeedsProfile(profileNeeded);
+        setApiChecked(true);
+
+        if (ulaNeeded) {
+          setInitialStep("ula");
+        } else if (profileNeeded) {
           setInitialStep("profile");
+        } else {
+          // Returning user — show welcome with updated copy so they know their context
+          setInitialStep("welcome");
         }
 
         // Pre-select the glyph from the user's most recently claimed glyph charm
@@ -307,6 +351,7 @@ export function ClaimCharmPage() {
       })
       .catch((e: any) => {
         setErr(e?.message ?? "Failed to check profile.");
+        setApiChecked(true);
         setInitialStep("memoryType"); // fall back so the page isn't stuck
       });
   }, [isAuthed, emailish, code, nav]);
@@ -341,9 +386,27 @@ export function ClaimCharmPage() {
   async function doSignIn() {
     setErr(null);
     try {
+      // Store the claim path so AuthGuard can return here after login completes
+      const returnTo = `/claim/${code}`;
+      sessionStorage.setItem("mc.returnTo", returnTo);
+      localStorage.setItem("mc.returnTo", returnTo);
       await instance.loginRedirect(loginRequest);
     } catch (e: any) {
       setErr(e?.message ?? "Sign-in failed.");
+    }
+  }
+
+  async function doAcceptUla() {
+    setUlaAccepting(true);
+    setUlaError(null);
+    try {
+      await acceptTerms();
+      setNeedsUla(false);
+      advanceTo(needsProfile ? "profile" : "memoryType");
+    } catch {
+      setUlaError("Something went wrong. Please try again.");
+    } finally {
+      setUlaAccepting(false);
     }
   }
 
@@ -461,13 +524,22 @@ export function ClaimCharmPage() {
             <div className="teIlluminatedNum">{stepNumber}</div>
           )}
           <div className="teInstructionsText">
-            {stepNumber !== null && (
+            {/* Step counter hidden on welcome — the pills in the card body explain the flow */}
+            {stepNumber !== null && step !== "welcome" && (
               <div className="teStickyCounter">
                 Step {stepNumber} of {totalSteps}
               </div>
             )}
-            <div className="teStickyTitle">{STEP_META[step].stickyTitle}</div>
-            <div className="teStickyDesc">{STEP_META[step].stickyDesc}</div>
+            <div className="teStickyTitle">
+              {step === "welcome" && isAuthed && apiChecked
+                ? "You're all set — let's continue"
+                : STEP_META[step].stickyTitle}
+            </div>
+            <div className="teStickyDesc">
+              {step === "welcome" && isAuthed && apiChecked
+                ? "Your account is ready. Pick up where you left off."
+                : STEP_META[step].stickyDesc}
+            </div>
           </div>
           <div className="teStatusPill" role="status" aria-live="polite">
             <span className={"teStatusDot " + (busy ? "isBusy" : "isReady")} />
@@ -482,50 +554,128 @@ export function ClaimCharmPage() {
       <div className="teClaimScrollArea">
       <div className="teClaimWrap">
       <div className="teClaimPanel">
-        {/* Auth banner — only when not signed in */}
-        {!isAuthed && (
-          <div className="teAuthBanner">
-            <div className="teAuthRow">
-              <div className="teAuthLeft">
-                <div className="teAuthKicker">You'll need an account to claim this charm.</div>
-                <div className="teAuthHint">Sign up or sign in with Entra External ID.</div>
-              </div>
-
-              <button
-                className="teBtn teBtnPrimary"
-                onClick={doSignIn}
-                disabled={working}
-              >
-                {working ? "Working…" : "Sign in"}
-              </button>
-            </div>
+        <div className="teCard">
+          <div className="teCardHeader">
+            <div className="teCardHeaderLine" />
+            <div className="teCardHeaderTitle">{STEP_META[step].cardTitle}</div>
+            <div className="teCardHeaderLine" />
           </div>
-        )}
 
-        {err && <div className="teClaimError">{err}</div>}
-
-        {!isAuthed && (
-          <div className="teClaimFooter">
-            <Link className="teLink" to="/">Home</Link>
-          </div>
-        )}
-
-        {isAuthed && (
-          <div className="teCard">
-            <div className="teCardHeader">
-              <div className="teCardHeaderLine" />
-              <div className="teCardHeaderTitle">
-                {STEP_META[step].cardTitle}
-              </div>
-              <div className="teCardHeaderLine" />
+          {/* STEP: LOADING */}
+          {step === "loading" && (
+            <div className="teCardBody">
+              <div className="teHint">Checking your account…</div>
             </div>
+          )}
 
-            {/* STEP: LOADING */}
-            {step === "loading" && (
-              <div className="teCardBody">
-                <div className="teHint">Checking account…</div>
+          {/* STEP: WELCOME — pre-auth instructions or post-auth returning-user briefing */}
+          {step === "welcome" && (
+            <div className="teCardBody">
+              <div className="teGrid">
+                {!isAuthed ? (
+                  <>
+                    <p style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "var(--fs-label)",
+                      opacity: 0.75,
+                      lineHeight: 1.65,
+                      margin: "0 0 4px",
+                      textAlign: "center",
+                    }}>
+                      This charm is yours to claim. Here's what happens when you continue:
+                    </p>
+
+                    {[
+                      { s: "STEP 1", label: "SIGN IN OR CREATE AN ACCOUNT", desc: "You'll need a Memory Charm account to become this charm's Keeper." },
+                      { s: "STEP 2", label: "ACCEPT THE LICENSE AGREEMENT", desc: "A one-time acceptance. Takes about a minute to read." },
+                      { s: "STEP 3", label: "BIND YOUR MEMORY",             desc: "Upload a video, a photo, or an audio clip to seal inside this charm." },
+                      { s: "STEP 4", label: "YOUR CHARM IS SEALED",         desc: "The memory is locked in and ready to share — forever." },
+                    ].map(({ s, label, desc }) => (
+                      <div
+                        key={s}
+                        className="tePill tePillLarge"
+                        style={{ cursor: "default", pointerEvents: "none" }}
+                      >
+                        <span className="tePillSpec">{s}</span>
+                        <span className="tePillLabel">{label}</span>
+                        <span className="tePillDesc">{desc}</span>
+                      </div>
+                    ))}
+
+                    {err && <div className="teClaimError">{err}</div>}
+
+                    <div className="teActionsRow">
+                      <button
+                        className="teBtn teBtnPrimary teBtnWide"
+                        onClick={doSignIn}
+                        disabled={working}
+                        type="button"
+                      >
+                        {working ? "Working…" : "Claim this Charm"}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "var(--fs-label)",
+                      opacity: 0.75,
+                      lineHeight: 1.65,
+                      margin: "0 0 4px",
+                      textAlign: "center",
+                    }}>
+                      You're back. Your account is set up and ready — let's seal this memory.
+                    </p>
+
+                    {err && <div className="teClaimError">{err}</div>}
+
+                    <div className="teActionsRow">
+                      <button
+                        className="teBtn teBtnPrimary teBtnWide"
+                        onClick={() => advanceTo("memoryType")}
+                        disabled={busy}
+                        type="button"
+                      >
+                        Let's Continue
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <div style={{ textAlign: "center" }}>
+                  <Link className="teLink" to="/">← Home</Link>
+                </div>
               </div>
-            )}
+            </div>
+          )}
+
+          {/* STEP: ULA — inline license agreement within the claim flow */}
+          {step === "ula" && (
+            <div className="teCardBody">
+              <UlaContent />
+              {ulaError && <p className="teClaimError">{ulaError}</p>}
+              <p style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "0.78rem",
+                opacity: 0.55,
+                textAlign: "center",
+                margin: "16px 0 0",
+              }}>
+                By clicking Accept, you confirm you have read and agree to this User License Agreement.
+              </p>
+              <div className="teActionsRow">
+                <button
+                  className="teBtn teBtnPrimary teBtnWide"
+                  onClick={doAcceptUla}
+                  disabled={ulaAccepting}
+                  type="button"
+                >
+                  {ulaAccepting ? "Saving…" : "I Accept"}
+                </button>
+              </div>
+            </div>
+          )}
 
             {/* STEP: PROFILE */}
             {step === "profile" && (
@@ -922,8 +1072,7 @@ export function ClaimCharmPage() {
                 </div>
               </div>
             )}
-          </div>
-        )}
+        </div>
 
         <div className="teClaimFooter">
           <Link className="teLink" to="/">Home</Link>

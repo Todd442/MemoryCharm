@@ -93,17 +93,9 @@ export const router = createBrowserRouter([
         ),
       },
 
-      // Claim flow (protected)
-      {
-        path: "/claim/:code",
-        element: (
-          <RequireAuth>
-            <RequireUla>
-              <ClaimCharmPage />
-            </RequireUla>
-          </RequireAuth>
-        ),
-      },
+      // Claim flow — rendered immediately (no auth gate); ClaimCharmPage
+      // handles the unauthenticated welcome screen and triggers login on user action.
+      { path: "/claim/:code", element: <ClaimCharmPage /> },
       { path: "/test/scroll", element: <ScrollTestPage /> },
     ],
   },

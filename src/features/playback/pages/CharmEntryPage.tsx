@@ -210,7 +210,7 @@ export function CharmEntryPage() {
     );
   }
 
-  // Unclaimed — shouldn't reach here (effect redirects), but satisfies TS narrowing
+  // Unclaimed — redirected in effect above; this satisfies TS narrowing
   if (entry.kind === "unclaimed") return null;
 
   // Claimed — not configured
