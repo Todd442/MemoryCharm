@@ -17,7 +17,27 @@ async function bootstrap() {
   // IMPORTANT: Initialize MSAL and process the redirect response *before* rendering.
   debugLog("bootstrap", `Starting. URL: ${window.location.href}`);
   debugLog("bootstrap", `Search: ${window.location.search}, Hash: ${window.location.hash}`);
-  
+
+  // Detect a failed MSAL redirect response (e.g. AADSTS50058 from a silent
+  // token renewal attempt). The hash will contain both `error=` and `state=`.
+  // handleRedirectPromise() returns null for interactionType:silent errors, so
+  // the stale account stays cached and the page loops indefinitely.
+  // Fix: clear all MSAL storage and reload clean to force an interactive login.
+  const hash = window.location.hash;
+  const isMsalErrorHash = hash.includes("error=") && hash.includes("state=");
+  if (isMsalErrorHash) {
+    debugLog("bootstrap", `Auth error in hash — clearing MSAL state and reloading: ${hash}`);
+    const clientId = msalConfig.auth.clientId;
+    const clearStore = (store: Storage) =>
+      Object.keys(store)
+        .filter(k => k.includes(clientId) || k.toLowerCase().includes("msal"))
+        .forEach(k => store.removeItem(k));
+    clearStore(sessionStorage);
+    clearStore(localStorage);
+    window.location.replace(window.location.origin + window.location.pathname);
+    return;
+  }
+
   await msalInstance.initialize();
   debugLog("bootstrap", "MSAL initialized");
 
