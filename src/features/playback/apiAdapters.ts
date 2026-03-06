@@ -13,6 +13,7 @@ export type CharmStatusApiResponse = {
   glyphs?: { id: string; name: string }[];
   memoryName?: string;
   memoryDescription?: string;
+  isOwner?: boolean;
 };
 
 /**
@@ -90,6 +91,7 @@ export function toEntryResponse(
       memoryType: (api.memoryType as MemoryType) ?? "video",
       memoryName: api.memoryName || undefined,
       memoryDescription: api.memoryDescription || undefined,
+      isOwner: api.isOwner || undefined,
     };
   }
 

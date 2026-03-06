@@ -6,7 +6,7 @@ import {
   toGlyphVerifyResult,
   type CharmStatusApiResponse,
 } from "./apiAdapters";
-import { API_BASE } from "../../app/http/apiClient";
+import { API_BASE, authPost, tryGetBearerToken } from "../../app/http/apiClient";
 
 /** Safely parse JSON and normalize PascalCase keys to camelCase. */
 async function safeJsonNormalized(res: Response): Promise<CharmStatusApiResponse | null> {
@@ -32,9 +32,11 @@ export function entryByToken(token: string): Promise<EntryResponse> {
  * Entry by charm code. GET /api/charm/{code}
  */
 export async function entryByCode(code: string): Promise<EntryResponse> {
-  const res = await fetch(`${API_BASE}/api/charm/${encodeURIComponent(code)}`, {
-    headers: { Accept: "application/json" },
-  });
+  const token = await tryGetBearerToken();
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/charm/${encodeURIComponent(code)}`, { headers });
 
   if (res.status === 404) {
     return { kind: "not_found" };
@@ -102,4 +104,15 @@ export async function verifyGlyph(
     throw new Error(`Glyph verify returned ${res.status} with no parseable body`);
   }
   return toGlyphVerifyResult(body, res.status);
+}
+
+/**
+ * Report a content playback issue for a charm the authenticated user owns.
+ * POST /api/charm/{code}/report-issue
+ */
+export async function reportIssue(
+  code: string,
+  payload: { consentGranted: boolean; userNote?: string; detectedCodec?: string }
+): Promise<void> {
+  await authPost(`/api/charm/${encodeURIComponent(code)}/report-issue`, payload);
 }

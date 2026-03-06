@@ -10,6 +10,7 @@ import { CURRENT_TERMS_VERSION, isUlaCachedLocally, cacheUlaLocally, acceptTerms
 import { UlaContent } from "../../legal/components/UlaContent";
 import { getUserCharms, getCharmDetail } from "../../account/api";
 import { entryByCode } from "../../playback/api";
+import { checkFileAudioCodec } from "../../playback/utils/codecDetection";
 import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
@@ -267,7 +268,7 @@ export function ClaimCharmPage() {
       // If this charm was already sealed this session, don't let back navigate
       // into the claim flow — redirect straight to the playback page.
       if (code && sessionStorage.getItem(`mc.sealed.${code}`) === "true") {
-        nav(`/c/${encodeURIComponent(code)}`, { replace: true });
+        nav(`/c/${encodeURIComponent(code)}`, { replace: true, state: { isOwner: true } });
         return;
       }
       if (e.state?.step) {
@@ -296,7 +297,7 @@ export function ClaimCharmPage() {
 
     // Fast-path: charm was already sealed this session — skip API round-trip
     if (sessionStorage.getItem(`mc.sealed.${code}`) === "true") {
-      nav(`/c/${encodeURIComponent(code)}`, { replace: true });
+      nav(`/c/${encodeURIComponent(code)}`, { replace: true, state: { isOwner: true } });
       return;
     }
 
@@ -310,7 +311,7 @@ export function ClaimCharmPage() {
       .then(([profileRes, entry]) => {
         // If charm is already configured with content, go straight to playback
         if (entry.kind === "claimed" && entry.configured) {
-          nav(`/c/${encodeURIComponent(code)}`, { replace: true });
+          nav(`/c/${encodeURIComponent(code)}`, { replace: true, state: { isOwner: true } });
           return;
         }
 
@@ -441,7 +442,7 @@ export function ClaimCharmPage() {
   const MAX_IMAGE_FILES = 10;
   const [fileErr, setFileErr] = useState<string | null>(null);
 
-  function handleFileSelect(selected: FileList | null) {
+  async function handleFileSelect(selected: FileList | null) {
     setFileErr(null);
     if (!selected || selected.length === 0) {
       setFiles([]);
@@ -459,6 +460,20 @@ export function ClaimCharmPage() {
       setFileErr(`Total file size exceeds ${maxCharmMB} MB (${(totalBytes / 1024 / 1024).toFixed(1)} MB selected). Try a shorter clip or smaller file.`);
       setFiles([]);
       return;
+    }
+
+    // Check audio codec for video files before committing to upload
+    if (memoryType === "video" && picked[0]) {
+      const codecResult = await checkFileAudioCodec(picked[0]);
+      if (codecResult.ok === false) {
+        setFileErr(
+          "This video's audio format isn't supported by web browsers (codec: " +
+          codecResult.codec +
+          "). Please re-export or convert the video to MP4 with AAC audio and try again."
+        );
+        setFiles([]);
+        return;
+      }
     }
 
     setFiles(picked);
@@ -1064,7 +1079,7 @@ export function ClaimCharmPage() {
                 <div className="tePills tePillsWrap" style={{ marginTop: 14 }}>
                   <button
                     className="tePill"
-                    onClick={() => nav(`/c/${encodeURIComponent(code)}`, { replace: true })}
+                    onClick={() => nav(`/c/${encodeURIComponent(code)}`, { replace: true, state: { isOwner: true } })}
                     type="button"
                   >
                     View Charm

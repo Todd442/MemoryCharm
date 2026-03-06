@@ -712,7 +712,7 @@ export function CharmDetailPage() {
           </button>
           <button
             className="teBtn teBtnSm teBtnGhost"
-            onClick={() => nav(`/c/${encodeURIComponent(charm.charmId)}`)}
+            onClick={() => nav(`/c/${encodeURIComponent(charm.charmId)}`, { state: { isOwner: true } })}
             type="button"
           >
             View Charm

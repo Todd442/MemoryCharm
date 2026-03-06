@@ -152,3 +152,32 @@ export async function authPut<T>(path: string, body: unknown): Promise<T> {
   });
   return handleResponse<T>(res);
 }
+
+/**
+ * Like getBearerToken but returns null instead of throwing when the user
+ * is not signed in. Used for optionally-authenticated public endpoints.
+ *
+ * Unlike getBearerToken, this does NOT fall back to VITE_DEV_TOKEN when
+ * no MSAL account exists. That prevents VITE_DEV_TOKEN (a system-env bypass
+ * for required-auth flows) from making anonymous/incognito sessions appear
+ * authenticated on public endpoints.
+ */
+export async function tryGetBearerToken(): Promise<string | null> {
+  try {
+    const account =
+      msalInstance.getActiveAccount() ?? msalInstance.getAllAccounts()[0];
+    if (!account) return null;
+
+    // In dev, VITE_DEV_TOKEN replaces a real silent token acquisition.
+    const devToken = import.meta.env.VITE_DEV_TOKEN as string | undefined;
+    if (devToken) return devToken;
+
+    const result = await msalInstance.acquireTokenSilent({
+      account,
+      scopes: API_SCOPES,
+    });
+    return result.accessToken;
+  } catch {
+    return null; // silently fail — caller treats auth as optional
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell.exe -Command \"Get-Item ''C:\\\\Users\\\\appli\\\\OneDrive\\\\Pictures 1\\\\Samsung Gallery\\\\DCIM\\\\Camera\\\\20180901_110539.mp4'' | Select-Object Name, Length, Extension\")",
+      "Bash(powershell.exe -Command \":*)",
+      "Bash(powershell.exe -NoProfile -Command \"& {:*)",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\appli\\\\source\\\\repos\\\\MemoryCharm\\\\mediainfo.ps1\")",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\appli\\\\source\\\\repos\\\\MemoryCharm\\\\mediacodec.ps1\")",
+      "Bash(node patch-api.mjs)",
+      "Bash(rm patch-api.mjs)",
+      "Bash(node patch-claim.mjs)",
+      "Bash(rm patch-claim.mjs)",
+      "Bash(node patch-playback.mjs)",
+      "Bash(rm patch-playback.mjs)"
+    ]
+  }
+}

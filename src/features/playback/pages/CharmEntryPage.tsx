@@ -5,6 +5,7 @@ import type { EntryResponse, ContentFile } from "../types";
 import { GlyphAuthPanel } from "../../../components/GlyphAuthPanel";
 import { MemoryGallery } from "../components/MemoryGallery";
 import { FullscreenButton } from "../components/FullscreenButton";
+import { ReportIssueDialog } from "../components/ReportIssueDialog";
 import { usePwaInstall } from "../../../app/hooks/usePwaInstall";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill styles
 
@@ -32,8 +33,13 @@ function getTokenCaseInsensitive(search: string): string | null {
 
 export function CharmEntryPage() {
   const nav = useNavigate();
-  const { search } = useLocation();
+  const { search, state: navState } = useLocation();
   const { code } = useParams<{ code?: string }>();
+  // true when the router state explicitly marks this as an owner navigation
+  // (set by CharmDetailPage and ClaimCharmPage). Also true when the API
+  // confirms ownership via the optionally-attached Bearer token (covers NFC
+  // scans and direct URL visits where the owner is already signed in).
+  const navIsOwner = (navState as { isOwner?: boolean } | null)?.isOwner === true;
 
   const token = getTokenCaseInsensitive(search);
 
@@ -253,8 +259,10 @@ export function CharmEntryPage() {
       <PlaybackRenderer
         files={playback.files}
         type={playback.type}
+        code={entry.code}
         memoryName={entry.memoryName}
         memoryDescription={entry.memoryDescription}
+        isOwner={navIsOwner || entry.isOwner === true}
       />
     );
   }
@@ -266,13 +274,15 @@ export function CharmEntryPage() {
 /** Video player with magical buffering / error overlay.
  *  While buffering, the display cycles: magical phrase (3.8 s) → twinkle out
  *  → tech phrase (2.2 s) → twinkle back. After 7 s the magical text upgrades. */
-function VideoPlayer({ url }: { url: string }) {
+function VideoPlayer({ url, code, isOwner }: { url: string; code?: string; isOwner?: boolean }) {
   const [loading, setLoading]         = useState(true);   // initial load until canPlay
   const [buffering, setBuffering]     = useState(false);  // mid-playback stall
   const [showTech, setShowTech]       = useState(false);
   const [twinkle, setTwinkle]         = useState(false);
   const [slowNetwork, setSlowNetwork] = useState(false);
   const [error, setError]             = useState(false);
+  const [showReport, setShowReport]   = useState(false);
+  const [triggerVisible, setTriggerVisible] = useState(false);
 
   const cycleActive = useRef(false);
   const slowTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -282,6 +292,16 @@ function VideoPlayer({ url }: { url: string }) {
     if (slowTimer.current)  { clearTimeout(slowTimer.current);  slowTimer.current  = null; }
     if (cycleTimer.current) { clearTimeout(cycleTimer.current); cycleTimer.current = null; }
   };
+
+  // Show the report trigger once the video has settled (loaded or errored).
+  // Using useEffect means it fires even if isOwner prop arrives after canPlay.
+  useEffect(() => {
+    if (!isOwner || !code) return;
+    if (loading && !error) return; // wait until video has loaded or failed
+    const delay = error ? 0 : 5000;
+    const t = setTimeout(() => setTriggerVisible(true), delay);
+    return () => clearTimeout(t);
+  }, [isOwner, code, loading, error]);
 
   // Recursive cycle: hold → sparkle out → swap text → fade in → repeat
   const runCycle = (isTech: boolean) => {
@@ -332,7 +352,7 @@ function VideoPlayer({ url }: { url: string }) {
     setBuffering(false);
   };
 
-  useEffect(() => () => { cycleActive.current = false; clearAll(); }, []);
+  useEffect(() => () => { cycleActive.current = false; clearAll(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const magicalText = slowNetwork
     ? "The memory is finding its way to you…"
@@ -346,6 +366,22 @@ function VideoPlayer({ url }: { url: string }) {
 
   return (
     <div style={{ position: "relative" }}>
+      {isOwner && code && triggerVisible && !showReport && (
+        <button
+          className="pb-report-trigger"
+          onClick={() => setShowReport(true)}
+          aria-label="Report a playback issue"
+        >
+          Having trouble with this video?
+        </button>
+      )}
+      {isOwner && code && showReport && (
+        <ReportIssueDialog
+          code={code}
+          videoUrl={url}
+          onClose={() => setShowReport(false)}
+        />
+      )}
       <video
         src={url}
         controls
@@ -428,10 +464,12 @@ function PwaInstallToast() {
 function PlaybackRenderer(props: {
   files: ContentFile[];
   type: "video" | "image" | "audio";
+  code?: string;
   memoryName?: string;
   memoryDescription?: string;
+  isOwner?: boolean;
 }) {
-  const { files, type, memoryName, memoryDescription } = props;
+  const { files, type, code, memoryName, memoryDescription, isOwner } = props;
   const nav = useNavigate();
   const [imgReady, setImgReady] = useState(false);
 
@@ -458,7 +496,7 @@ function PlaybackRenderer(props: {
       <>
         <div className="pb-frame">
           {brand}
-          <VideoPlayer url={files[0].url} />
+          <VideoPlayer url={files[0].url} code={code} isOwner={isOwner} />
           {memoryDescription && (
             <div className="pb-memory-desc">{memoryDescription}</div>
           )}
