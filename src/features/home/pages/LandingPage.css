@@ -246,6 +246,11 @@
   letter-spacing: 0.04em;
 }
 
+.lp-section--lifetime {
+  background: #040100;
+  border-top: 1px solid rgba(210, 170, 110, 0.08);
+}
+
 .lp-section--maker {
   background: #040100;
   border-top: 1px solid rgba(210, 170, 110, 0.08);

@@ -255,15 +255,56 @@ export function LandingPage() {
           </div>
         </section>
 
+        {/* ── Lifetime & no subscription ───────────────────────────────── */}
+        <section className="lp-section lp-section--lifetime">
+          <div className="lp-prose">
+            <h2 className="lp-section-title">Yours, For Years</h2>
+            <div className="lp-verse">
+              <p>
+                You purchase a Memory Charm.<br />
+                The memory is yours.
+              </p>
+              <p>
+                Paid once.<br />
+                No monthly bill arrives.<br />
+                No renewal demanded before you are ready.
+              </p>
+            </div>
+            <div className="lp-body">
+              <p>
+                Each charm holds its memory for a decade or more.
+              </p>
+              <p>
+                Time begins to pass not when you purchase it &mdash;<br />
+                but when you bind your memory to it.<br />
+                A charm in a drawer, still unbound, is still waiting.
+              </p>
+            </div>
+            <p className="lp-pullquote">
+              Some things are meant to last a lifetime.<br />
+              Some, just long enough.
+            </p>
+            <div className="lp-body">
+              <p>
+                When the time grows near for the memory to fade,
+                we will let you know.
+                You can renew it for another span &mdash;
+                or let it go, as memories sometimes do.
+              </p>
+              <p>
+                The charm remains yours, regardless.
+                The object endures. The memory, while it lives,
+                is held faithfully.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* ── Where It's Made ──────────────────────────────────────────── */}
         <section className="lp-section lp-section--maker">
           <div className="lp-prose">
-            <h2 className="lp-section-title">Where It&rsquo;s Made</h2>
+            <h2 className="lp-section-title">Why We Made It</h2>
             <div className="lp-body">
-              <p>
-                Central Minnesota. A long way from the places that name
-                themselves the future.
-              </p>
               <p>
                 The maker spent three decades as a software architect &mdash;
                 from the first web to the latest wave, building systems for
@@ -281,8 +322,12 @@ export function LandingPage() {
             </p>
             <div className="lp-body">
               <p>
-                MemoryCharm is a different kind of working. The technology is
-                here &mdash; but it is meant to disappear. What remains is the
+                MemoryCharm is the answer to that. Built in Central Minnesota &mdash;
+                a long way from the places that name themselves the future &mdash;
+                because the technology was never the point.
+              </p>
+              <p>
+                It is meant to disappear. What remains is the
                 moment: a tap, a memory, a thing held in the hand.
               </p>
               <p>
@@ -343,6 +388,10 @@ export function LandingPage() {
 
         {/* ── Site footer ───────────────────────────────────────────────── */}
         <footer className="lp-footer">
+          <a href="/faq" onClick={e => { e.preventDefault(); nav("/faq"); }}>
+            FAQ
+          </a>
+          <span className="lp-footer-sep" aria-hidden="true">·</span>
           <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>
             Terms &amp; Conditions
           </a>

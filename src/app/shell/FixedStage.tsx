@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type FitMode = "contain" | "cover";
 
@@ -17,16 +17,28 @@ export function FixedStage(props: {
 
   const [vw, setVw] = useState(() => window.innerWidth);
   const [vh, setVh] = useState(() => window.innerHeight);
+  // Track the last width at which we accepted a height update.
+  // When the soft keyboard opens on Android, the width stays the same but
+  // the height shrinks — we ignore that to prevent the stage from rescaling.
+  // When orientation changes the width changes too, so we accept both dimensions.
+  const lastAcceptedVwRef = useRef(window.innerWidth);
 
   useEffect(() => {
     const onResize = () => {
       const vv = window.visualViewport;
-      if (vv) {
-        setVw(vv.width);
-        setVh(vv.height);
+      const newVw = vv ? vv.width : window.innerWidth;
+      const newVh = vv ? vv.height : window.innerHeight;
+
+      setVw(newVw);
+
+      if (newVw !== lastAcceptedVwRef.current) {
+        // Orientation change — accept the new height unconditionally.
+        lastAcceptedVwRef.current = newVw;
+        setVh(newVh);
       } else {
-        setVw(window.innerWidth);
-        setVh(window.innerHeight);
+        // Width unchanged: only grow vh. A shrink is almost always the soft
+        // keyboard appearing; growing back means the keyboard was dismissed.
+        setVh(prev => Math.max(prev, newVh));
       }
     };
 

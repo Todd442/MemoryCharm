@@ -15,6 +15,7 @@ import { NfcCheckPage } from "../features/nfc-check/pages/NfcCheckPage";
 import { TermsPage } from "../features/legal/pages/TermsPage";
 import { PlainTermsPage } from "../features/legal/pages/PlainTermsPage";
 import { TermsAcceptPage } from "../features/legal/pages/TermsAcceptPage";
+import { FaqPage } from "../features/home/pages/FaqPage";
 import { NotFoundPage } from "../features/home/pages/NotFoundPage";
 import { StatusProvider } from "../app/providers/StatusProvider";
 
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
   { path: "/terms", element: <TermsPage /> },
   { path: "/terms/plain", element: <PlainTermsPage /> },
   { path: "/terms/accept", element: <TermsAcceptPage /> },
+  { path: "/faq", element: <FaqPage /> },
 
   // NFC check — standalone, no shell (public, recipient-facing)
   { path: "/nfc-check", element: <StatusProvider><NfcCheckPage /></StatusProvider> },

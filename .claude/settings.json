@@ -11,7 +11,15 @@
       "Bash(node patch-claim.mjs)",
       "Bash(rm patch-claim.mjs)",
       "Bash(node patch-playback.mjs)",
-      "Bash(rm patch-playback.mjs)"
+      "Bash(rm patch-playback.mjs)",
+      "Bash(python3 /tmp/write_insert.py)",
+      "Bash(node /tmp/insert.js)",
+      "Bash(/tmp/test2.js:*)",
+      "Bash(node /tmp/test2.js)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\appli\\Downloads",
+      "\\tmp"
     ]
   }
 }

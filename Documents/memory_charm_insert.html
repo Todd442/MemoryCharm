@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Memory Charm Insert</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --ink: #1f140b; --ink-mid: #4a3321; --ink-light: #7a5c3a; --gold: #c9a85c; --gold-faint: rgba(201,168,92,0.35); --panel-w: 4.25in; --panel-h: 5.5in; }
+body { background: #1c1c1c; padding: 48px 32px 80px; display: flex; flex-direction: column; align-items: center; gap: 16px; font-family: "Cormorant Garamond", Georgia, serif; }
+.page-label { font-family: ui-monospace, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; text-align: center; padding: 7px 16px; background: #252525; border: 1px solid #333; border-bottom: none; width: fit-content; }
+.page { width: 8.5in; background: white; box-shadow: 0 24px 72px rgba(0,0,0,0.7); }
+.half { width: 8.5in; height: 5.5in; display: flex; }
+.half--top { transform: rotate(180deg); }
+.fold-line { width: 8.5in; height: 0; border-top: 1.5px dashed #aaa; position: relative; display: flex; justify-content: center; }
+.fold-line span { position: absolute; top: -9px; background: white; padding: 0 8px; font-family: ui-monospace, monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; }
+.panel { width: var(--panel-w); height: var(--panel-h); background: white; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+.panel + .panel { border-left: 1px dashed rgba(0,0,0,0.12); }
+.panel--front { align-items: center; justify-content: center; text-align: center; padding: 0.55in 0.5in; }
+.glyph-ring { width: 72px; height: 72px; border: 1.5px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 0.32in; position: relative; }
+.glyph-ring::before { content: ""; position: absolute; inset: 5px; border: 0.5px solid var(--gold-faint); border-radius: 50%; }
+.glyph-m { font-family: "Cinzel", serif; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; }
+.front-title { font-family: "Cinzel", serif; font-size: 19px; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink); margin-bottom: 0.22in; }
+.rule-gold { width: 2.2in; height: 1px; background: linear-gradient(to right, transparent, var(--gold) 30%, var(--gold) 70%, transparent); margin-bottom: 0.22in; }
+.front-tagline { font-size: 16px; font-weight: 300; font-style: italic; color: var(--ink-mid); letter-spacing: 0.05em; line-height: 1.6; margin-bottom: 0.52in; }
+.front-cta { font-family: "Cinzel", serif; font-size: 11.5px; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase; color: var(--ink); }
+.panel--back { align-items: center; justify-content: flex-end; text-align: center; padding: 0 0.5in 0.65in; }
+.back-glyph-ring { width: 52px; height: 52px; border: 1px solid var(--gold-faint); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.22in; }
+.back-glyph-m { font-family: "Cinzel", serif; font-size: 22px; font-weight: 700; color: var(--ink-mid); line-height: 1; }
+.back-url { font-family: "Cinzel", serif; font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mid); }
+.back-sub { font-size: 13px; font-style: italic; font-weight: 300; color: var(--ink-light); margin-top: 0.12in; letter-spacing: 0.04em; }
+.panel--inside { padding: 0.4in 0.4in; justify-content: flex-start; }
+.panel-heading { font-family: "Cinzel", serif; font-size: 12px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink); margin-bottom: 0.12in; }
+.rule-left { height: 1px; background: linear-gradient(to right, var(--gold), transparent); margin-bottom: 0.3in; }
+.body-text { font-size: 13.5px; font-weight: 400; color: var(--ink); line-height: 1.7; }
+.body-text p { margin-bottom: 0.13in; }
+.body-text em { color: var(--ink-mid); }
+.steps { list-style: none; margin: 0.05in 0 0; }
+.steps li { font-size: 14px; color: var(--ink); line-height: 1.65; padding-left: 1em; position: relative; margin-bottom: 0.06in; }
+.steps li::before { content: "—"; position: absolute; left: 0; color: var(--gold); }
+.note-qr { display: flex; align-items: flex-start; gap: 0.18in; margin-top: 0.16in; padding-top: 0.14in; border-top: 1px solid var(--gold-faint); }
+.note-text { flex: 1; font-size: 12px; font-style: italic; font-weight: 300; color: var(--ink-mid); line-height: 1.75; }
+.qr-side { display: flex; flex-direction: column; align-items: center; gap: 0.06in; flex-shrink: 0; }
+.qr-side img { width: 0.8in; height: 0.8in; display: block; opacity: 0.85; }
+.qr-label { font-family: "Cinzel", serif; font-size: 7.5px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-light); text-align: center; line-height: 1.5; max-width: 0.9in; }
+.qr-url { font-family: "Cormorant Garamond", serif; font-size: 7px; font-style: italic; color: var(--ink-light); text-align: center; margin-top: 0.04in; max-width: 0.9in; word-break: break-all; }
+.note { font-size: 12.5px; font-style: italic; font-weight: 300; color: var(--ink-mid); line-height: 1.7; margin-top: 0.2in; padding-top: 0.16in; border-top: 1px solid var(--gold-faint); }
+@media print {
+  @page { size: 8.5in 11in portrait; margin: 0; }
+  body { background: white; padding: 0; gap: 0; display: block; }
+  .page-label { display: none; }
+  .fold-line { display: none; }
+  .page { box-shadow: none; }
+  .panel { overflow: visible; }
+  .panel + .panel { border-left: none; }
+}
+</style></head><body>
+<div class="page-label">Memory Charm Insert · 8.5” × 11” Portrait · Fold top edge down to bottom edge · Inside pages print upside-down by design</div>
+<div class="page">
+  <div class="half half--top">
+    <div class="panel panel--inside">
+      <div class="panel-heading">Awakening</div>
+      <div class="rule-left"></div>
+      <div class="body-text">
+        <p>First, confirm NFC is on.<br>Open Settings, search for <em>NFC</em>, and switch it on if it is not already.</p>
+        <p>Then find where it wakes.<br>On <em>iPhone</em>, that place lives along the top center edge.<br>On <em>Android</em>, it should be in the upper half of the back &mdash;<br>usually near the camera.</p>
+        <p>Hold the charm there. Move slowly.<br>When you find the right place, your phone will know.</p>
+        <div class="note-qr">
+          <p class="note-text">A single tap is all it takes.<br>No app to install.<br>No pairing.<br>Just tap, and the journey starts.</p>
+          <div class="qr-side">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=1f140b&bgcolor=ffffff&data=https%3A%2F%2Fmemorycharm.todd-ef7.workers.dev%2Fnfc-check" alt="NFC help">
+            <div class="qr-label">Need help?<br>Scan for NFC guide</div>
+            <div class="qr-url">memorycharm.com/nfc-check</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel--inside">
+      <div class="panel-heading">Binding</div>
+      <div class="rule-left"></div>
+      <div class="body-text">
+        <p>A guide will open. You will be asked to shape the memory:</p>
+        <ul class="steps">
+          <li>Create a Keeper account</li>
+          <li>Accept the Memory Charm license</li>
+          <li>Choose a memory &mdash; video, photo, or audio</li>
+          <li>Give it a title and a short description</li>
+          <li>Set how it may be shared</li>
+          <li>Seal the charm</li>
+        </ul>
+        <p class="note">For the first fourteen days,<br>the memory stays soft &mdash; editable, still taking shape.<br><br>After that, it settles into its final form &mdash;<br>a story, ready to be told.</p>
+      </div>
+    </div>
+  </div>
+  <div class="fold-line"><span>fold here &mdash; top folds down</span></div>
+  <div class="half half--bottom">
+    <div class="panel panel--back">
+      <div style="flex:1"></div>
+      <div class="back-glyph-ring"><span class="back-glyph-m">M</span></div>
+      <div class="back-url">memorycharm.com</div>
+      <div class="back-sub">Bound to hold what matters.</div>
+    </div>
+    <div class="panel panel--front">
+      <div class="glyph-ring"><span class="glyph-m">M</span></div>
+      <div class="front-title">Memory Charm</div>
+      <div class="rule-gold"></div>
+      <div class="front-tagline">A small object that holds a moment.</div>
+      <div class="front-cta">Tap your phone to begin.</div>
+    </div>
+  </div>
+</div>
+</body></html>
