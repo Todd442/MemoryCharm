@@ -3,10 +3,11 @@ import "../pages/LegalPage.css";
 /**
  * UlaContent — shared ULA article body.
  * Used in both TermsAcceptPage (standalone) and ClaimCharmPage (inline step).
+ * Pass compact={true} when rendering inside a card step to reduce padding.
  */
-export function UlaContent() {
+export function UlaContent({ compact }: { compact?: boolean }) {
   return (
-    <article className="legal-article">
+    <article className={compact ? "legal-article legal-article--compact" : "legal-article"}>
       <header className="legal-header">
         <h1 className="legal-title">User License Agreement</h1>
         <p className="legal-updated">Last Updated: [Insert Date]</p>
@@ -97,6 +98,15 @@ export function UlaContent() {
           <li>Track users beyond what is necessary for security and service reliability</li>
         </ul>
         <p>Technical logs (such as scan timestamps or device types) may be collected for security and performance monitoring. Full details are in our Privacy Policy.</p>
+        <h3>Why We Ask for Your Address and Phone Number</h3>
+        <p>We collect a mailing address and phone number for the following specific purposes:</p>
+        <ul>
+          <li><strong>Ownership verification.</strong> If you contact support to recover access, dispute a claim, or request account changes, your address and phone number help us confirm you are the legitimate owner of a charm.</li>
+          <li><strong>Copyright and legal contact.</strong> Under the Digital Millennium Copyright Act (DMCA) and applicable law, we may be required to contact you in connection with copyright complaints or legal notices relating to content you have uploaded. A physical address and phone number are standard requirements for these processes.</li>
+          <li><strong>Critical service notifications.</strong> We commit to notifying you before your Hosting Commitment Period expires and before any service discontinuation. While email is our primary channel, a phone number and mailing address provide reliable backup contact methods for notices that could affect your memories.</li>
+          <li><strong>Warranty fulfilment.</strong> If your physical charm is eligible for replacement under the manufacturing defect warranty, a mailing address is required to ship a replacement.</li>
+        </ul>
+        <p>These fields are not used for marketing. We will not share them with third parties except as required by law or as necessary to fulfil the purposes above.</p>
       </section>
 
       <section className="legal-section">

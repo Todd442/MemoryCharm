@@ -62,8 +62,6 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
     const TURNS       = 3;
     const HELIX_SPEED = 0.0000058; // t-units per ms — same as MemoryGallery
-    const TILT_SMOOTH = 0.08;
-    const TILT_STRENGTH = 0.012;
 
     let W = 0, H = 0;
     let RX = 0, RZ = 0, FOCAL = 0, CW = 0, CH = 0;
@@ -71,9 +69,6 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
     let glowPhase = 0;
     let hitRects: { id: number; x: number; y: number; w: number; h: number }[] = [];
     let raf = 0;
-    let tiltX = 0, tiltY = 0, rawTX = 0, rawTY = 0;
-    let calBeta: number | null = null;
-    let calGamma: number | null = null;
 
     function resize() {
       if (!canvas) return;
@@ -141,9 +136,6 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
 
       ctx.save();
-      ctx.translate(x, y);
-      ctx.transform(1, tiltY * TILT_STRENGTH, -tiltX * TILT_STRENGTH, 1, 0, 0);
-      ctx.translate(-x, -y);
       ctx.globalAlpha = Math.min(1, alpha);
 
       ctx.shadowColor   = "rgba(0,0,0,0.65)";
@@ -222,9 +214,6 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
       ctx.clearRect(0, 0, W, H);
 
-      tiltX += (rawTX - tiltX) * TILT_SMOOTH;
-      tiltY += (rawTY - tiltY) * TILT_SMOOTH;
-
       state.forEach(c => {
         c.t = (c.t + HELIX_SPEED * dt) % 1;
       });
@@ -245,28 +234,9 @@ export function LandingHelix({ cards, dimFactor = 0 }: Props) {
 
     raf = requestAnimationFrame(frame);
 
-    function onOrientation(e: DeviceOrientationEvent) {
-      const beta = e.beta ?? 0, gamma = e.gamma ?? 0;
-      if (calBeta === null) { calBeta = beta; calGamma = gamma; }
-      rawTX = gamma - calGamma!;
-      rawTY = beta  - calBeta!;
-    }
-    window.addEventListener("deviceorientation", onOrientation);
-
-    // Double-tap to recalibrate tilt
-    let lastTap = 0;
-    function onTouchEnd(_e: TouchEvent) {
-      const now = Date.now();
-      if (now - lastTap < 300) { calBeta = null; calGamma = null; }
-      lastTap = now;
-    }
-    canvas.addEventListener("touchend", onTouchEnd, { passive: true });
-
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      window.removeEventListener("deviceorientation", onOrientation);
-      canvas.removeEventListener("touchend", onTouchEnd);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

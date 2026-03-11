@@ -112,7 +112,7 @@ const STEP_META: Record<Step, StepMeta> = {
     statusText: "Claim this Charm",
     statusSubtitle: "Sign in to become this charm’s Keeper.",
     stickyTitle: "What to expect",
-    stickyDesc: "Sign in to get started — it only takes a few minutes.",
+    stickyDesc: "Everything you need to claim this charm and seal your memory.",
   },
   ula: {
     cardTitle: "LICENSE AGREEMENT",
@@ -208,8 +208,14 @@ export function ClaimCharmPage() {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [carouselIdx, setCarouselIdx] = useState(0);
   const lastUploadedRef = useRef<string | null>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
+
+  // Scroll back to top whenever the step changes
+  useEffect(() => {
+    scrollAreaRef.current?.scrollTo({ top: 0, behavior: "instant" });
+  }, [step]);
 
   // Dynamic step list — always starts with welcome, then ULA/profile only if needed.
   const orderedSteps = useMemo<Step[]>(() => {
@@ -265,16 +271,16 @@ export function ClaimCharmPage() {
   // Sync browser back-button with step state
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {
-      // If this charm was already sealed this session, don't let back navigate
-      // into the claim flow — redirect straight to the playback page.
+      // If this charm was already sealed this session, any back navigation
+      // should land on the charm's admin page, not loop into the claim flow.
       if (code && sessionStorage.getItem(`mc.sealed.${code}`) === "true") {
-        nav(`/c/${encodeURIComponent(code)}`, { replace: true, state: { isOwner: true } });
+        nav(`/account/charms/${encodeURIComponent(code)}`, { replace: true });
         return;
       }
       if (e.state?.step) {
         setStep(e.state.step as Step);
       } else {
-        nav("/");
+        nav(-1 as any);
       }
     };
     window.addEventListener("popstate", onPopState);
@@ -327,14 +333,9 @@ export function ClaimCharmPage() {
         setNeedsProfile(profileNeeded);
         setApiChecked(true);
 
-        if (ulaNeeded) {
-          setInitialStep("ula");
-        } else if (profileNeeded) {
-          setInitialStep("profile");
-        } else {
-          // Returning user — show welcome with updated copy so they know their context
-          setInitialStep("welcome");
-        }
+        // Always land on welcome so new users see the process overview before ULA/profile.
+        // The welcome card routes to the right next step based on needsUla/needsProfile.
+        setInitialStep("welcome");
 
         // Pre-select the glyph from the user's most recently claimed glyph charm
         getUserCharms()
@@ -566,7 +567,7 @@ export function ClaimCharmPage() {
       )}
 
       {/* Scrollable content */}
-      <div className="teClaimScrollArea">
+      <div className="teClaimScrollArea" ref={scrollAreaRef}>
       <div className="teClaimWrap">
       <div className="teClaimPanel">
         <div className="teCard">
@@ -630,7 +631,51 @@ export function ClaimCharmPage() {
                       </button>
                     </div>
                   </>
+                ) : needsUla || needsProfile ? (
+                  /* New user: just signed in, still needs ULA and/or profile */
+                  <>
+                    <p style={{
+                      fontFamily: "var(--font-body)",
+                      fontSize: "var(--fs-label)",
+                      opacity: 0.75,
+                      lineHeight: 1.65,
+                      margin: "0 0 4px",
+                      textAlign: "center",
+                    }}>
+                      You're signed in. Here's what comes next:
+                    </p>
+
+                    {([
+                      needsUla    && { s: "STEP 1", label: "REVIEW THE LICENSE AGREEMENT", desc: "A one-time acceptance. Takes about a minute to read." },
+                      needsProfile && { s: needsUla ? "STEP 2" : "STEP 1", label: "COMPLETE YOUR REGISTRATION", desc: "Your name, email, address, and phone — so this charm is linked to you." },
+                      { s: needsUla && needsProfile ? "STEP 3" : needsUla || needsProfile ? "STEP 2" : "STEP 1", label: "BIND YOUR MEMORY", desc: "Upload the video, photo, or audio clip to seal inside this charm." },
+                      { s: needsUla && needsProfile ? "STEP 4" : needsUla || needsProfile ? "STEP 3" : "STEP 2", label: "YOUR CHARM IS SEALED",  desc: "The memory is locked in and ready to share." },
+                    ] as const).filter(Boolean).map((item) => {
+                      const { s, label, desc } = item as { s: string; label: string; desc: string };
+                      return (
+                        <div key={label} className="tePill tePillLarge" style={{ cursor: "default", pointerEvents: "none" }}>
+                          <span className="tePillSpec">{s}</span>
+                          <span className="tePillLabel">{label}</span>
+                          <span className="tePillDesc">{desc}</span>
+                        </div>
+                      );
+                    })}
+
+                    {err && <div className="teClaimError">{err}</div>}
+
+                    <div className="teActionsRow">
+                      <button
+                        className="teBtn teBtnPrimary teBtnWide"
+                        onClick={() => advanceTo(needsUla ? "ula" : needsProfile ? "profile" : "memoryType")}
+                        disabled={busy || !apiChecked}
+                        type="button"
+                      >
+                        {!apiChecked ? "One moment…" : "Let's Begin"}
+                      </button>
+                    </div>
+                  </>
                 ) : (
+                  /* Returning user: ULA and profile already on file */
                   <>
                     <p style={{
                       fontFamily: "var(--font-body)",
@@ -667,8 +712,10 @@ export function ClaimCharmPage() {
 
           {/* STEP: ULA — inline license agreement within the claim flow */}
           {step === "ula" && (
-            <div className="teCardBody">
-              <UlaContent />
+            <div className="teCardBody teCardBody--ula">
+              <div className="legal-scroll-box">
+                <UlaContent compact />
+              </div>
               {ulaError && <p className="teClaimError">{ulaError}</p>}
               <p style={{
                 fontFamily: "var(--font-body)",
@@ -699,9 +746,9 @@ export function ClaimCharmPage() {
                   {([
                     { key: "firstName"  as const, label: "First Name",            placeholder: "e.g., Elowen",              hint: "" },
                     { key: "lastName"   as const, label: "Last Name",             placeholder: "e.g., Blackthorne",         hint: "" },
-                    { key: "address"    as const, label: "Mailing Address",       placeholder: "e.g., 123 Main Street",     hint: "" },
+                    { key: "address"    as const, label: "Mailing Address",       placeholder: "e.g., 123 Main Street",     hint: "Used for warranty fulfilment, legal notices, and ownership verification." },
                     { key: "email"      as const, label: "Email",                 placeholder: "e.g., you@email.com",       hint: "We'll send a confirmation to this address." },
-                    { key: "cellNumber" as const, label: "Phone",                 placeholder: "e.g., +1 555 012 3456",    hint: "" },
+                    { key: "cellNumber" as const, label: "Phone",                 placeholder: "e.g., +1 555 012 3456",    hint: "Used for ownership verification and as a backup contact for critical service notices." },
                   ] as const).map(({ key, label, placeholder, hint }) => (
                     <ThemedInput
                       key={key}

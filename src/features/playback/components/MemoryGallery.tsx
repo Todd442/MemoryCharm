@@ -124,8 +124,10 @@ export function MemoryGallery(props: {
   files: ContentFile[];
   memoryName?: string;
   memoryDescription?: string;
+  isOwner?: boolean;
+  code?: string;
 }) {
-  const { files, memoryName, memoryDescription } = props;
+  const { files, memoryName, memoryDescription, isOwner, code } = props;
   const nav  = useNavigate();
   const [selected, setSelected] = useState<number | null>(null);
   const [focusImgReady, setFocusImgReady] = useState(false);
@@ -200,7 +202,7 @@ export function MemoryGallery(props: {
       <div className={`mg-space ${isOpen ? "mg-space--dimmed" : ""}`}>
 
         {/* Central brand anchor */}
-        <button className="mg-logo" onClick={() => nav("/")}>
+        <button className="mg-logo" onClick={() => nav(isOwner && code ? `/account/charms/${encodeURIComponent(code)}` : "/")}>
           {memoryName && <div className="mg-logo__name">{truncateWords(memoryName, 5)}</div>}
           <div className="mg-logo__text">Memory</div>
           <div className="mg-logo__sub">Charm</div>
@@ -249,7 +251,7 @@ export function MemoryGallery(props: {
               >
                 &times;
               </button>
-              <span onClick={() => nav("/")} style={{ cursor: "pointer" }}>
+              <span onClick={() => nav(isOwner && code ? `/account/charms/${encodeURIComponent(code)}` : "/")} style={{ cursor: "pointer" }}>
                 Memory Charm
               </span>
               <FullscreenButton />

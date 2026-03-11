@@ -344,6 +344,20 @@
   padding: 6px 2px 2px;
 }
 
+/* ULA step: fill the scroll area so the document uses the full stage height */
+.teCardBody--ula {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.teCardBody--ula .legal-scroll-box {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
 .teStepTitle {
   font-size: var(--fs-heading);
   margin-bottom: 10px;
@@ -526,9 +540,12 @@
   border-radius: 14px;
   border: 1px solid rgba(210,170,110,0.35);
   font-family: "Cinzel", serif;
-  font-size: var(--fs-body);
+  font-size: var(--fs-xs);
   letter-spacing: 1px;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .teBtnSm {

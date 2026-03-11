@@ -149,8 +149,17 @@ export function TermsPage() {
         </section>
 
         <section className="legal-section">
-          <h2>13. Privacy</h2>
+          <h2>13. Privacy and Data Collection</h2>
           <p>The Company collects only information reasonably necessary to operate the Services. Uploaded content is processed solely to provide the Services and is not sold for advertising purposes.</p>
+          <h3>13.1 Why We Collect Address and Phone Number</h3>
+          <p>Account registration requires a mailing address and phone number. These are collected for the following specific purposes:</p>
+          <ul>
+            <li><strong>Ownership verification.</strong> Contact information is used to confirm identity when handling account disputes, support requests, or requests for account changes.</li>
+            <li><strong>Copyright and legal contact.</strong> The Company may be required to contact users in connection with copyright complaints, DMCA notices, or other legal matters relating to uploaded content. Physical address and phone number are standard requirements under these processes.</li>
+            <li><strong>Critical service notifications.</strong> The Company commits to notifying registered users before their Hosting Commitment Period expires and before any service discontinuation (see Section 4). While email is the primary notification channel, mailing address and phone number serve as backup contact methods for notices that materially affect a user's memories.</li>
+            <li><strong>Warranty fulfilment.</strong> A mailing address is required to deliver a replacement charm where a manufacturing defect is covered under the applicable warranty.</li>
+          </ul>
+          <p>Address and phone number are not used for marketing. They will not be shared with third parties except as required by law or as necessary to fulfil the purposes stated above.</p>
         </section>
 
         <section className="legal-section">

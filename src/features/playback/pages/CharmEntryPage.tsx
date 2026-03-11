@@ -103,6 +103,14 @@ export function CharmEntryPage() {
           return;
         }
 
+        // claimed — if the current user is the owner and didn't arrive via an
+        // explicit owner navigation (e.g. preview from the admin page), send
+        // them to their charm management page instead of the playback view.
+        if (entry.kind === "claimed" && entry.isOwner === true && !navIsOwner) {
+          nav(`/account/charms/${encodeURIComponent(entry.code)}`, { replace: true });
+          return;
+        }
+
         // claimed
         setUi({ s: "ready", entry });
 
@@ -129,7 +137,7 @@ export function CharmEntryPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, code, nav]);
+  }, [token, code, nav, navIsOwner]);
 
   async function handleGlyphSubmit(glyph: string) {
     if (ui.s !== "ready") return;
@@ -473,9 +481,11 @@ function PlaybackRenderer(props: {
   const nav = useNavigate();
   const [imgReady, setImgReady] = useState(false);
 
+  const brandDest = isOwner && code ? `/account/charms/${encodeURIComponent(code)}` : "/";
+
   const brand = (
     <div className="pb-brand">
-      <div className="pb-brand__title" onClick={() => nav("/")} style={{ cursor: "pointer" }}>
+      <div className="pb-brand__title" onClick={() => nav(brandDest)} style={{ cursor: "pointer" }}>
         {memoryName ? (
           <>
             <span className="pb-brand__name">{memoryName}</span>
@@ -512,7 +522,7 @@ function PlaybackRenderer(props: {
         <div className="pb-frame pb-status">
           <div
             className={memoryName ? "pb-status-title pb-status-title--named" : "pb-status-title"}
-            onClick={() => nav("/")}
+            onClick={() => nav(brandDest)}
             style={{ cursor: "pointer" }}
           >
             {memoryName ? memoryName : "Memory Charm"}
@@ -561,6 +571,8 @@ function PlaybackRenderer(props: {
       files={files}
       memoryName={memoryName}
       memoryDescription={memoryDescription}
+      isOwner={isOwner}
+      code={code}
     />
   );
 }

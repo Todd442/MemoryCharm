@@ -113,6 +113,34 @@ We do not:
 Technical logs (such as scan timestamps or device types) may be collected for
 security and performance monitoring. Full details are in our Privacy Policy.
 
+WHY WE ASK FOR YOUR ADDRESS AND PHONE NUMBER
+
+We collect a mailing address and phone number for the following specific
+purposes only:
+
+  - Ownership verification: If you contact support to recover access, dispute
+    a claim, or request account changes, your address and phone number help us
+    confirm you are the legitimate charm owner.
+
+  - Copyright and legal contact: Under the DMCA and applicable law, we may be
+    required to contact you regarding copyright complaints or legal notices
+    relating to content you have uploaded. Physical address and phone are
+    standard requirements for these processes.
+
+  - Critical service notifications: We commit to notifying you before your
+    Hosting Commitment Period expires and before any service discontinuation.
+    While email is our primary channel, a phone number and mailing address
+    provide reliable backup contact methods for notices that affect your
+    memories.
+
+  - Warranty fulfilment: A mailing address is required to ship a replacement
+    charm if your physical charm is eligible under the manufacturing defect
+    warranty.
+
+These fields are not used for marketing. We will not share them with third
+parties except as required by law or as necessary to fulfil the purposes
+above.
+
 ================================================================================
 
 7. ACCEPTABLE USE
