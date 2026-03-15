@@ -24,6 +24,8 @@
 .lp-scroll {
   position: relative;
   z-index: 1;
+  /* Room for the fixed footer so last section isn't permanently hidden */
+  padding-bottom: 100px;
 }
 
 /* ── Hero ──────────────────────────────────────────────────────────────── */
@@ -40,13 +42,19 @@
   );
 }
 
-/* Subtitle — sits just below the canvas-drawn "Charm" word.
+/* Tagline wrapper — positions both subtitle and descriptor below the canvas glyph.
    top offset mirrors the canvas: 50% + (fs * 0.52 + fs * 0.5) ≈ min(9.5vw, 95px) */
-.lp-hero-sub {
-  position: absolute;
+.lp-hero-tagline {
+  position: fixed;
   top: calc(50% + min(9.5vw, 95px));
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
+  transition: opacity 0.1s linear;
+  pointer-events: none;
+}
+
+.lp-hero-sub {
   margin: 0;
   white-space: nowrap;
   font-family: "Cinzel", serif;
@@ -55,20 +63,21 @@
   text-transform: uppercase;
   color: rgba(220, 175, 110, 0.92);
   text-align: center;
-  transition: opacity 0.1s linear;
-  /* Frosted pill — gives the subtitle a clear surface over the canvas */
-  background: rgba(4, 1, 0, 0.52);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(210, 170, 110, 0.14);
-  border-radius: 24px;
-  padding: 6px 22px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+}
+
+.lp-hero-descriptor {
+  display: block;
+  font-size: clamp(8px, 1.1vw, 12px);
+  letter-spacing: 0.26em;
+  color: rgba(210, 170, 110, 0.58);
+  margin-top: 6px;
 }
 
 /* Context label — fixed to viewport bottom, fades as user scrolls ----- */
 .lp-hero-context {
   position: fixed;
-  bottom: clamp(48px, 9vh, 80px);
+  bottom: clamp(96px, 14vh, 130px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -316,7 +325,7 @@
 
 /* ── CTA block ──────────────────────────────────────────────────────────── */
 .lp-cta {
-  max-width: 520px;
+  max-width: 860px;
   width: 100%;
   text-align: center;
 }
@@ -393,6 +402,139 @@
   border-bottom-color: rgba(140, 230, 205, 0.65);
 }
 
+/* ── Split CTA (two paths: have a charm / want one) ──────────────────────── */
+.lp-cta-split {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0;
+  width: 100%;
+  max-width: 820px;
+}
+
+.lp-cta-path {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 clamp(20px, 4vw, 48px);
+}
+
+.lp-cta-path-label {
+  font-family: "Cinzel", serif;
+  font-size: clamp(11px, 1.2vw, 14px);
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: rgba(210, 170, 110, 0.60);
+  margin: 0 0 clamp(16px, 2.5vh, 24px);
+}
+
+.lp-cta-path-body {
+  font-size: clamp(15px, 1.75vw, 19px);
+  color: rgba(243, 231, 207, 0.72);
+  line-height: 1.7;
+  margin: 0 0 clamp(28px, 4vh, 44px);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  flex: 1;
+}
+
+/* Vertical rule between paths */
+.lp-cta-divider {
+  width: 1px;
+  align-self: stretch;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(210, 170, 110, 0.20) 20%,
+    rgba(210, 170, 110, 0.20) 80%,
+    transparent
+  );
+  flex-shrink: 0;
+}
+
+/* Ghost/outline variant of the CTA button */
+.lp-cta-btn--ghost {
+  background: transparent;
+  border-color: rgba(210, 170, 110, 0.45);
+  color: rgba(210, 170, 110, 0.88);
+}
+
+.lp-cta-btn--ghost:hover {
+  background: rgba(210, 170, 110, 0.06);
+  border-color: rgba(210, 170, 110, 0.75);
+  color: rgba(230, 190, 130, 1);
+}
+
+/* Waitlist form */
+.lp-cta-waitlist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+.lp-cta-waitlist-input {
+  width: 100%;
+  max-width: 280px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(210, 170, 110, 0.28);
+  border-radius: 40px;
+  color: rgba(243, 231, 207, 0.92);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(14px, 1.6vw, 17px);
+  letter-spacing: 0.04em;
+  padding: clamp(11px, 1.8vh, 16px) clamp(20px, 3vw, 28px);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.lp-cta-waitlist-input::placeholder {
+  color: rgba(210, 170, 110, 0.30);
+}
+
+.lp-cta-waitlist-input:focus {
+  border-color: rgba(210, 170, 110, 0.55);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lp-cta-waitlist-confirm {
+  font-family: "Cinzel", serif;
+  font-size: clamp(12px, 1.3vw, 15px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(140, 230, 205, 0.80);
+  margin: 0;
+}
+
+/* Stack paths vertically on mobile */
+@media (max-width: 640px) {
+  .lp-cta-split {
+    flex-direction: column;
+    align-items: stretch;
+    gap: clamp(40px, 7vh, 60px);
+  }
+
+  .lp-cta-divider {
+    width: auto;
+    height: 1px;
+    align-self: auto;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(210, 170, 110, 0.20) 20%,
+      rgba(210, 170, 110, 0.20) 80%,
+      transparent
+    );
+  }
+
+  .lp-cta-path {
+    padding: 0;
+  }
+}
+
 /* ── Floating nav ───────────────────────────────────────────────────────── */
 /* Base: ghost state — always visible, blends over hero canvas */
 .lp-nav {
@@ -420,6 +562,7 @@
 }
 
 .lp-nav-right {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -467,6 +610,88 @@
 }
 
 .lp-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Overflow circle button — always visible against any background */
+.lp-nav-overflow {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(210, 170, 110, 0.55);
+  background: rgba(6, 3, 1, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: border-color 0.25s ease, background 0.25s ease;
+  flex-shrink: 0;
+}
+
+.lp-nav-overflow:hover {
+  border-color: rgba(210, 170, 110, 0.85);
+  background: rgba(10, 5, 2, 0.75);
+}
+
+.lp-nav-overflow-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(220, 175, 110, 0.85);
+  flex-shrink: 0;
+}
+
+/* Backdrop — invisible, closes menu on outside click */
+.lp-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+/* Dropdown menu */
+.lp-nav-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 101;
+  background: rgba(8, 4, 1, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(210, 170, 110, 0.28);
+  border-radius: 12px;
+  padding: 6px 0;
+  min-width: 160px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+.lp-nav-menu-item {
+  display: block;
+  width: 100%;
+  padding: 13px 22px;
+  background: none;
+  border: none;
+  color: rgba(220, 175, 110, 0.82);
+  font-family: "Cinzel", serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.lp-nav-menu-item:hover {
+  color: #f3e7cf;
+  background: rgba(210, 170, 110, 0.1);
+}
+
+.lp-nav-menu-item:disabled {
   opacity: 0.5;
   cursor: default;
 }
@@ -577,13 +802,32 @@
   .lp-section--cta { padding-left: 20px; padding-right: 20px; }
 }
 
-/* ── Site footer ─────────────────────────────────────────────────────── */
+/* ── Site footer — fixed to viewport bottom, always visible ──────────── */
 .lp-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   gap: 14px;
-  padding: clamp(24px, 4vh, 40px) 24px clamp(32px, 5vh, 56px);
+  /* Tall gradient: scroll content fades gracefully into this bar */
+  padding: 52px 24px 28px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(5, 2, 0, 0.82) 45%,
+    rgba(5, 2, 0, 0.97) 100%
+  );
+  /* Gradient area passes scroll gestures through; only links intercept taps */
+  pointer-events: none;
+}
+
+.lp-footer a,
+.lp-footer-sep {
+  pointer-events: auto;
 }
 
 .lp-footer a {
@@ -591,13 +835,13 @@
   font-size: clamp(10px, 1.1vw, 12px);
   letter-spacing: 0.20em;
   text-transform: uppercase;
-  color: rgba(210, 170, 110, 0.38);
+  color: rgba(210, 170, 110, 0.72);
   text-decoration: none;
   transition: color 0.2s;
 }
-.lp-footer a:hover { color: rgba(210, 170, 110, 0.72); }
+.lp-footer a:hover { color: rgba(210, 170, 110, 1); }
 
 .lp-footer-sep {
-  color: rgba(210, 170, 110, 0.20);
+  color: rgba(210, 170, 110, 0.40);
   font-size: 14px;
 }

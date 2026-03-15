@@ -195,3 +195,87 @@
   font-style: italic;
   color: rgba(220, 200, 170, 0.68);
 }
+
+/* ── FAQ collapsible items ────────────────────────────────────────────── */
+.faq-item {
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(210, 170, 110, 0.10);
+}
+
+.faq-item:first-of-type {
+  border-top: 1px solid rgba(210, 170, 110, 0.10);
+}
+
+.faq-item summary {
+  font-family: "Cinzel", Georgia, serif;
+  font-size: clamp(15px, 1.9vw, 20px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(210, 170, 110, 0.82);
+  padding: clamp(14px, 2vh, 20px) 0;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::marker { display: none; }
+
+.faq-item summary::after {
+  content: '+';
+  font-size: 20px;
+  font-weight: 300;
+  color: rgba(210, 170, 110, 0.40);
+  flex-shrink: 0;
+  margin-left: 16px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.faq-item[open] > summary::after {
+  content: '−';
+  color: rgba(210, 170, 110, 0.65);
+}
+
+.faq-item summary:hover {
+  color: rgba(210, 170, 110, 1);
+}
+
+.faq-item summary:hover::after {
+  color: rgba(210, 170, 110, 0.80);
+}
+
+.faq-item-body {
+  padding: 0 0 clamp(16px, 2.5vh, 28px);
+}
+
+.faq-item-body p {
+  font-size: clamp(14px, 1.6vw, 17px);
+  line-height: 1.78;
+  color: rgba(220, 200, 170, 0.82);
+  margin: 0 0 0.85em;
+}
+
+.faq-item-body ul {
+  margin: 0 0 0.85em 1.2em;
+  padding: 0;
+}
+
+.faq-item-body li {
+  font-size: clamp(14px, 1.6vw, 17px);
+  line-height: 1.72;
+  color: rgba(220, 200, 170, 0.78);
+  margin-bottom: 4px;
+}
+
+.faq-item-body a {
+  color: rgba(210, 170, 110, 0.80);
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.faq-item-body a:hover { color: rgba(210, 170, 110, 1); }

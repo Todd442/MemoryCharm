@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
@@ -59,6 +59,9 @@ export function LandingPage() {
   const { accounts, instance, inProgress } = useMsal();
   const [dimFactor, setDimFactor] = useState(0);
   const [navVisible, setNavVisible] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistDone, setWaitlistDone] = useState(false);
 
   const isAuthed  = accounts.length > 0;
   const working   = inProgress !== InteractionStatus.None;
@@ -75,6 +78,12 @@ export function LandingPage() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  function handleWaitlist(e: React.FormEvent) {
+    e.preventDefault();
+    // TODO: wire to POST /api/waitlist
+    setWaitlistDone(true);
+  }
 
   async function handleSignIn() {
     try {
@@ -94,6 +103,14 @@ export function LandingPage() {
         <LandingHelix cards={HELIX_CARDS} dimFactor={dimFactor} />
       </div>
 
+      {/* Fixed tagline pill — anchored below the canvas glyph, fades on scroll */}
+      <div className="lp-hero-tagline" style={{ opacity: 1 - dimFactor }}>
+        <p className="lp-hero-sub">
+          A Small Working of Purposeful Magic<br />
+          <span className="lp-hero-descriptor">One tap · a memory opens</span>
+        </p>
+      </div>
+
       {/* Fixed context label — anchored to viewport bottom, fades on scroll */}
       <p className="lp-hero-context" style={{ opacity: (1 - dimFactor) * 0.55 }}>
         Real Memories bound to a charm.
@@ -103,21 +120,39 @@ export function LandingPage() {
       <nav className={`lp-nav${navVisible ? " lp-nav--visible" : ""}`} aria-label="Site navigation">
         <span className="lp-nav-brand">MemoryCharm</span>
         <div className="lp-nav-right">
-          <a
-            href="/nfc-check"
-            className="lp-nav-btn lp-nav-link"
-            onClick={e => { e.preventDefault(); nav("/nfc-check"); }}
+          <button
+            className="lp-nav-overflow"
+            type="button"
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(o => !o)}
           >
-            Charm help
-          </a>
-          {isAuthed ? (
-            <button className="lp-nav-btn" type="button" onClick={() => nav("/account")}>
-              Account
-            </button>
-          ) : (
-            <button className="lp-nav-btn" type="button" onClick={handleSignIn} disabled={working}>
-              {working ? "Working…" : "Sign In"}
-            </button>
+            <span className="lp-nav-overflow-dot" />
+            <span className="lp-nav-overflow-dot" />
+            <span className="lp-nav-overflow-dot" />
+          </button>
+          {menuOpen && (
+            <>
+              {/* Invisible backdrop — closes menu on outside tap */}
+              <div className="lp-nav-backdrop" onClick={() => setMenuOpen(false)} />
+              <div className="lp-nav-menu">
+                <a
+                  className="lp-nav-menu-item"
+                  href="/nfc-check"
+                  onClick={e => { e.preventDefault(); nav("/nfc-check"); setMenuOpen(false); }}
+                >
+                  Charm Help
+                </a>
+                <button
+                  className="lp-nav-menu-item"
+                  type="button"
+                  disabled={working}
+                  onClick={() => { isAuthed ? nav("/account") : handleSignIn(); setMenuOpen(false); }}
+                >
+                  {working ? "Working…" : isAuthed ? "Account" : "Sign In"}
+                </button>
+              </div>
+            </>
           )}
         </div>
       </nav>
@@ -127,9 +162,6 @@ export function LandingPage() {
 
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <section className="lp-hero">
-          <p className="lp-hero-sub" style={{ opacity: 1 - dimFactor }}>
-            A Small Working of Purposeful Magic
-          </p>
           <a className="lp-scroll-cue" href="#magic" aria-label="Scroll to learn more">
             <span className="lp-scroll-cue-line" />
           </a>
@@ -228,30 +260,6 @@ export function LandingPage() {
             <p className="lp-flagship-caption">
               The Original MemoryCharm — handcrafted, NFC-encoded, yours.
             </p>
-          </div>
-        </section>
-
-        {/* ── Help with the magic ──────────────────────────────────────── */}
-        <section className="lp-section lp-section--magic" id="magic-help">
-          <div className="lp-magic">
-            <h2 className="lp-section-title">Charm not responding?</h2>
-            <p className="lp-magic-intro">
-              Our NFC guide detects your device, shows you exactly where to hold the charm,
-              and runs a live tap test.
-            </p>
-
-            {/* Placeholder for future video -------------------------------- */}
-            {/* <div className="lp-magic-video">[Video guide coming]</div> */}
-
-            <div className="lp-magic-cta">
-              <a
-                href="/nfc-check"
-                className="lp-cta-btn lp-magic-btn"
-                onClick={e => { e.preventDefault(); nav("/nfc-check"); }}
-              >
-                Walk me through it
-              </a>
-            </div>
           </div>
         </section>
 
@@ -359,49 +367,75 @@ export function LandingPage() {
                 </button>
               </>
             ) : (
-              <>
-                <p className="lp-cta-sub">
-                  Claim a charm.<br />Bind your first memory.
-                </p>
-                <button
-                  className="lp-cta-btn"
-                  type="button"
-                  onClick={handleSignIn}
-                  disabled={working}
-                >
-                  {working ? "Working…" : "Sign In"}
-                </button>
-              </>
+              <div className="lp-cta-split">
+                <div className="lp-cta-path">
+                  <p className="lp-cta-path-label">Have a charm?</p>
+                  <p className="lp-cta-path-body">
+                    Your charm is ready to be awakened.<br />
+                    Sign in to bind your memory to it.
+                  </p>
+                  <button
+                    className="lp-cta-btn"
+                    type="button"
+                    onClick={handleSignIn}
+                    disabled={working}
+                  >
+                    {working ? "Working…" : "Activate Your Charm"}
+                  </button>
+                </div>
+
+                <div className="lp-cta-divider" aria-hidden="true" />
+
+                <div className="lp-cta-path">
+                  <p className="lp-cta-path-label">Want one?</p>
+                  <p className="lp-cta-path-body">
+                    Charms are made in small batches from Central Minnesota.<br />
+                    Join the list and we'll reach out when the next ones are ready.
+                  </p>
+                  {waitlistDone ? (
+                    <p className="lp-cta-waitlist-confirm">You're on the list.</p>
+                  ) : (
+                    <form className="lp-cta-waitlist" onSubmit={handleWaitlist}>
+                      <input
+                        className="lp-cta-waitlist-input"
+                        type="email"
+                        required
+                        placeholder="your@email.com"
+                        value={waitlistEmail}
+                        onChange={e => setWaitlistEmail(e.target.value)}
+                      />
+                      <button className="lp-cta-btn lp-cta-btn--ghost" type="submit">
+                        Notify Me
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </div>
             )}
 
-            <p className="lp-cta-footer">
-              Already have a charm?{" "}
-              <a
-                href="/c"
-                onClick={e => { e.preventDefault(); nav("/c"); }}
-              >
-                Enter your charm code
-              </a>
-            </p>
           </div>
         </section>
 
-        {/* ── Site footer ───────────────────────────────────────────────── */}
-        <footer className="lp-footer">
-          <a href="/faq" onClick={e => { e.preventDefault(); nav("/faq"); }}>
-            FAQ
-          </a>
-          <span className="lp-footer-sep" aria-hidden="true">·</span>
-          <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>
-            Terms &amp; Conditions
-          </a>
-          <span className="lp-footer-sep" aria-hidden="true">·</span>
-          <a href="/terms/plain" onClick={e => { e.preventDefault(); nav("/terms/plain"); }}>
-            Plain English
-          </a>
-        </footer>
-
       </div>
+
+      {/* ── Site footer — fixed to bottom of viewport ─────────────────── */}
+      <footer className="lp-footer">
+        <a href="/nfc-check" onClick={e => { e.preventDefault(); nav("/nfc-check"); }}>
+          Charm Help
+        </a>
+        <span className="lp-footer-sep" aria-hidden="true">·</span>
+        <a href="/faq" onClick={e => { e.preventDefault(); nav("/faq"); }}>
+          FAQ
+        </a>
+        <span className="lp-footer-sep" aria-hidden="true">·</span>
+        <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>
+          Terms &amp; Conditions
+        </a>
+        <span className="lp-footer-sep" aria-hidden="true">·</span>
+        <a href="/terms/plain" onClick={e => { e.preventDefault(); nav("/terms/plain"); }}>
+          Plain English
+        </a>
+      </footer>
     </div>
   );
 }

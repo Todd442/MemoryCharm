@@ -366,22 +366,28 @@ export function ClaimCharmPage() {
 
   if (!code) {
     return (
-      <div className="teClaimWrap">
-        <div className="teClaimPanel">
-          <div className="teClaimHero">
-            <h1>Claim this Charm</h1>
-            <p className="teClaimSub">A charm code is required to bind a memory.</p>
-          </div>
+      <>
+        <div className="teClaimWrap">
+          <div className="teClaimPanel">
+            <div className="teClaimHero">
+              <h1>Claim this Charm</h1>
+              <p className="teClaimSub">A charm code is required to bind a memory.</p>
+            </div>
 
-          <div className="teClaimError">
-            Missing charm code.
-          </div>
-
-          <div className="teClaimFooter">
-            <Link className="teLink" to="/">Home</Link>
+            <div className="teClaimError">
+              Missing charm code.
+            </div>
           </div>
         </div>
-      </div>
+        {footerEl && createPortal(
+          <div className="te-footerActions">
+            <button className="teBtn teBtnSm teBtnGhost" onClick={() => nav("/")} type="button">
+              Home
+            </button>
+          </div>,
+          footerEl
+        )}
+      </>
     );
   }
 
@@ -703,9 +709,6 @@ export function ClaimCharmPage() {
                   </>
                 )}
 
-                <div style={{ textAlign: "center" }}>
-                  <Link className="teLink" to="/">← Home</Link>
-                </div>
               </div>
             </div>
           )}
@@ -1136,18 +1139,22 @@ export function ClaimCharmPage() {
             )}
         </div>
 
-        <div className="teClaimFooter">
-          <Link className="teLink" to="/">Home</Link>
-        </div>
       </div>
     </div>
     </div>{/* close teClaimScrollArea */}
     </div>{/* close teClaimLayout */}
 
-    {/* Portal: auth actions into the frame footer */}
-    {isAuthed && footerEl && createPortal(
+    {/* Portal: nav actions into the frame footer */}
+    {footerEl && createPortal(
       <div className="te-footerActions">
-        {step !== "loading" && (
+        <button
+          className="teBtn teBtnSm teBtnGhost"
+          onClick={() => nav("/")}
+          type="button"
+        >
+          Home
+        </button>
+        {step !== "loading" && isAuthed && (
           <button
             className="teBtn teBtnSm teBtnGhost"
             onClick={goBack}
@@ -1156,13 +1163,15 @@ export function ClaimCharmPage() {
             ← Back
           </button>
         )}
-<button
-          className="teBtn teBtnSm teBtnGhost"
-          onClick={doSignOut}
-          disabled={working}
-        >
-          Sign out
-        </button>
+        {isAuthed && (
+          <button
+            className="teBtn teBtnSm teBtnGhost"
+            onClick={doSignOut}
+            disabled={working}
+          >
+            Sign out
+          </button>
+        )}
       </div>,
       footerEl
     )}

@@ -27,16 +27,16 @@ body { background: #1c1c1c; padding: 48px 32px 80px; display: flex; flex-directi
 .back-glyph-m { font-family: "Cinzel", serif; font-size: 22px; font-weight: 700; color: var(--ink-mid); line-height: 1; }
 .back-url { font-family: "Cinzel", serif; font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-mid); }
 .back-sub { font-size: 13px; font-style: italic; font-weight: 300; color: var(--ink-light); margin-top: 0.12in; letter-spacing: 0.04em; }
-.panel--inside { padding: 0.4in 0.4in; justify-content: flex-start; }
-.panel-heading { font-family: "Cinzel", serif; font-size: 12px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink); margin-bottom: 0.12in; }
-.rule-left { height: 1px; background: linear-gradient(to right, var(--gold), transparent); margin-bottom: 0.3in; }
-.body-text { font-size: 13.5px; font-weight: 400; color: var(--ink); line-height: 1.7; }
-.body-text p { margin-bottom: 0.13in; }
+.panel--inside { padding: 0.32in 0.38in; justify-content: flex-start; }
+.panel-heading { font-family: "Cinzel", serif; font-size: 12px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink); margin-bottom: 0.08in; }
+.rule-left { height: 1px; background: linear-gradient(to right, var(--gold), transparent); margin-bottom: 0.2in; }
+.body-text { font-size: 13px; font-weight: 400; color: var(--ink); line-height: 1.65; display: flex; flex-direction: column; flex: 1; }
+.body-text p { margin-bottom: 0.09in; }
 .body-text em { color: var(--ink-mid); }
-.steps { list-style: none; margin: 0.05in 0 0; }
-.steps li { font-size: 14px; color: var(--ink); line-height: 1.65; padding-left: 1em; position: relative; margin-bottom: 0.06in; }
+.steps { list-style: none; margin: 0.04in 0 0; }
+.steps li { font-size: 13.5px; color: var(--ink); line-height: 1.65; padding-left: 1em; position: relative; margin-bottom: 0.05in; }
 .steps li::before { content: "—"; position: absolute; left: 0; color: var(--gold); }
-.note-qr { display: flex; align-items: flex-start; gap: 0.18in; margin-top: 0.16in; padding-top: 0.14in; border-top: 1px solid var(--gold-faint); }
+.note-qr { display: flex; align-items: flex-start; gap: 0.15in; margin-top: auto; padding-top: 0.12in; border-top: 1px solid var(--gold-faint); }
 .note-text { flex: 1; font-size: 12px; font-style: italic; font-weight: 300; color: var(--ink-mid); line-height: 1.75; }
 .qr-side { display: flex; flex-direction: column; align-items: center; gap: 0.06in; flex-shrink: 0; }
 .qr-side img { width: 0.8in; height: 0.8in; display: block; opacity: 0.85; }
@@ -63,6 +63,7 @@ body { background: #1c1c1c; padding: 48px 32px 80px; display: flex; flex-directi
         <p>First, confirm NFC is on.<br>Open Settings, search for <em>NFC</em>, and switch it on if it is not already.</p>
         <p>Then find where it wakes.<br>On <em>iPhone</em>, that place lives along the top center edge.<br>On <em>Android</em>, it should be in the upper half of the back &mdash;<br>usually near the camera.</p>
         <p>Hold the charm there. Move slowly.<br>When you find the right place, your phone will know.</p>
+        <p><em>One thing to be aware of:</em> a magnetic phone case &mdash; the kind that lets your phone cling to a car mount without a bracket &mdash; will silence the charm. The magnets interfere with the NFC reader and prevent it from waking. Simply remove the case, and the magic returns.</p>
         <div class="note-qr">
           <p class="note-text">A single tap is all it takes.<br>No app to install.<br>No pairing.<br>Just tap, and the journey starts.</p>
           <div class="qr-side">
