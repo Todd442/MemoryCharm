@@ -46,7 +46,7 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: 270px 1fr 320px;
+  grid-template-rows: 310px 1fr 320px;
 }
 
 /* Top status plaque */
@@ -108,14 +108,14 @@
 
 /* Scrollable middle */
 .te-scroll {
-  padding: 32px 65px 32px 85px;
+  padding: 47px 65px 32px 85px;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   /* Fade content into the footer plate as it approaches the bottom */
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 88%, transparent 100%);
 }
 
 /* Bottom command plate */
