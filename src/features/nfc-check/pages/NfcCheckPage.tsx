@@ -19,6 +19,7 @@ export function NfcCheckPage() {
   const [detection, setDetection] = useState<DetectionResult | null>(null);
   const [selectedFamily, setSelectedFamily] = useState<DeviceFamily>("android");
   const [tapStatus, setTapStatus] = useState<"idle" | "waiting" | "success" | "failed">("idle");
+  const [deviceMenuOpen, setDeviceMenuOpen] = useState(false);
   const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -296,31 +297,43 @@ export function NfcCheckPage() {
             {step === "antenna" && (
               <div className="teCardBody">
                 <div className="teGrid">
-                  <div>
-                    <div className="teFieldLabel">Your device</div>
-                    <div className="tePills tePillsWrap">
-                      {(["apple", "samsung", "pixel", "android"] as DeviceFamily[]).map((f) => (
-                        <button
-                          key={f}
-                          className={"tePill " + (selectedFamily === f ? "isActive" : "")}
-                          onClick={() => setSelectedFamily(f)}
-                          type="button"
-                        >
-                          {MANUFACTURER_DATA[f].displayName.toUpperCase()}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="teHint" style={{ marginTop: 8 }}>
-                      If auto-detection was wrong, select your device above.
-                    </div>
-                  </div>
-
                   <div className="teNfcPhoneWrap">
                     <PhoneSvg deviceFamily={selectedFamily} />
                     <div className="teNfcPhoneCaption">
                       Hold your charm near the highlighted area on the <strong>back</strong> of your phone.
                     </div>
                   </div>
+
+                  <div className="teNfcDeviceSelector">
+                    <button
+                      className="teNfcDeviceTrigger"
+                      type="button"
+                      aria-expanded={deviceMenuOpen}
+                      onClick={() => setDeviceMenuOpen(o => !o)}
+                    >
+                      <span>{MANUFACTURER_DATA[selectedFamily].displayName}</span>
+                      <span className="teNfcDeviceChevron">{deviceMenuOpen ? "▲" : "▼"}</span>
+                    </button>
+
+                    {deviceMenuOpen && (
+                      <>
+                        <div className="teNfcDeviceBackdrop" onClick={() => setDeviceMenuOpen(false)} />
+                        <div className="teNfcDeviceMenu">
+                          {(["apple", "samsung", "pixel", "android"] as DeviceFamily[]).map((f) => (
+                            <button
+                              key={f}
+                              className={"teNfcDeviceMenuItem" + (selectedFamily === f ? " isActive" : "")}
+                              type="button"
+                              onClick={() => { setSelectedFamily(f); setDeviceMenuOpen(false); }}
+                            >
+                              {MANUFACTURER_DATA[f].displayName}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="teHint">Wrong device? Tap above to change.</div>
 
                   <div className="teActionsRow">
                     {detection?.canRunTapTest ? (

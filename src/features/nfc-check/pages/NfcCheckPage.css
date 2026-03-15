@@ -160,13 +160,95 @@
 }
 
 .teNfcPhoneWrap svg {
-  width: 200px;
+  width: min(340px, 100%);
   height: auto;
 }
 
 .teNfcPhoneSmall svg,
 .teNfcPhoneSmall {
   width: 140px;
+}
+
+/* Device selector — labeled trigger + dropdown */
+.teNfcDeviceSelector {
+  position: relative;
+}
+
+.teNfcDeviceTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(210, 170, 110, 0.35);
+  background: rgba(12, 6, 2, 0.62);
+  color: rgba(240, 225, 195, 0.92);
+  font-family: "Cinzel", serif;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.teNfcDeviceTrigger:hover {
+  border-color: rgba(210, 170, 110, 0.65);
+  background: rgba(18, 10, 3, 0.75);
+}
+
+.teNfcDeviceChevron {
+  font-size: 9px;
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+.teNfcDeviceBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.teNfcDeviceMenu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 101;
+  background: rgba(8, 4, 1, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(210, 170, 110, 0.28);
+  border-radius: 12px;
+  padding: 6px 0;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+.teNfcDeviceMenuItem {
+  display: block;
+  width: 100%;
+  padding: 13px 18px;
+  background: none;
+  border: none;
+  color: rgba(220, 175, 110, 0.82);
+  font-family: "Cinzel", serif;
+  font-size: var(--fs-meta);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.teNfcDeviceMenuItem:hover {
+  color: #f3e7cf;
+  background: rgba(210, 170, 110, 0.1);
+}
+
+.teNfcDeviceMenuItem.isActive {
+  color: #f3e7cf;
+  background: rgba(210, 170, 110, 0.08);
 }
 
 .teNfcPhoneCaption {

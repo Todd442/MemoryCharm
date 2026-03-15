@@ -76,7 +76,7 @@ export const MANUFACTURER_DATA: Record<DeviceFamily, ManufacturerInfo> = {
     quickSettingsTip:
       "Swipe down from the top of the screen and look for the NFC tile in Quick Settings \u2014 often the fastest way.",
     controlCenterTip: null,
-    antennaSvgConfig: { cy: 25, cx: 50, r: 12 },
+    antennaSvgConfig: { cy: 50, cx: 50, r: 12 },
   },
 };
 
