@@ -351,6 +351,13 @@
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
+/* Recipient copy — slightly smaller and dimmer, visually secondary */
+.lp-cta-sub--recipient {
+  font-size: clamp(13px, 1.6vw, 16px);
+  color: rgba(210, 170, 110, 0.62);
+  margin-top: clamp(-20px, -2vh, -12px); /* pull up closer to the buyer copy */
+}
+
 .lp-cta-btn {
   display: inline-block;
   background: linear-gradient(

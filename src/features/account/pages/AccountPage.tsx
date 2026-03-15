@@ -227,12 +227,12 @@ export function AccountPage() {
             <div className="teAcctSectionTitle">Profile</div>
             <div className="teAcctForm">
               {([
-                { key: "firstName" as const, label: "Given Name", placeholder: "e.g., Elowen" },
-                { key: "lastName" as const, label: "Family Name", placeholder: "e.g., Blackthorne" },
-                { key: "address" as const, label: "Dwelling Place", placeholder: "e.g., 12 Hollow Lane" },
-                { key: "email" as const, label: "Signal Address (Email)", placeholder: "captain@trianglesend.com" },
-                { key: "cellNumber" as const, label: "Cipher Line", placeholder: "e.g., +1 555 012 3456" },
-              ]).map(({ key, label, placeholder }) => (
+                { key: "firstName"  as const, label: "First Name",      placeholder: "e.g., Elowen",              hint: "" },
+                { key: "lastName"   as const, label: "Last Name",       placeholder: "e.g., Blackthorne",         hint: "" },
+                { key: "address"    as const, label: "Mailing Address", placeholder: "e.g., 123 Main Street",     hint: "Used for warranty fulfilment, legal notices, and ownership verification." },
+                { key: "email"      as const, label: "Email",           placeholder: "e.g., you@email.com",       hint: "We'll send a confirmation to this address." },
+                { key: "cellNumber" as const, label: "Phone",           placeholder: "e.g., +1 555 012 3456",    hint: "Used for ownership verification and as a backup contact for critical service notices." },
+              ]).map(({ key, label, placeholder, hint }) => (
                 <ThemedInput
                   key={key}
                   label={label}
@@ -240,6 +240,7 @@ export function AccountPage() {
                   onChange={(v) => setProfile((p) => ({ ...p, [key]: v }))}
                   disabled={busy}
                   placeholder={placeholder}
+                  hint={hint || undefined}
                 />
               ))}
               <div>

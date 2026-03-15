@@ -371,8 +371,9 @@ export function LandingPage() {
                 <div className="lp-cta-path">
                   <p className="lp-cta-path-label">Have a charm?</p>
                   <p className="lp-cta-path-body">
-                    Your charm is ready to be awakened.<br />
-                    Sign in to bind your memory to it.
+                    Every charm is searching for the one memory that belongs to it.<br />
+                    Touch your phone to it.<br />
+                    The memory opens on its own.
                   </p>
                   <button
                     className="lp-cta-btn"
