@@ -111,11 +111,6 @@ export function LandingPage() {
         </p>
       </div>
 
-      {/* Fixed context label — anchored to viewport bottom, fades on scroll */}
-      <p className="lp-hero-context" style={{ opacity: (1 - dimFactor) * 0.55 }}>
-        Real Memories bound to a charm.
-      </p>
-
       {/* Floating nav — fades in once hero scrolls away */}
       <nav className={`lp-nav${navVisible ? " lp-nav--visible" : ""}`} aria-label="Site navigation">
         <span className="lp-nav-brand">MemoryCharm</span>
@@ -245,6 +240,7 @@ export function LandingPage() {
                 <div className="lp-charm-col-rule" />
                 <p className="lp-charm-col-body">
                   The moment appears.<br />
+                  Video. Photos. A voice.<br />
                   No search.<br />
                   No scroll.
                 </p>
@@ -314,15 +310,14 @@ export function LandingPage() {
             <h2 className="lp-section-title">Why We Made It</h2>
             <div className="lp-body">
               <p>
-                The maker spent three decades as a software architect &mdash;
-                from the first web to the latest wave, building systems for
-                companies across the world, watching an industry mistake
-                complexity for progress and novelty for meaning.
+                MemoryCharm was built on a simple belief: that technology
+                should close the distance between people, not fill the space between them.
               </p>
               <p>
-                The promise of technology was always larger than what arrived.
-                That it might close the distance between people. That it might
-                make the world feel more alive.
+                The maker spent three decades as a software architect &mdash;
+                from the first web to the latest wave, building systems for
+                companies across the world. The promise was always that it might
+                make the world feel more alive. More connected. More present.
               </p>
             </div>
             <p className="lp-pullquote">
@@ -345,6 +340,13 @@ export function LandingPage() {
               <p>
                 Only the quiet conviction that the world deserves more magic.<br />
                 And that we are capable of making it.
+              </p>
+              <p>
+                Questions?{" "}
+                <a className="lp-maker-contact" href="mailto:hello@memorycharm.com">
+                  hello@memorycharm.com
+                </a>
+                {" "}— we're a small operation and we read every message.
               </p>
             </div>
           </div>
@@ -429,12 +431,8 @@ export function LandingPage() {
           FAQ
         </a>
         <span className="lp-footer-sep" aria-hidden="true">·</span>
-        <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>
-          Terms &amp; Conditions
-        </a>
-        <span className="lp-footer-sep" aria-hidden="true">·</span>
         <a href="/terms/plain" onClick={e => { e.preventDefault(); nav("/terms/plain"); }}>
-          Plain English
+          Terms
         </a>
       </footer>
     </div>
