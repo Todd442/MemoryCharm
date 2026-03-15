@@ -160,13 +160,43 @@
 }
 
 .teNfcPhoneWrap svg {
-  width: min(340px, 100%);
+  width: 100%;
   height: auto;
 }
 
 .teNfcPhoneSmall svg,
 .teNfcPhoneSmall {
   width: 140px;
+}
+
+/* Antenna step: device selector on top, then side-by-side below */
+.teNfcAntennaLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.teNfcAntennaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (min-width: 460px) {
+  .teNfcAntennaLayout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .teNfcAntennaLayout .teNfcPhoneWrap {
+    flex: 0 0 42%;
+  }
+
+  .teNfcAntennaInfo {
+    flex: 1;
+    padding-top: 8px;
+  }
 }
 
 /* Device selector — labeled trigger + dropdown */

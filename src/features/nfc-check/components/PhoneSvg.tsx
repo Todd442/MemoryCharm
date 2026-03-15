@@ -16,7 +16,7 @@ export function PhoneSvg({ deviceFamily, className }: PhoneSvgProps) {
 
   return (
     <svg
-      viewBox="0 0 200 400"
+      viewBox="20 0 160 400"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"

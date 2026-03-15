@@ -297,13 +297,7 @@ export function NfcCheckPage() {
             {step === "antenna" && (
               <div className="teCardBody">
                 <div className="teGrid">
-                  <div className="teNfcPhoneWrap">
-                    <PhoneSvg deviceFamily={selectedFamily} />
-                    <div className="teNfcPhoneCaption">
-                      Hold your charm near the highlighted area on the <strong>back</strong> of your phone.
-                    </div>
-                  </div>
-
+                  {/* Device selector — always at top */}
                   <div className="teNfcDeviceSelector">
                     <button
                       className="teNfcDeviceTrigger"
@@ -333,22 +327,34 @@ export function NfcCheckPage() {
                       </>
                     )}
                   </div>
-                  <div className="teHint">Wrong device? Tap above to change.</div>
 
-                  <div className="teActionsRow">
-                    {detection?.canRunTapTest ? (
-                      <button
-                        className="teBtn teBtnPrimary"
-                        onClick={() => advanceTo("test")}
-                        type="button"
-                      >
-                        Try a Tap Test
-                      </button>
-                    ) : (
-                      <div className="teNfcManualTestHint">
-                        Hold your charm near the highlighted area. If your screen shows content, NFC is working!
+                  {/* Two-column body: phone left, info right */}
+                  <div className="teNfcAntennaLayout">
+                    <div className="teNfcPhoneWrap">
+                      <PhoneSvg deviceFamily={selectedFamily} />
+                    </div>
+
+                    <div className="teNfcAntennaInfo">
+                      <div className="teNfcPhoneCaption">
+                        Hold your charm near the highlighted area on the <strong>back</strong> of your phone.
                       </div>
-                    )}
+                      <div className="teHint">Wrong device? Tap above to change.</div>
+                      <div className="teActionsRow">
+                        {detection?.canRunTapTest ? (
+                          <button
+                            className="teBtn teBtnPrimary"
+                            onClick={() => advanceTo("test")}
+                            type="button"
+                          >
+                            Try a Tap Test
+                          </button>
+                        ) : (
+                          <div className="teNfcManualTestHint">
+                            Hold your charm near the highlighted area. If your screen shows content, NFC is working!
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
