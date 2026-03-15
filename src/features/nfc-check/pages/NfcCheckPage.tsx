@@ -159,31 +159,53 @@ export function NfcCheckPage() {
                     </div>
                     <div className="teNfcInfoRow">
                       <span className="teNfcInfoLabel">Platform</span>
-                      <span className="teNfcInfoValue">{detection?.platform}</span>
+                      <span className="teNfcInfoValue">
+                        {detection?.platform === "ios" ? "iOS" : detection?.platform === "android" ? "Android" : detection?.platform}
+                      </span>
                     </div>
                     <div className="teNfcInfoRow">
                       <span className="teNfcInfoLabel">NFC</span>
                       <span className="teNfcInfoValue">
-                        {detection?.nfcStatus === "supported" && "Supported"}
-                        {detection?.nfcStatus === "not_detected" && "Not detected"}
+                        {detection?.nfcStatus === "supported" && "Enabled"}
+                        {detection?.nfcStatus === "not_detected" && "Not enabled"}
                         {detection?.nfcStatus === "unknown" && (
                           detection?.platform === "ios"
-                            ? "Unknown \u2014 most iPhones support NFC"
+                            ? "Always on \u2014 no toggle needed"
                             : "Unknown"
                         )}
                       </span>
                     </div>
 
-                    <div>
-                      {detection?.nfcStatus === "supported" ? (
-                        <div className="teNfcBadge teNfcBadge--ok">NFC Ready</div>
-                      ) : (
-                        <div className="teNfcBadge teNfcBadge--warn">NFC may need attention</div>
-                      )}
+                    <div className="teNfcStatusIndicator">
+                      <span className={`teNfcDot teNfcDot--${
+                        detection?.nfcStatus === "supported" ? "green"
+                        : detection?.nfcStatus === "unknown" ? "yellow"
+                        : "red"
+                      }`} />
+                      <span className="teNfcStatusLabel">
+                        {detection?.nfcStatus === "supported"
+                          ? "NFC Ready"
+                          : detection?.nfcStatus === "unknown"
+                          ? (detection?.platform === "ios" ? "Likely supported" : "Status unknown")
+                          : "NFC needs attention"}
+                      </span>
                     </div>
 
-                    <div className="teBtnsRow">
-                      {detection?.nfcStatus !== "supported" && (
+                    {detection?.platform === "ios" && (
+                      <div className="teNfcTip">
+                        On iPhone 7 and later, NFC is always on — no settings needed.
+                        Just tap your charm to the <strong>top edge</strong> of your phone.
+                      </div>
+                    )}
+
+                    {detection?.platform === "android" && detection?.nfcStatus === "unknown" && (
+                      <div className="teNfcTip">
+                        Your browser can&rsquo;t confirm NFC status. Check <strong>Settings &rarr; Connected devices &rarr; NFC</strong> to make sure it&rsquo;s on.
+                      </div>
+                    )}
+
+                    <div className="teNfcActions">
+                      {detection?.platform !== "ios" && detection?.nfcStatus !== "supported" && (
                         <button
                           className="teBtn teBtnPrimary"
                           onClick={() => advanceTo("enable")}
