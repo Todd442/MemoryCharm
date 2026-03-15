@@ -16,15 +16,15 @@ export function PhoneSvg({ deviceFamily, className }: PhoneSvgProps) {
 
   return (
     <svg
-      viewBox="20 0 160 400"
+      viewBox="0 0 200 400"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
       aria-label={`Phone diagram showing NFC antenna location for ${MANUFACTURER_DATA[deviceFamily].displayName}`}
     >
-      {/* Phone body */}
+      {/* Phone body — 176×382 gives ~1:2.17 ratio, matching a real smartphone */}
       <rect
-        x="30" y="10" width="140" height="380" rx="24" ry="24"
+        x="12" y="9" width="176" height="382" rx="28" ry="28"
         fill="rgba(15,10,6,0.6)"
         stroke="rgba(210,170,110,0.45)"
         strokeWidth="2"
@@ -32,16 +32,18 @@ export function PhoneSvg({ deviceFamily, className }: PhoneSvgProps) {
 
       {/* Screen */}
       <rect
-        x="38" y="30" width="124" height="340" rx="8" ry="8"
+        x="19" y="34" width="162" height="332" rx="10" ry="10"
         fill="rgba(30,20,12,0.4)"
         stroke="rgba(210,170,110,0.15)"
         strokeWidth="1"
       />
 
-      {/* Camera notch */}
-      <ellipse
-        cx="100" cy="22" rx="18" ry="4"
-        fill="rgba(210,170,110,0.12)"
+      {/* Camera — center punch hole */}
+      <circle
+        cx="100" cy="22" r="5"
+        fill="rgba(210,170,110,0.15)"
+        stroke="rgba(210,170,110,0.3)"
+        strokeWidth="1"
       />
 
       {/* NFC highlight — pulsing outer ring */}
@@ -77,7 +79,7 @@ export function PhoneSvg({ deviceFamily, className }: PhoneSvgProps) {
 
       {/* "BACK" label at bottom */}
       <text
-        x="100" y="390"
+        x="100" y="403"
         textAnchor="middle"
         fill="rgba(210,170,110,0.35)"
         fontSize="11"
