@@ -44,8 +44,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
       debugLog("RequireAuth", `Not authed. Storing path: ${toStore}`);
       sessionStorage.setItem(RETURN_TO_KEY, toStore);
-      localStorage.setItem(RETURN_TO_KEY, toStore);
-      debugLog("RequireAuth", `Path stored in both sessionStorage and localStorage`);
+      debugLog("RequireAuth", `Path stored in sessionStorage`);
 
       instance.loginRedirect({
         ...loginRequest,

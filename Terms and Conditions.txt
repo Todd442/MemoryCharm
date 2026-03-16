@@ -1,31 +1,10 @@
-Absolutely. Below is the **fully consolidated, litigation-hardened Terms & Conditions**, integrating everything we developed:
+MEMORY CHARM
 
-* Account requirement for activation/admin
-* Multi-tier Charm Plans
-* Hosting Commitment Period (activation-based)
-* 14-day Modification Window + freeze
-* Optional paid reopening
-* Link-based access (without exposing architecture)
-* Glyph as friction, not security
-* Rate limits + abuse protection
-* Wind-down/export remedy
-* No escrow obligation
-* Backup responsibility
-* Liability cap (including sentimental value exclusion)
-* Force majeure
-* Minnesota governing law
+Terms and Conditions
 
-This is the complete, aligned version.
+Last Updated: March 15, 2026
 
----
-
-# MEMORY CHARM
-
-## Terms and Conditions
-
-**Last Updated: [Insert Date]**
-
-These Terms and Conditions (“Terms”) govern your purchase, activation, and use of the Memory Charm physical product and associated digital services (collectively, the “Services”) provided by [Company Name] (“Company,” “we,” “us,” or “our”).
+These Terms and Conditions ("Terms") govern your purchase, activation, and use of the Memory Charm physical product and associated digital services (collectively, the "Services") provided by Triangles End LLC ("Company," "we," "us," or "our").
 
 By purchasing, activating, accessing, or using a Memory Charm, you agree to these Terms.
 
@@ -61,43 +40,105 @@ You are responsible for maintaining the confidentiality of your account credenti
 
 General viewing of a Memory Charm does not require a viewer account unless optional viewing controls are enabled under the applicable Charm Plan.
 
+## 2.3 Unactivated Accounts
+
+The expiry of a memory at the end of its Hosting Commitment Period is the designed lifecycle of the product and is addressed in Section 7. Separately, accounts that were created but never used to activate any charm may be removed after twenty-four (24) months of inactivity. No content is lost in these cases because no memory was ever bound to the account.
+
 ---
 
-# 3. User Representations and Content Responsibility
+# 3. License Grant
 
-You must be at least 18 years of age to upload or manage media.
+## 3.1 Limited License to Use the Platform
+
+The Company grants you a limited, non-exclusive, non-transferable, revocable license to access and use the Memory Charm platform solely for personal, non-commercial purposes.
+
+You may:
+
+* Upload your own content
+* Share your charm with friends and family
+* Gift the physical charm to another person; the recipient acquires the license upon activation or continued use
+
+You may not:
+
+* Reverse engineer, decompile, or disassemble any part of the platform software
+* Resell, sublicense, or provide commercial third-party access to the hosting service
+* Use the platform for commercial purposes without written authorisation from the Company
+* Attempt to bypass, circumvent, or disable any service limits, access controls, rate limits, or security measures
+
+## 3.2 No Transfer of Platform Ownership
+
+You are not purchasing ownership of the software platform, hosting infrastructure, or any intellectual property of the Company. These Terms grant only the limited license described above.
+
+---
+
+# 4. Age Restrictions
+
+## 4.1 Minimum Age to Register and Upload
+
+You must be at least 18 years of age to create an account, activate a Memory Charm, or upload, manage, or associate content with the Services. By creating an account or uploading content, you represent and warrant that you are at least 18 years old.
+
+## 4.2 Children Under 13
+
+The Services are not directed at children under the age of 13. The Company does not knowingly collect personal information from children under 13. If you believe that a child under 13 has provided personal information through the Services, please contact us and we will take steps to delete such information.
+
+## 4.3 Viewer Responsibility
+
+The account holder is responsible for ensuring that access to their Memory Charm is appropriate for any viewer who may access it, including minors. The Company assumes no responsibility for the suitability of user-uploaded content for any particular audience.
+
+---
+
+# 5. Content Ownership and License
+
+## 5.1 You Retain Ownership
+
+You retain full copyright and all other ownership rights in any content you upload or associate with a Memory Charm ("Your Content"). These Terms do not transfer any ownership of Your Content to the Company.
+
+## 5.2 License You Grant to the Company
+
+By uploading Your Content, you grant the Company a limited, non-exclusive, royalty-free, worldwide license to host, store, reproduce, transmit, display, and deliver Your Content solely as necessary to operate and provide the Services to you and authorised viewers. This license exists for no purpose other than enabling the Company to operate the Services.
+
+## 5.3 No Promotional Use
+
+The Company will not use Your Content in advertising, marketing materials, social media, or any other promotional context without your explicit, written consent obtained separately from these Terms.
+
+## 5.4 License Termination
+
+The license described in Section 5.2 terminates when Your Content is permanently deleted from the Services. Deletion may occur upon your request, upon expiration of your Hosting Commitment Period, or upon removal of violating content under these Terms. Residual copies in backup systems may persist briefly after deletion but will not be used or made accessible.
+
+## 5.5 Your Representations
 
 By uploading or associating content with a Memory Charm, you represent and warrant that:
 
-* You have all rights necessary to upload and share the content.
-* The content does not infringe intellectual property or privacy rights.
-* The content complies with applicable laws.
+* You have all rights necessary to upload, display, and grant the license above.
+* The content does not infringe any intellectual property, privacy, or publicity rights of any third party.
+* The content complies with all applicable laws.
+* You have obtained all necessary consents from any identifiable individuals appearing in the content.
 
-You are solely responsible for your content.
+You are solely responsible for Your Content.
 
 ---
 
-# 4. Charm Plans and Hosting Commitment Period
+# 6. Charm Plans and Hosting Commitment Period
 
-## 4.1 Charm Plans
+## 6.1 Charm Plans
 
-Memory Charm products are offered under different service tiers (“Charm Plans”).
+Memory Charm products are offered under different service tiers ("Charm Plans").
 
 Each Charm Plan may include:
 
-* A defined hosting duration (“Hosting Commitment Period”)
+* A defined hosting duration ("Hosting Commitment Period")
 * Applicable storage limits
 * Feature availability
 * Optional viewing controls
 * Any additional services
 
-The specific Charm Plan and its details (“Plan Details”) are disclosed at or before activation and may appear on packaging, product listings, or within the activation interface.
+The specific Charm Plan and its details ("Plan Details") are disclosed at or before activation and may appear on packaging, product listings, or within the activation interface.
 
-## 4.2 Activation Date
+## 6.2 Activation Date
 
-The Hosting Commitment Period begins on the date the Memory Charm is first activated (“Activation Date”), not the purchase date.
+The Hosting Commitment Period begins on the date the Memory Charm is first activated ("Activation Date"), not the purchase date.
 
-## 4.3 Plan Stability
+## 6.3 Plan Stability
 
 The Plan Details presented at activation control in the event of any conflict with marketing or third-party descriptions.
 
@@ -110,15 +151,17 @@ The Company may make changes required for:
 
 ---
 
-# 5. Hosting Commitment
+# 7. Hosting Commitment
 
-## 5.1 Service Commitment
+## 7.1 Service Commitment
 
 During the applicable Hosting Commitment Period, the Company will use commercially reasonable efforts to provide access to hosted content associated with the activated Memory Charm.
 
 Uninterrupted, error-free, or permanent availability is not guaranteed.
 
-## 5.2 Permitted Modifications
+At the end of the Hosting Commitment Period, hosted content will expire and may no longer be accessible. This is the intended lifecycle of the product, not a failure of service. The Company may offer renewal options to extend the period before it expires.
+
+## 7.2 Permitted Modifications
 
 The Company may modify, update, replace, or migrate:
 
@@ -136,17 +179,39 @@ The Company is not required to maintain any specific feature, interface, or tech
 
 ---
 
-# 6. Content Modification Window and Freeze
+# 8. Business Continuity
 
-## 6.1 Fourteen-Day Modification Window
+## 8.1 Acquisition or Transfer
 
-Following Activation, users may upload, replace, or modify media content for fourteen (14) calendar days (“Modification Window”).
+If the Company is acquired or transfers its assets to a successor entity, the successor agrees, as a condition of that transfer, to honour the Hosting Commitment Periods of all active charms at the time of transfer. Your memories will not be deleted as a result of a change in ownership.
+
+## 8.2 Service Discontinuation
+
+If the Company determines that the Services must be permanently discontinued, the Company will:
+
+1. Provide no less than ninety (90) days advance written notice to all registered users at their email address on file.
+2. Offer a sixty (60) day window during which users may download or export their uploaded content via their account.
+3. Permanently delete all hosted content after the export window closes.
+
+The Company cannot guarantee that content exported during this window will be playable outside the Memory Charm platform, as playback depends on the Company's application. Users are encouraged to maintain independent copies of all uploaded media at all times.
+
+## 8.3 Reserve Right to Discontinue
+
+The Company reserves the right to discontinue the Services if the platform becomes technically or economically unviable, or if laws or regulations require material changes that make continued operation impracticable, subject to the notice obligations in Section 8.2.
+
+---
+
+# 9. Content Modification Window and Freeze
+
+## 9.1 Fourteen-Day Modification Window
+
+Following Activation, users may upload, replace, or modify media content for fourteen (14) calendar days ("Modification Window").
 
 After expiration of the Modification Window, media content becomes fixed and may not be replaced, edited, or altered through standard use of the Services.
 
 The inability to modify media content after expiration of the Modification Window shall not constitute a defect, service failure, or breach of these Terms.
 
-## 6.2 Metadata Updates
+## 9.2 Metadata Updates
 
 After expiration of the Modification Window, users may update non-media descriptive elements such as:
 
@@ -154,7 +219,7 @@ After expiration of the Modification Window, users may update non-media descript
 * Text description
 * Display captions
 
-## 6.3 Optional Reopening
+## 9.3 Optional Reopening
 
 The Company may, at its sole discretion, offer paid services that temporarily reopen the Modification Window.
 
@@ -167,7 +232,7 @@ Such services:
 
 Nothing in these Terms creates a right to reopen media after expiration of the Modification Window.
 
-## 6.4 User Responsibility
+## 9.4 User Responsibility
 
 Users are responsible for reviewing and confirming uploaded media during the Modification Window.
 
@@ -175,9 +240,27 @@ After expiration, the Company is not responsible for incorrect uploads, unintend
 
 ---
 
-# 7. Access Method and Viewing Controls
+# 10. Service Limits
 
-## 7.1 Viewing Access
+## 10.1 Current Content Limits
+
+The following limits apply to content uploaded to a Memory Charm:
+
+* Video: Up to 200 MB per charm. 30 seconds or less is recommended for the best viewing experience.
+* Images: Up to 10 photos per charm, with a combined size of up to 40 MB.
+* Audio: Up to 60 seconds recommended. Files should not exceed 50 MB.
+
+These limits reflect current platform capabilities and may vary by Charm Plan. Limits applicable to your specific Charm Plan are disclosed at activation.
+
+## 10.2 No Retroactive Reduction
+
+The Company will not retroactively reduce the content limits applicable to an already-activated charm during its Hosting Commitment Period without reasonable prior notice.
+
+---
+
+# 11. Access Method and Viewing Controls
+
+## 11.1 Viewing Access
 
 Memory Charm provides access to associated content through a web-based viewing experience triggered by the charm.
 
@@ -185,13 +268,13 @@ Anyone with access to the charm or its viewing path may be able to view associat
 
 The Company is not responsible for access resulting from intentional or unintentional sharing by the user or third parties.
 
-## 7.2 Optional Glyph Control
+## 11.2 Optional Glyph Control
 
 Certain Charm Plans allow activation of a visual glyph confirmation step before content is displayed.
 
 The glyph is intended to introduce intentional access friction. It is not a password system, authentication mechanism, encryption system, or security guarantee.
 
-## 7.3 Traffic and Abuse Controls
+## 11.3 Traffic and Abuse Controls
 
 To protect system integrity and availability, the Company may implement rate limits, automated abuse detection, and other safeguards.
 
@@ -199,11 +282,11 @@ These safeguards may temporarily restrict access in cases of excessive, automate
 
 Such restrictions do not constitute a defect or service failure.
 
-The Company does not guarantee prevention of unauthorized or automated access.
+The Company does not guarantee prevention of unauthorised or automated access.
 
 ---
 
-# 8. Sustainability Funding
+# 12. Sustainability Funding
 
 The Company may allocate a portion of product revenue to support hosting and infrastructure during Hosting Commitment Periods.
 
@@ -211,7 +294,7 @@ Any such allocation is an internal business practice and does not create a trust
 
 ---
 
-# 9. Customer Backups
+# 13. Customer Backups
 
 Users are responsible for maintaining independent backups of their media.
 
@@ -219,17 +302,19 @@ The Services are not guaranteed to function as the sole archival repository of i
 
 ---
 
-# 10. Transferability
+# 14. Transferability
 
 Charm Plans follow the physical Memory Charm.
 
+If a charm is gifted, the recipient becomes the user of record upon activation. The original purchaser no longer retains administrative access rights unless explicitly shared.
+
 Anyone in possession of the charm may be able to access associated content unless optional viewing controls are enabled.
 
-The Company is not responsible for unauthorized access resulting from loss, theft, or transfer of the physical charm.
+The Company is not responsible for unauthorised access resulting from loss, theft, or transfer of the physical charm.
 
 ---
 
-# 11. NFC and Device Compatibility
+# 15. NFC and Device Compatibility
 
 The Company does not guarantee compatibility with all devices, operating systems, browsers, or NFC implementations.
 
@@ -237,71 +322,203 @@ Device updates or manufacturer changes may affect performance.
 
 ---
 
-# 12. Prohibited Content
+# 16. Prohibited Content
 
-Users may not upload content that:
+You may not upload, associate, or transmit content that:
 
-* Infringes intellectual property rights
-* Violates applicable law
-* Is defamatory, harmful, obscene, or exploitative
-* Contains malware or malicious code
+* Infringes intellectual property rights. Content you do not own or have licensed, including copyrighted images, videos, or music, without authorisation from the rights holder.
+* Is sexually explicit or pornographic. Nudity or sexual content of any kind is prohibited on the Services.
+* Depicts or exploits minors. Any content that sexualises, exploits, or endangers minors is strictly prohibited and will be reported to the National Center for Missing and Exploited Children (NCMEC) and law enforcement as required by applicable law.
+* Violates privacy or publicity rights. Non-consensual intimate images, doxxing, or content depicting identifiable individuals without their consent.
+* Is defamatory, threatening, or harassing. Content intended to harm, intimidate, or harass any individual or group.
+* Violates any applicable law. Content that is illegal in your jurisdiction or in the United States.
+* Contains malware or malicious code. Files, links, or content designed to damage, disrupt, or gain unauthorised access to systems.
 
-The Company may remove content that violates these Terms.
-
----
-
-# 13. Privacy
-
-The Company collects only information reasonably necessary to operate the Services.
-
-Uploaded content is processed solely to provide the Services and is not sold for advertising purposes.
+The Company reserves the right, but assumes no obligation, to review uploaded content. Violation of this section may result in immediate removal of content, account suspension, and referral to law enforcement where legally required.
 
 ---
 
-# 14. Warranty Disclaimer
+# 17. Content Removal
 
-To the maximum extent permitted by law, Memory Charm and the Services are provided “as is” and “as available,” without warranties of any kind, express or implied.
+## 17.1 Company-Initiated Removal
+
+The Company may remove or disable access to content at any time if it reasonably believes the content violates these Terms, applicable law, or the rights of any third party. The Company will use reasonable efforts to notify the account holder of removal, except where prohibited by law or where emergency action is required.
+
+## 17.2 User-Requested Removal
+
+You may request removal of Your Content by contacting the Company. Requests will be processed within a reasonable time. Note that deletion of content associated with an activated Memory Charm effectively renders the charm non-functional. Removal of content at your request does not entitle you to a refund of the purchase price or any portion of the Hosting Commitment Period.
+
+## 17.3 Third-Party Removal Claims
+
+If a third party credibly claims that content hosted on the Services belongs to them or infringes their rights, the Company may remove or disable access to that content while the claim is investigated. The Company is not liable for removal of content based on a third-party claim later found to be erroneous. Account holders disputing such removals should follow the counter-notice procedure described in Section 18.
+
+## 17.4 No Guarantee of Availability After Removal Request
+
+Removal of content is not instantaneous and may be subject to caching, CDN propagation delays, or other technical factors. The Company does not guarantee that removed content will be inaccessible to all parties at any specific time following a removal request.
 
 ---
 
-# 15. Limitation of Liability
+# 18. DMCA Copyright Policy
+
+## 18.1 Designated Agent
+
+The Company respects intellectual property rights and complies with the Digital Millennium Copyright Act ("DMCA"), 17 U.S.C. § 512. Copyright owners who believe that content hosted on the Services infringes their copyright may submit a written notice to the Company's designated DMCA agent:
+
+DMCA Agent: Triangles End LLC
+Email: dmca@trianglesend.com
+Subject line: DMCA Takedown Notice
+
+NOTE: The designated DMCA agent must be registered with the U.S. Copyright Office at https://www.copyright.gov/dmca-directory/ prior to launch.
+
+## 18.2 Required Information for a Takedown Notice
+
+A valid DMCA takedown notice must include:
+
+* A physical or electronic signature of the copyright owner or authorised agent.
+* Identification of the copyrighted work claimed to be infringed.
+* Identification of the material on the Services that is claimed to be infringing, with sufficient information to locate it (e.g., the charm URL).
+* Your contact information (name, address, telephone number, and email).
+* A statement that you have a good faith belief that the use of the material is not authorised by the copyright owner, its agent, or the law.
+* A statement, under penalty of perjury, that the information in the notice is accurate and that you are the copyright owner or authorised to act on the owner's behalf.
+
+## 18.3 Counter-Notice Procedure
+
+If content you uploaded was removed in response to a DMCA notice and you believe the removal was made in error or based on misidentification, you may submit a counter-notice to the designated agent listed above. A valid counter-notice must include:
+
+* Your physical or electronic signature.
+* Identification of the material that was removed and the location where it appeared before removal.
+* A statement under penalty of perjury that you have a good faith belief the material was removed by mistake or misidentification.
+* Your name, address, and telephone number.
+* A statement that you consent to the jurisdiction of the Federal District Court for the judicial district in which your address is located, and that you will accept service of process from the party who submitted the original takedown notice.
+
+Upon receipt of a valid counter-notice, the Company may restore the removed content after the statutory waiting period unless the original claimant files a court action.
+
+## 18.4 Repeat Infringers
+
+The Company maintains a policy of terminating accounts of users who are repeat infringers of intellectual property rights in appropriate circumstances.
+
+---
+
+# 19. Privacy and Data Collection
+
+The Company's collection, use, and protection of personal data is governed by our Privacy Policy, which is incorporated into these Terms by reference. By using the Services, you agree to the practices described in the Privacy Policy.
+
+The Company collects only information reasonably necessary to operate the Services. Uploaded content is processed solely to provide the Services and is not sold for advertising purposes.
+
+## 19.1 Why We Collect Address and Phone Number
+
+Account registration requires a mailing address and phone number. These are collected for the following specific purposes:
+
+* Ownership verification. Contact information is used to confirm identity when handling account disputes, support requests, or requests for account changes.
+* Copyright and legal contact. The Company may be required to contact users in connection with copyright complaints, DMCA notices, or other legal matters relating to uploaded content. Physical address and phone number are standard requirements under these processes.
+* Critical service notifications. The Company commits to notifying registered users before their Hosting Commitment Period expires and before any service discontinuation. While email is the primary notification channel, mailing address and phone number serve as backup contact methods for notices that materially affect a user's memories.
+* Warranty fulfilment. A mailing address is required to deliver a replacement charm where a manufacturing defect is covered under the applicable warranty.
+
+Address and phone number are not used for marketing. They will not be shared with third parties except as required by law or as necessary to fulfil the purposes stated above.
+
+---
+
+# 20. Security Expectations
+
+## 20.1 Measures the Company Takes
+
+The Company implements industry-standard technical safeguards including:
+
+* Encrypted transmission of content and account data using HTTPS/TLS.
+* Access token authentication for account management functions.
+* Rate limiting and abuse detection to prevent automated bulk access or enumeration of content.
+
+## 20.2 What the Company Cannot Guarantee
+
+No security system is impenetrable. The Company cannot guarantee that the Services are free from unauthorised access, data breaches, or cyberattacks. The Company is not liable for unauthorised access to content that results from factors beyond its reasonable control.
+
+## 20.3 Content Is URL-Accessible by Design
+
+Memory Charm content is accessible to anyone who obtains the viewing URL or physical charm, unless optional viewing controls (such as the glyph) are enabled. The URL associated with your charm is not a secret — it is encoded in the NFC tag and may be shared, forwarded, or discovered. Users who require restricted access should enable available viewing controls.
+
+## 20.4 Physical Charm Security
+
+You are responsible for the physical security of your Memory Charm. Anyone who gains access to the physical charm can tap it to access associated content. If your charm is lost or stolen, contact the Company to explore options for disabling associated content.
+
+## 20.5 Breach Notification
+
+In the event of a security breach that affects your personal data, the Company will notify affected users as required by applicable law.
+
+---
+
+# 21. Physical Product Warranty
+
+## 21.1 Limited Warranty Against Manufacturing Defects
+
+The Company warrants that the physical Memory Charm hardware, including the NFC tag embedded in the product, is free from defects in materials and workmanship for ninety (90) days from the original purchase date ("Warranty Period"). If a Memory Charm fails due to a covered manufacturing defect during the Warranty Period, the Company will, at its option, repair or replace the defective charm at no charge.
+
+## 21.2 What Is Not Covered
+
+This warranty does not cover:
+
+* Damage caused by accident, misuse, abuse, neglect, or modification.
+* Damage caused by exposure to extreme temperature, moisture, or physical impact.
+* Normal wear and tear.
+* Damage resulting from failure to follow product instructions.
+* Loss of the physical charm.
+
+## 21.3 Device Failure and Your Content
+
+A replacement charm will be linked to your existing account and associated content, provided that the Hosting Commitment Period has not expired and your account remains in good standing. Content is stored on Company-managed servers, not on the physical charm itself, so physical charm failure does not cause loss of hosted content.
+
+## 21.4 How to Claim
+
+To claim a warranty replacement, contact the Company with proof of purchase and a description of the defect. A valid mailing address is required for fulfilment of physical replacements.
+
+## 21.5 Exclusive Remedy
+
+Repair or replacement of the defective physical charm is the sole and exclusive remedy for a warranty claim. This warranty gives you specific legal rights; you may also have other rights that vary by jurisdiction.
+
+---
+
+# 22. Warranty Disclaimer (Digital Services)
+
+To the maximum extent permitted by law, the digital Services (hosting, delivery, and access to content) are provided "as is" and "as available," without warranties of any kind, express or implied, including warranties of merchantability, fitness for a particular purpose, or non-infringement. The physical product warranty in Section 21 is the only express warranty provided by the Company.
+
+---
+
+# 23. Limitation of Liability
 
 To the fullest extent permitted by law:
 
 The Company shall not be liable for indirect, incidental, consequential, special, exemplary, or punitive damages, including loss of data, loss of content, loss of sentimental value, emotional distress, or goodwill.
 
-The Company’s total liability for any claim relating to a Memory Charm or the Services shall not exceed the amount paid for the specific Memory Charm giving rise to the claim.
+The Company's total liability for any claim relating to a Memory Charm or the Services shall not exceed the amount paid for the specific Memory Charm giving rise to the claim.
 
 ---
 
-# 16. Indemnification
+# 24. Indemnification
 
-You agree to indemnify and hold harmless the Company from claims arising from your content or violation of these Terms.
+You agree to indemnify and hold harmless the Company from claims arising from your content, your use of the Services, or your violation of these Terms, including any claim by a third party that your content infringes their intellectual property or privacy rights.
 
 ---
 
-# 17. Force Majeure
+# 25. Force Majeure
 
 The Company is not responsible for delays or failures caused by events beyond its reasonable control, including infrastructure failures, cloud provider outages, cyberattacks, regulatory changes, natural disasters, or other force majeure events.
 
 ---
 
-# 18. Changes to Terms
+# 26. Changes to Terms
 
 The Company may update these Terms periodically. Continued use of the Services after updates constitutes acceptance of revised Terms.
 
 ---
 
-# 19. Governing Law
+# 27. Governing Law
 
 These Terms are governed by the laws of the State of Minnesota, without regard to conflict-of-law principles.
 
 ---
 
-If you'd like next, we can:
+OPEN ITEMS FOR LEGAL REVIEW
 
-* Add arbitration + class action waiver language (hardening level up)
-* Create the matching Privacy Policy
-* Or audit your marketing copy against this finalized T&C to ensure zero misalignment
-
-You’ve built something unusually well structured for a hybrid physical/digital product.
+* DMCA agent: Must be registered with the U.S. Copyright Office before launch (https://www.copyright.gov/dmca-directory/). The mailing address for the designated agent must be added to Section 18.1.
+* DMCA email: This document uses dmca@trianglesend.com. The ULA previously used dmca@memorycharm.com. Confirm which address is correct and update both documents.
+* Arbitration clause: Consider adding binding arbitration and class action waiver to reduce litigation exposure. Requires legal counsel to draft correctly for multi-state consumer products.
+* Support contact: Confirm support@memorycharm.com (referenced in ULA) is operational, or update to the correct address.

@@ -1,5 +1,5 @@
 Memory Charm™ — User License Agreement (ULA)
-Last Updated: [Insert Date]
+Last Updated: March 15, 2026
 
 ================================================================================
 
@@ -58,6 +58,8 @@ By uploading content, you grant us a limited license to:
 
 We do NOT sell your content.
 We do NOT claim ownership of your memories.
+We do NOT use your content for advertising or promotional purposes without
+your explicit written consent.
 
 You are responsible for ensuring you have the right to upload any content (e.g.,
 no copyrighted movies, no content you don't have rights to). You must be at
@@ -147,12 +149,16 @@ above.
 
 You agree not to upload:
   - Illegal content
-  - Explicit content involving minors
+  - Sexually explicit or pornographic content of any kind
+  - Content that sexualises, exploits, or endangers minors (strictly prohibited
+    and will be reported to NCMEC and law enforcement)
   - Malware or harmful code
   - Content intended to harass or threaten others
   - Content that infringes intellectual property or privacy rights
+  - Non-consensual intimate images
 
-We reserve the right to remove content that violates these standards.
+We reserve the right to remove content that violates these standards and may
+suspend accounts or refer cases to law enforcement where required.
 
 ================================================================================
 
@@ -171,8 +177,9 @@ Memory Charm is provided "as is" and "as available." While we strive for
 reliability, we do not guarantee uninterrupted service. We recommend keeping
 your own backup of uploaded content.
 
-The physical charm is warranted against manufacturing defects for [X] days
-from purchase.
+The physical charm is warranted against manufacturing defects for ninety (90)
+days from purchase. See the full Terms and Conditions for coverage details,
+exclusions, and how to claim.
 
 To the maximum extent permitted by law, Memory Charm and the services are
 provided without warranties of any kind, express or implied.
@@ -267,10 +274,9 @@ same. We comply with the Digital Millennium Copyright Act (DMCA), 17 U.S.C.
 § 512, and respond to valid notices of alleged copyright infringement.
 
 Designated DMCA Agent:
-  [DMCA Agent Name]
-  [Company Name]
-  [Mailing Address]
-  Email: dmca@memorycharm.com
+  Triangles End LLC
+  [Mailing Address — must be added before launch]
+  Email: dmca@trianglesend.com
 
   NOTE TO LEGAL: This agent must be registered with the US Copyright Office
   at https://www.copyright.gov/dmca-directory/ before launch.

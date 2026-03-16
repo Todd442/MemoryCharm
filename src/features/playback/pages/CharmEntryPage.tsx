@@ -39,7 +39,9 @@ export function CharmEntryPage() {
   // (set by CharmDetailPage and ClaimCharmPage). Also true when the API
   // confirms ownership via the optionally-attached Bearer token (covers NFC
   // scans and direct URL visits where the owner is already signed in).
-  const navIsOwner = (navState as { isOwner?: boolean } | null)?.isOwner === true;
+  type NavState = { isOwner?: boolean; prefetchedEntry?: EntryResponse } | null;
+  const navIsOwner = (navState as NavState)?.isOwner === true;
+  const prefetchedEntry = (navState as NavState)?.prefetchedEntry ?? null;
 
   const token = getTokenCaseInsensitive(search);
 
@@ -71,13 +73,18 @@ export function CharmEntryPage() {
           if (cancelled) return;
 
           if (entry.kind === "claimed" || entry.kind === "unclaimed") {
-            nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true });
+            nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true, state: { prefetchedEntry: entry } });
+            return;
           }
         }
-        // 2) Clean URL: /c/:code
+        // 2) Clean URL: /c/:code — use prefetched entry from NFC path if available
         else if (code) {
-          entry = await entryByCode(code);
-          if (cancelled) return;
+          if (prefetchedEntry) {
+            entry = prefetchedEntry;
+          } else {
+            entry = await entryByCode(code);
+            if (cancelled) return;
+          }
         } else {
           setUi({ s: "error", message: "Missing token or charm code." });
           return;
@@ -137,7 +144,7 @@ export function CharmEntryPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, code, nav, navIsOwner]);
+  }, [token, code, nav, navIsOwner, prefetchedEntry]);
 
   async function handleGlyphSubmit(glyph: string) {
     if (ui.s !== "ready") return;
