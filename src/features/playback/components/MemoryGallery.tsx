@@ -156,10 +156,47 @@ export function MemoryGallery(props: {
     pausedRef.current = false;
   }, []);
 
+  const handleNext = useCallback(() => {
+    setSelected(s => s === null ? 0 : (s + 1) % files.length);
+    pausedRef.current = true;
+  }, [files.length]);
+
+  const handlePrev = useCallback(() => {
+    setSelected(s => s === null ? 0 : (s - 1 + files.length) % files.length);
+    pausedRef.current = true;
+  }, [files.length]);
+
+  const touchStartXRef = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartXRef.current;
+    touchStartXRef.current = null;
+    if (Math.abs(delta) < 40) return;
+    if (delta < 0) handleNext();
+    else handlePrev();
+  }, [handleNext, handlePrev]);
+
   // Reset focused image fade-in whenever a new image is selected
   useLayoutEffect(() => {
     setFocusImgReady(false);
   }, [selected]);
+
+  // Keyboard navigation when focused view is open
+  useEffect(() => {
+    if (selected === null) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "ArrowRight") handleNext();
+      else if (e.key === "ArrowLeft") handlePrev();
+      else if (e.key === "Escape") handleDismiss();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected, handleNext, handlePrev, handleDismiss]);
 
   useEffect(() => {
     function onResize() { dimsRef.current = computeDims(); }
@@ -242,7 +279,12 @@ export function MemoryGallery(props: {
       {/* Zoomed-in framed view */}
       {isOpen && (
         <div className="mg-focus" onClick={handleDismiss}>
-          <div className="mg-focus__frame" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="mg-focus__frame"
+            onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <div className="pb-brand">
               <button
                 className="mg-focus__close"
@@ -256,12 +298,41 @@ export function MemoryGallery(props: {
               </span>
               <FullscreenButton />
             </div>
-            <img
-              src={files[selected!].url}
-              alt={`Memory ${selected! + 1} of ${n}`}
-              className={`pb-media${focusImgReady ? " pb-media--ready" : ""}`}
-              onLoad={() => setFocusImgReady(true)}
-            />
+
+            <div className="mg-focus__media-wrap">
+              {n > 1 && (
+                <button className="mg-focus__arrow mg-focus__arrow--prev" onClick={handlePrev} aria-label="Previous image">
+                  &#8249;
+                </button>
+              )}
+              <img
+                src={files[selected!].url}
+                alt={`Memory ${selected! + 1} of ${n}`}
+                className={`pb-media${focusImgReady ? " pb-media--ready" : ""}`}
+                onLoad={() => setFocusImgReady(true)}
+              />
+              {n > 1 && (
+                <button className="mg-focus__arrow mg-focus__arrow--next" onClick={handleNext} aria-label="Next image">
+                  &#8250;
+                </button>
+              )}
+            </div>
+
+            {n > 1 && (
+              <div className="mg-focus__dots">
+                {n <= 15
+                  ? files.map((_, i) => (
+                      <button
+                        key={i}
+                        className={`mg-focus__dot${i === selected ? " mg-focus__dot--active" : ""}`}
+                        onClick={(e) => { e.stopPropagation(); setSelected(i); pausedRef.current = true; }}
+                        aria-label={`Go to image ${i + 1}`}
+                      />
+                    ))
+                  : <span className="mg-focus__counter">{selected! + 1} / {n}</span>
+                }
+              </div>
+            )}
           </div>
         </div>
       )}

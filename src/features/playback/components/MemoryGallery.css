@@ -222,3 +222,101 @@
   background: rgba(0, 0, 0, 0.7);
   border-color: rgba(210, 170, 110, 0.5);
 }
+
+
+/* ── Image media wrapper (positioning context for arrows) ── */
+
+.mg-focus__media-wrap {
+  position: relative;
+  width: 100%;
+}
+
+
+/* ── Swipe navigation arrows ── */
+
+.mg-focus__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  width: clamp(32px, 5vmin, 48px);
+  height: clamp(32px, 5vmin, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(210, 170, 110, 0.3);
+  border-radius: 50%;
+  color: rgba(230, 210, 180, 0.9);
+  font-size: clamp(22px, 4vmin, 34px);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+
+  /* Subtle on mobile; revealed on hover on desktop */
+  opacity: 0.4;
+  transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.mg-focus__frame:hover .mg-focus__arrow {
+  opacity: 0.75;
+}
+
+.mg-focus__arrow:hover,
+.mg-focus__arrow:focus-visible {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(210, 170, 110, 0.6);
+}
+
+.mg-focus__arrow:focus-visible {
+  outline: 2px solid rgba(210, 170, 110, 0.5);
+  outline-offset: 3px;
+}
+
+.mg-focus__arrow--prev { left:  clamp(6px, 1.5vmin, 14px); }
+.mg-focus__arrow--next { right: clamp(6px, 1.5vmin, 14px); }
+
+
+/* ── Dot / counter indicator ── */
+
+.mg-focus__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(5px, 1vmin, 9px);
+  padding: clamp(6px, 1.2vmin, 10px) clamp(12px, 2vmin, 24px) clamp(8px, 1.5vmin, 14px);
+  max-width: 100%;
+}
+
+.mg-focus__dot {
+  width: clamp(6px, 1vmin, 9px);
+  height: clamp(6px, 1vmin, 9px);
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: rgba(210, 170, 110, 0.25);
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.mg-focus__dot--active {
+  background: rgba(210, 170, 110, 0.9);
+  transform: scale(1.4);
+}
+
+.mg-focus__dot:hover:not(.mg-focus__dot--active) {
+  background: rgba(210, 170, 110, 0.5);
+}
+
+.mg-focus__counter {
+  font-family: var(--font-body);
+  font-size: clamp(11px, 1.8vmin, 15px);
+  color: rgba(210, 170, 110, 0.6);
+  letter-spacing: 0.08em;
+  padding-bottom: clamp(4px, 0.8vmin, 8px);
+}
