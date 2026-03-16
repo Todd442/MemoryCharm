@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import { getCharmDetail } from "../api";
 import type { UserCharmDetail } from "../api";
@@ -8,7 +8,6 @@ import "../../claim/pages/ClaimCharmPage.css"; // shared .teBtn styles
 import "./PurchasePage.css";
 
 export function PurchasePage() {
-  const nav = useNavigate();
   const { code } = useParams<{ code: string }>();
   const { setStatus } = useStatus();
 
