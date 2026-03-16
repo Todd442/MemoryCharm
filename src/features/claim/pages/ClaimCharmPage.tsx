@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
 import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
 import type { UserProfile } from "../api";
-import { CURRENT_TERMS_VERSION, isUlaCachedLocally, cacheUlaLocally, acceptTerms } from "../../../app/api/profileApi";
-import { UlaContent } from "../../legal/components/UlaContent";
 import { getUserCharms, getCharmDetail } from "../../account/api";
 import { entryByCode } from "../../playback/api";
 import { checkFileAudioCodec } from "../../playback/utils/codecDetection";
@@ -87,7 +84,7 @@ export function MemoryDetailsFields({
 }
 // ---------------------------------------------------------------------------
 
-type Step = "loading" | "welcome" | "ula" | "profile" | "memoryType" | "details" | "protection" | "glyphSelect" | "upload" | "done";
+type Step = "loading" | "welcome" | "profile" | "memoryType" | "details" | "protection" | "glyphSelect" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
 
@@ -113,13 +110,6 @@ const STEP_META: Record<Step, StepMeta> = {
     statusSubtitle: "Sign in to become this charm’s Keeper.",
     stickyTitle: "What to expect",
     stickyDesc: "Everything you need to claim this charm and seal your memory.",
-  },
-  ula: {
-    cardTitle: "LICENSE AGREEMENT",
-    statusText: "User License Agreement",
-    statusSubtitle: "A one-time read-and-accept for your account.",
-    stickyTitle: "Review and accept",
-    stickyDesc: "This agreement covers how your memories are hosted and protected.",
   },
   details: {
     cardTitle: "MEMORY DETAILS",
@@ -185,13 +175,10 @@ export function ClaimCharmPage() {
   const emailish = useMemo(() => me?.username ?? "", [me]);
 
   const [step, setStep] = useState<Step>("welcome");
-  // needsUla / needsProfile: pessimistic defaults so pre-auth step count is accurate for new users.
+  // needsProfile: pessimistic default so pre-auth step count is accurate for new users.
   // Updated after API call completes.
-  const [needsUla, setNeedsUla] = useState(!isUlaCachedLocally());
   const [needsProfile, setNeedsProfile] = useState(true);
   const [apiChecked, setApiChecked] = useState(false);
-  const [ulaAccepting, setUlaAccepting] = useState(false);
-  const [ulaError, setUlaError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [claimed, setClaimed] = useState<{ charmId: string } | null>(null);
@@ -209,24 +196,20 @@ export function ClaimCharmPage() {
   const [carouselIdx, setCarouselIdx] = useState(0);
   const lastUploadedRef = useRef<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
-
   // Scroll back to top whenever the step changes
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: "instant" });
   }, [step]);
 
-  // Dynamic step list — always starts with welcome, then ULA/profile only if needed.
+  // Dynamic step list — always starts with welcome, then profile only if needed.
   const orderedSteps = useMemo<Step[]>(() => {
     const base: Step[] = ["welcome"];
-    if (needsUla) base.push("ula");
     if (needsProfile) base.push("profile");
     base.push("memoryType", "details", "upload", "protection");
     if (authMode === "glyph") base.push("glyphSelect");
     base.push("done");
     return base;
-  }, [needsUla, needsProfile, authMode]);
+  }, [needsProfile, authMode]);
 
   const stepNumber = useMemo(() => {
     const idx = orderedSteps.indexOf(step);
@@ -234,10 +217,6 @@ export function ClaimCharmPage() {
   }, [orderedSteps, step]);
 
   const totalSteps = orderedSteps.length;
-
-  useEffect(() => {
-    setFooterEl(document.getElementById("te-footer"));
-  }, []);
 
   // Create/revoke object URLs for content preview on done page
   useEffect(() => {
@@ -322,19 +301,13 @@ export function ClaimCharmPage() {
         }
 
         // Determine what this user still needs to complete
-        const ulaNeeded = !isUlaCachedLocally() && profileRes.termsVersion !== CURRENT_TERMS_VERSION;
         const profileNeeded = !profileRes.hasProfile;
 
-        if (!ulaNeeded && profileRes.termsVersion === CURRENT_TERMS_VERSION) {
-          cacheUlaLocally(); // server confirmed — warm the local cache
-        }
-
-        setNeedsUla(ulaNeeded);
         setNeedsProfile(profileNeeded);
         setApiChecked(true);
 
-        // Always land on welcome so new users see the process overview before ULA/profile.
-        // The welcome card routes to the right next step based on needsUla/needsProfile.
+        // Always land on welcome so new users see the process overview before profile.
+        // The welcome card routes to the right next step based on needsProfile.
         setInitialStep("welcome");
 
         // Pre-select the glyph from the user's most recently claimed glyph charm
@@ -379,14 +352,6 @@ export function ClaimCharmPage() {
             </div>
           </div>
         </div>
-        {footerEl && createPortal(
-          <div className="te-footerActions">
-            <button className="teBtn teBtnSm teBtnGhost" onClick={() => nav("/")} type="button">
-              Home
-            </button>
-          </div>,
-          footerEl
-        )}
       </>
     );
   }
@@ -403,30 +368,6 @@ export function ClaimCharmPage() {
       setErr(e?.message ?? "Sign-in failed.");
     }
   }
-
-  async function doAcceptUla() {
-    setUlaAccepting(true);
-    setUlaError(null);
-    try {
-      await acceptTerms();
-      setNeedsUla(false);
-      advanceTo(needsProfile ? "profile" : "memoryType");
-    } catch {
-      setUlaError("Something went wrong. Please try again.");
-    } finally {
-      setUlaAccepting(false);
-    }
-  }
-
-  async function doSignOut() {
-    setErr(null);
-    try {
-      await instance.logoutRedirect();
-    } catch (e: any) {
-      setErr(e?.message ?? "Sign-out failed.");
-    }
-  }
-
 
   async function doSaveProfile() {
     setErr(null);
@@ -637,8 +578,8 @@ export function ClaimCharmPage() {
                       </button>
                     </div>
                   </>
-                ) : needsUla || needsProfile ? (
-                  /* New user: just signed in, still needs ULA and/or profile */
+                ) : needsProfile ? (
+                  /* New user: just signed in, still needs profile */
                   <>
                     <p style={{
                       fontFamily: "var(--font-body)",
@@ -652,27 +593,23 @@ export function ClaimCharmPage() {
                     </p>
 
                     {([
-                      needsUla    && { s: "STEP 1", label: "REVIEW THE LICENSE AGREEMENT", desc: "A one-time acceptance. Takes about a minute to read." },
-                      needsProfile && { s: needsUla ? "STEP 2" : "STEP 1", label: "COMPLETE YOUR REGISTRATION", desc: "Your name, email, address, and phone — so this charm is linked to you." },
-                      { s: needsUla && needsProfile ? "STEP 3" : needsUla || needsProfile ? "STEP 2" : "STEP 1", label: "BIND YOUR MEMORY", desc: "Upload the video, photo, or audio clip to seal inside this charm." },
-                      { s: needsUla && needsProfile ? "STEP 4" : needsUla || needsProfile ? "STEP 3" : "STEP 2", label: "YOUR CHARM IS SEALED",  desc: "The memory is locked in and ready to share." },
-                    ] as const).filter(Boolean).map((item) => {
-                      const { s, label, desc } = item as { s: string; label: string; desc: string };
-                      return (
-                        <div key={label} className="tePill tePillLarge" style={{ cursor: "default", pointerEvents: "none" }}>
-                          <span className="tePillSpec">{s}</span>
-                          <span className="tePillLabel">{label}</span>
-                          <span className="tePillDesc">{desc}</span>
-                        </div>
-                      );
-                    })}
+                      { s: "STEP 1", label: "COMPLETE YOUR REGISTRATION", desc: "Your name, email, address, and phone — so this charm is linked to you." },
+                      { s: "STEP 2", label: "BIND YOUR MEMORY", desc: "Upload the video, photo, or audio clip to seal inside this charm." },
+                      { s: "STEP 3", label: "YOUR CHARM IS SEALED",  desc: "The memory is locked in and ready to share." },
+                    ]).map(({ s, label, desc }) => (
+                      <div key={label} className="tePill tePillLarge" style={{ cursor: "default", pointerEvents: "none" }}>
+                        <span className="tePillSpec">{s}</span>
+                        <span className="tePillLabel">{label}</span>
+                        <span className="tePillDesc">{desc}</span>
+                      </div>
+                    ))}
 
                     {err && <div className="teClaimError">{err}</div>}
 
                     <div className="teActionsRow">
                       <button
                         className="teBtn teBtnPrimary teBtnWide"
-                        onClick={() => advanceTo(needsUla ? "ula" : needsProfile ? "profile" : "memoryType")}
+                        onClick={() => advanceTo(needsProfile ? "profile" : "memoryType")}
                         disabled={busy || !apiChecked}
                         type="button"
                       >
@@ -681,7 +618,7 @@ export function ClaimCharmPage() {
                     </div>
                   </>
                 ) : (
-                  /* Returning user: ULA and profile already on file */
+                  /* Returning user: profile already on file */
                   <>
                     <p style={{
                       fontFamily: "var(--font-body)",
@@ -713,35 +650,6 @@ export function ClaimCharmPage() {
             </div>
           )}
 
-          {/* STEP: ULA — inline license agreement within the claim flow */}
-          {step === "ula" && (
-            <div className="teCardBody teCardBody--ula">
-              <div className="legal-scroll-box">
-                <UlaContent compact />
-              </div>
-              {ulaError && <p className="teClaimError">{ulaError}</p>}
-              <p style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.78rem",
-                opacity: 0.55,
-                textAlign: "center",
-                margin: "16px 0 0",
-              }}>
-                By clicking Accept, you confirm you have read and agree to this User License Agreement.
-              </p>
-              <div className="teActionsRow">
-                <button
-                  className="teBtn teBtnPrimary teBtnWide"
-                  onClick={doAcceptUla}
-                  disabled={ulaAccepting}
-                  type="button"
-                >
-                  {ulaAccepting ? "Saving…" : "I Accept"}
-                </button>
-              </div>
-            </div>
-          )}
-
             {/* STEP: PROFILE */}
             {step === "profile" && (
               <div className="teCardBody">
@@ -764,28 +672,11 @@ export function ClaimCharmPage() {
                     />
                   ))}
 
-                  {/* Terms acceptance */}
-                  <label className="teTermsRow">
-                    <input
-                      className="teTermsCheck"
-                      type="checkbox"
-                      checked={termsAccepted}
-                      onChange={(e) => setTermsAccepted(e.target.checked)}
-                      disabled={busy}
-                    />
-                    <span className="teTermsText">
-                      I accept the{" "}
-                      <a href="/terms/plain" onClick={(e) => { e.preventDefault(); nav("/terms/plain"); }}>Plain English Terms</a>
-                      {" "}and the{" "}
-                      <a href="/terms" onClick={(e) => { e.preventDefault(); nav("/terms"); }}>Terms &amp; Conditions</a>.
-                    </span>
-                  </label>
-
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
                       onClick={doSaveProfile}
-                      disabled={busy || !termsAccepted || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
+                      disabled={busy || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
                       type="button"
                     >
                       {busy ? "Saving…" : "Continue"}
@@ -1144,36 +1035,17 @@ export function ClaimCharmPage() {
     </div>{/* close teClaimScrollArea */}
     </div>{/* close teClaimLayout */}
 
-    {/* Portal: nav actions into the frame footer */}
-    {footerEl && createPortal(
-      <div className="te-footerActions">
+    {/* Wizard back — in-page, only when inside an active authenticated step */}
+    {step !== "loading" && isAuthed && (
+      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
         <button
           className="teBtn teBtnSm teBtnGhost"
-          onClick={() => nav("/")}
+          onClick={goBack}
           type="button"
         >
-          Home
+          &#8592; Back
         </button>
-        {step !== "loading" && isAuthed && (
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={goBack}
-            type="button"
-          >
-            ← Back
-          </button>
-        )}
-        {isAuthed && (
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={doSignOut}
-            disabled={working}
-          >
-            Sign out
-          </button>
-        )}
-      </div>,
-      footerEl
+      </div>
     )}
     </>
   );

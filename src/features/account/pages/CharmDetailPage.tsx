@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
@@ -28,7 +27,6 @@ export function CharmDetailPage() {
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
 
   // Glyph editing state
   const [editAuthMode, setEditAuthMode] = useState<"none" | "glyph">("none");
@@ -51,10 +49,6 @@ export function CharmDetailPage() {
 
   // Factory reset state
   const [resetConfirm, setResetConfirm] = useState(false);
-
-  useEffect(() => {
-    setFooterEl(document.getElementById("te-footer"));
-  }, []);
 
   useEffect(() => {
     setStatus({ text: "Charm Details", subtitle: "Manage your memory charm." });
@@ -292,6 +286,17 @@ export function CharmDetailPage() {
               {msg}
             </div>
           )}
+
+          {/* View Charm shortcut */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <button
+              className="teBtn teBtnSm teBtnGhost"
+              onClick={() => nav(`/c/${encodeURIComponent(charm.charmId)}`, { state: { isOwner: true } })}
+              type="button"
+            >
+              View Charm &#8594;
+            </button>
+          </div>
 
           {/* Memory Details (name + description) */}
           <details className="teCharmSection" open>
@@ -700,26 +705,6 @@ export function CharmDetailPage() {
         </div>
       </div>
 
-      {/* Footer actions */}
-      {footerEl && createPortal(
-        <div className="te-footerActions">
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={() => nav("/account")}
-            type="button"
-          >
-            &larr; Account
-          </button>
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={() => nav(`/c/${encodeURIComponent(charm.charmId)}`, { state: { isOwner: true } })}
-            type="button"
-          >
-            View Charm
-          </button>
-        </div>,
-        footerEl
-      )}
     </>
   );
 }

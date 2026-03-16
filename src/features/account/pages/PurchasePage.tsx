@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useNavigate, useParams, Link } from "react-router-dom";
 
 import { getCharmDetail } from "../api";
@@ -16,11 +15,6 @@ export function PurchasePage() {
   const [loading, setLoading] = useState(true);
   const [charm, setCharm] = useState<UserCharmDetail | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [footerEl, setFooterEl] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    setFooterEl(document.getElementById("te-footer"));
-  }, []);
 
   useEffect(() => {
     setStatus({ text: "Charm Shop", subtitle: "Extend and enhance your memory charm." });
@@ -169,26 +163,6 @@ export function PurchasePage() {
         </div>
       </div>
 
-      {/* Footer actions */}
-      {footerEl && createPortal(
-        <div className="te-footerActions">
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={() => nav(`/account/charms/${encodeURIComponent(charm.charmId)}`)}
-            type="button"
-          >
-            &larr; Charm Details
-          </button>
-          <button
-            className="teBtn teBtnSm teBtnGhost"
-            onClick={() => nav("/account")}
-            type="button"
-          >
-            Account
-          </button>
-        </div>,
-        footerEl
-      )}
     </>
   );
 }

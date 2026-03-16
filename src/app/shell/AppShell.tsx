@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { FixedStage } from "./FixedStage";
 import { StatusProvider } from "../providers/StatusProvider";
 import { StatusBar } from "./StatusBar";
+import { AppNav } from "./AppNav";
 import "./shell.css";
 
 export function AppShell() {
@@ -21,7 +22,9 @@ export function AppShell() {
               <Outlet />
             </main>
 
-            <footer className="te-commands" id="te-footer" />
+            <footer className="te-commands">
+              <AppNav />
+            </footer>
           </div>
         </StatusProvider>
       </div>
