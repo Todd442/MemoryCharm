@@ -5,22 +5,15 @@
 }
 
 .isStrip {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  overflow-x: auto;
-  padding: 4px 2px 8px;
-  /* Hide scrollbar on iOS but keep scrollability */
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 .isThumb,
 .isThumbAdd {
-  flex: 0 0 76px;
-  width: 76px;
-  height: 76px;
+  aspect-ratio: 1;
+  width: 100%;
   border-radius: 10px;
 }
 

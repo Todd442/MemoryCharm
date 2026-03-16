@@ -10,6 +10,7 @@ import { ALL_GLYPHS } from "../../../app/data/glyphs";
 import { useStatus } from "../../../app/providers/StatusProvider";
 import { ThemedInput } from "../../../components/ThemedInput";
 import { MemoryDetailsFields } from "../../claim/pages/ClaimCharmPage";
+import { ImageStrip } from "../../../components/ImageStrip";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill, .teBtn styles + .teTextarea
 import "./CharmDetailPage.css";
 
@@ -40,6 +41,7 @@ export function CharmDetailPage() {
 
   // Upload state
   const [files, setFiles] = useState<File[]>([]);
+  const [fileErr, setFileErr] = useState<string | null>(null);
   const [uploadPct, setUploadPct] = useState(0);
   const [carouselIdx, setCarouselIdx] = useState(0);
 
@@ -183,6 +185,7 @@ export function CharmDetailPage() {
       await uploadCharm(code, files, files[0].type, setUploadPct);
       setMsg("Content updated successfully.");
       setFiles([]);
+      setFileErr(null);
       // Refresh charm data
       const detail = await getCharmDetail(code);
       setCharm(detail);
@@ -197,6 +200,30 @@ export function CharmDetailPage() {
     } finally {
       setBusy(false);
     }
+  }
+
+  const MAX_IMAGE_FILES = 10;
+
+  function addImages(newFiles: File[]) {
+    setFileErr(null);
+    setFiles(prev => {
+      const combined = [...prev, ...newFiles];
+      const capped = combined.slice(0, MAX_IMAGE_FILES);
+      if (combined.length > MAX_IMAGE_FILES) {
+        setFileErr(`Up to ${MAX_IMAGE_FILES} photos allowed. Some were not added.`);
+      }
+      const totalBytes = capped.reduce((s, f) => s + f.size, 0);
+      if (totalBytes > MAX_CHARM_BYTES) {
+        setFileErr(`Adding those photos would exceed the ${maxCharmMB} MB limit. Try removing some first.`);
+        return prev;
+      }
+      return capped;
+    });
+  }
+
+  function removeImage(index: number) {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFileErr(null);
   }
 
   if (loading) {
@@ -475,6 +502,7 @@ export function CharmDetailPage() {
                           } else {
                             setEditMemoryType(t);
                             setFiles([]);
+                            setFileErr(null);
                           }
                         }}
                         disabled={busy || !!typeChangePending}
@@ -512,6 +540,7 @@ export function CharmDetailPage() {
                             setEditMemoryType(typeChangePending);
                             setTypeChangePending(null);
                             setFiles([]);
+                            setFileErr(null);
                           }}
                           type="button"
                         >
@@ -526,29 +555,48 @@ export function CharmDetailPage() {
                 {!typeChangePending && editMemoryType && (
                   <div>
                     <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>
-                      Replace {editMemoryType} content
+                      {editMemoryType === "image" ? "Photos to upload" : `Replace ${editMemoryType} content`}
                     </div>
-                    <input
-                      key={editMemoryType}
-                      type="file"
-                      accept={acceptTypes[editMemoryType] ?? "*/*"}
-                      multiple={editMemoryType === "image"}
-                      disabled={busy}
-                      onChange={(e) => {
-                        const selected = e.target.files;
-                        setFiles(selected ? Array.from(selected) : []);
-                      }}
-                      style={{ padding: "6px 0" }}
-                    />
-                    {files.length === 1 && (
-                      <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
-                        {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
-                      </div>
-                    )}
-                    {files.length > 1 && (
-                      <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
-                        {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
-                      </div>
+                    {editMemoryType === "image" && files.length > 0 ? (
+                      <ImageStrip
+                        files={files}
+                        onRemove={removeImage}
+                        onAdd={addImages}
+                        max={MAX_IMAGE_FILES}
+                        disabled={busy}
+                        accept={acceptTypes.image}
+                        error={fileErr}
+                      />
+                    ) : (
+                      <>
+                        <input
+                          key={editMemoryType}
+                          type="file"
+                          accept={acceptTypes[editMemoryType] ?? "*/*"}
+                          multiple={editMemoryType === "image"}
+                          disabled={busy}
+                          onChange={(e) => {
+                            const selected = e.target.files;
+                            if (!selected || selected.length === 0) return;
+                            if (editMemoryType === "image") {
+                              addImages(Array.from(selected));
+                            } else {
+                              setFiles(Array.from(selected));
+                            }
+                          }}
+                          style={{ padding: "6px 0" }}
+                        />
+                        {files.length === 1 && editMemoryType !== "image" && (
+                          <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
+                            {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
+                          </div>
+                        )}
+                        {fileErr && (
+                          <div style={{ fontSize: "var(--fs-xs)", color: "#e07070", marginTop: 4 }}>
+                            {fileErr}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 )}

@@ -15,6 +15,7 @@ import { ALL_GLYPHS } from "../../../app/data/glyphs";
 import "./ClaimCharmPage.css";
 import { ThemedInput } from "../../../components/ThemedInput";
 import { InfoPanel } from "../../../components/InfoPanel";
+import { ImageStrip } from "../../../components/ImageStrip";
 
 // ---------------------------------------------------------------------------
 // Shared helper: counts words in a string
@@ -393,14 +394,14 @@ export function ClaimCharmPage() {
   async function handleFileSelect(selected: FileList | null) {
     setFileErr(null);
     if (!selected || selected.length === 0) {
-      setFiles([]);
+      if (memoryType !== "image") setFiles([]);
       return;
     }
-    let picked = Array.from(selected);
+    const picked = Array.from(selected);
 
-    if (memoryType === "image" && picked.length > MAX_IMAGE_FILES) {
-      picked = picked.slice(0, MAX_IMAGE_FILES);
-      setFileErr(`You can include up to ${MAX_IMAGE_FILES} photos. We kept the first ${MAX_IMAGE_FILES}.`);
+    if (memoryType === "image") {
+      addImages(picked);
+      return;
     }
 
     const totalBytes = picked.reduce((s, f) => s + f.size, 0);
@@ -425,6 +426,28 @@ export function ClaimCharmPage() {
     }
 
     setFiles(picked);
+  }
+
+  function addImages(newFiles: File[]) {
+    setFileErr(null);
+    setFiles(prev => {
+      const combined = [...prev, ...newFiles];
+      const capped = combined.slice(0, MAX_IMAGE_FILES);
+      if (combined.length > MAX_IMAGE_FILES) {
+        setFileErr(`Up to ${MAX_IMAGE_FILES} photos allowed. Some were not added.`);
+      }
+      const totalBytes = capped.reduce((s, f) => s + f.size, 0);
+      if (totalBytes > MAX_CHARM_BYTES) {
+        setFileErr(`Adding those photos would exceed the ${maxCharmMB} MB limit. Try removing some first.`);
+        return prev;
+      }
+      return capped;
+    });
+  }
+
+  function removeImage(index: number) {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFileErr(null);
   }
 
   async function doSealCharm() {
@@ -910,36 +933,50 @@ export function ClaimCharmPage() {
             {/* STEP: UPLOAD (file selection only — sealing happens on protection step) */}
             {step === "upload" && (
               <div className="teCardBody">
-                <label className="teField">
-                  <div className="teFieldLabel">
-                    Select {memoryType} file{memoryType === "image" ? `(s) — up to ${MAX_IMAGE_FILES}` : ""}
-                  </div>
-
-                  <div className="teRail">
-                    <div className="teRailIcon" aria-hidden="true">&#x2726;</div>
-                    <input
-                      type="file"
-                      accept={acceptTypes[memoryType]}
-                      multiple={memoryType === "image"}
+                {memoryType === "image" && files.length > 0 ? (
+                  <div className="teField">
+                    <div className="teFieldLabel">Selected photos</div>
+                    <ImageStrip
+                      files={files}
+                      onRemove={removeImage}
+                      onAdd={addImages}
+                      max={MAX_IMAGE_FILES}
                       disabled={busy}
-                      onChange={(e) => handleFileSelect(e.target.files)}
-                      style={{ flex: 1, padding: "6px 0" }}
+                      accept={acceptTypes.image}
+                      error={fileErr}
                     />
                   </div>
-                  {fileErr && (
-                    <div className="teClaimError" style={{ marginTop: 4 }}>{fileErr}</div>
-                  )}
-                  {!fileErr && files.length === 1 && (
-                    <div className="teHint" style={{ marginTop: 4 }}>
-                      {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
+                ) : (
+                  <label className="teField">
+                    <div className="teFieldLabel">
+                      Select {memoryType} file{memoryType === "image" ? `(s) — up to ${MAX_IMAGE_FILES}` : ""}
                     </div>
-                  )}
-                  {!fileErr && files.length > 1 && (
-                    <div className="teHint" style={{ marginTop: 4 }}>
-                      {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
+                    <div className="teRail">
+                      <div className="teRailIcon" aria-hidden="true">&#x2726;</div>
+                      <input
+                        type="file"
+                        accept={acceptTypes[memoryType]}
+                        multiple={memoryType === "image"}
+                        disabled={busy}
+                        onChange={(e) => handleFileSelect(e.target.files)}
+                        style={{ flex: 1, padding: "6px 0" }}
+                      />
                     </div>
-                  )}
-                </label>
+                    {fileErr && (
+                      <div className="teClaimError" style={{ marginTop: 4 }}>{fileErr}</div>
+                    )}
+                    {!fileErr && files.length === 1 && (
+                      <div className="teHint" style={{ marginTop: 4 }}>
+                        {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
+                      </div>
+                    )}
+                    {!fileErr && files.length > 1 && (
+                      <div className="teHint" style={{ marginTop: 4 }}>
+                        {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
+                      </div>
+                    )}
+                  </label>
+                )}
 
                 <div className="teActionsRow">
                   <button

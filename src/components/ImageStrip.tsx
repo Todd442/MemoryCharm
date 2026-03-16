@@ -63,7 +63,7 @@ export function ImageStrip({ files, onRemove, onAdd, max, disabled, accept, erro
             disabled={disabled}
             type="button"
           >
-            Add from another source
+            Add more photos
           </button>
         )}
       </div>
