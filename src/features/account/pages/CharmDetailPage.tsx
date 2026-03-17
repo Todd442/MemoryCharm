@@ -273,9 +273,10 @@ export function CharmDetailPage() {
   function addImages(newFiles: File[]) {
     setFileErr(null);
     setFiles(prev => {
+      const remaining = MAX_IMAGE_FILES - serverUrls.length;
       const combined = [...prev, ...newFiles];
-      const capped = combined.slice(0, MAX_IMAGE_FILES);
-      if (combined.length > MAX_IMAGE_FILES) {
+      const capped = combined.slice(0, remaining);
+      if (combined.length > remaining) {
         setFileErr(`Up to ${MAX_IMAGE_FILES} photos allowed. Some were not added.`);
       }
       const totalBytes = capped.reduce((s, f) => s + f.size, 0);
