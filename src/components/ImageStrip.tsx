@@ -119,20 +119,6 @@ export function ImageStrip(props: ImageStripProps) {
         )}
       </div>
 
-      <div className="isFooter">
-        <span className="isCount">{totalCount} of {max} photos</span>
-        {totalCount < max && (
-          <button
-            className="isAddLink"
-            onClick={() => inputRef.current?.click()}
-            disabled={disabled}
-            type="button"
-          >
-            Add more photos
-          </button>
-        )}
-      </div>
-
       {error && <div className="isError">{error}</div>}
 
       <input

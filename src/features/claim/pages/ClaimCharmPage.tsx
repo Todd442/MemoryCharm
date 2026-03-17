@@ -1009,30 +1009,26 @@ export function ClaimCharmPage() {
             {/* STEP: UPLOAD (file selection only — sealing happens on protection step) */}
             {step === "upload" && (
               <div className="teCardBody">
-                {memoryType === "image" && files.length > 0 ? (
-                  <div className="teField">
-                    <div className="teFieldLabel">Selected photos</div>
-                    <ImageStrip
-                      files={files}
-                      onRemoveFile={removeImage}
-                      onAdd={addImages}
-                      max={MAX_IMAGE_FILES}
-                      disabled={busy}
-                      accept={acceptTypes.image}
-                      error={fileErr}
-                    />
-                  </div>
+                {memoryType === "image" ? (
+                  <ImageStrip
+                    files={files}
+                    onRemoveFile={removeImage}
+                    onAdd={addImages}
+                    max={MAX_IMAGE_FILES}
+                    disabled={busy}
+                    accept={acceptTypes.image}
+                    error={fileErr}
+                  />
                 ) : (
                   <label className="teField">
                     <div className="teFieldLabel">
-                      Select {memoryType} file{memoryType === "image" ? `(s) — up to ${MAX_IMAGE_FILES}` : ""}
+                      Select {memoryType} file
                     </div>
                     <div className="teRail">
                       <div className="teRailIcon" aria-hidden="true">&#x2726;</div>
                       <input
                         type="file"
                         accept={acceptTypes[memoryType]}
-                        multiple={memoryType === "image"}
                         disabled={busy}
                         onChange={(e) => handleFileSelect(e.target.files)}
                         style={{ flex: 1, padding: "6px 0" }}
@@ -1044,11 +1040,6 @@ export function ClaimCharmPage() {
                     {!fileErr && files.length === 1 && (
                       <div className="teHint" style={{ marginTop: 4 }}>
                         {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
-                      </div>
-                    )}
-                    {!fileErr && files.length > 1 && (
-                      <div className="teHint" style={{ marginTop: 4 }}>
-                        {files.length} files ({(files.reduce((s, f) => s + f.size, 0) / 1024 / 1024).toFixed(1)} MB total)
                       </div>
                     )}
                   </label>
