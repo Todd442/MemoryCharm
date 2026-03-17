@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
-import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta, factoryResetCharm } from "../api";
+import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta, factoryResetCharm, trimCharmContent } from "../api";
 import { configureCharm } from "../../claim/api";
 import type { UserCharmDetail } from "../api";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
@@ -43,7 +43,8 @@ export function CharmDetailPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [fileErr, setFileErr] = useState<string | null>(null);
   const [uploadPct, setUploadPct] = useState(0);
-  const [carouselIdx, setCarouselIdx] = useState(0);
+  // Tracks the server-side image URLs still kept by the owner (removals are local until Upload)
+  const [serverUrls, setServerUrls] = useState<string[]>([]);
 
   // Memory type editing state
   const [editMemoryType, setEditMemoryType] = useState<MemoryType | null>(null);
@@ -63,7 +64,7 @@ export function CharmDetailPage() {
       try {
         const detail = await getCharmDetail(code!);
         setCharm(detail);
-        setCarouselIdx(0);
+        setServerUrls(detail.memoryType === "image" ? (detail.files ?? []).map((f: any) => f.url) : []);
         setEditAuthMode(detail.authMode as "none" | "glyph");
         if (detail.glyphId) setEditGlyphId(detail.glyphId);
         setEditMemoryName(detail.memoryName ?? "");
@@ -160,17 +161,53 @@ export function CharmDetailPage() {
     audio: "audio/mpeg,audio/wav,audio/ogg,audio/aac",
   };
 
+  const originalServerCount = charm?.memoryType === "image" ? (charm.files?.length ?? 0) : 0;
+  const serverPhotosChanged = editMemoryType === "image" && serverUrls.length !== originalServerCount;
+  const canUpload = files.length > 0 || serverPhotosChanged;
+
   async function handleUpload() {
-    if (!code || !charm || !editMemoryType || files.length === 0) return;
-    const totalBytes = files.reduce((s, f) => s + f.size, 0);
-    if (totalBytes > MAX_CHARM_BYTES) {
-      setErr(`Total file size exceeds ${maxCharmMB} MB limit.`);
-      return;
-    }
+    if (!code || !charm || !editMemoryType || !canUpload) return;
+
     setErr(null);
     setMsg(null);
     setBusy(true);
     setUploadPct(0);
+
+    // Trim-only path: server photos were removed but no new files were staged.
+    // Call the trim endpoint — server reorganises blobs without any client download.
+    if (editMemoryType === "image" && serverPhotosChanged && files.length === 0) {
+      try {
+        const keepIndices = serverUrls.map((url) =>
+          (charm.files ?? []).findIndex((f) => f.url === url)
+        ).filter((i) => i >= 0);
+        await trimCharmContent(code, keepIndices);
+        setMsg("Photos updated successfully.");
+        const detail = await getCharmDetail(code);
+        setCharm(detail);
+        setEditMemoryType(detail.memoryType as MemoryType | null);
+        setServerUrls(detail.memoryType === "image" ? (detail.files ?? []).map((f: any) => f.url) : []);
+      } catch (e: any) {
+        const errMsg = (e?.message ?? "").toLowerCase();
+        if (errMsg.includes("content_settled") || errMsg.includes("settled")) {
+          setErr("This memory has settled and can no longer be changed.");
+        } else {
+          setErr(e?.message ?? "Failed to remove photos.");
+        }
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
+    // Normal upload path: new files staged (replaces all existing content).
+    if (files.length === 0) { setBusy(false); return; }
+    const totalBytes = files.reduce((s, f) => s + f.size, 0);
+    if (totalBytes > MAX_CHARM_BYTES) {
+      setErr(`Total file size exceeds ${maxCharmMB} MB limit.`);
+      setBusy(false);
+      return;
+    }
+
     try {
       if (editMemoryType !== charm.memoryType) {
         await configureCharm(
@@ -190,6 +227,7 @@ export function CharmDetailPage() {
       const detail = await getCharmDetail(code);
       setCharm(detail);
       setEditMemoryType(detail.memoryType as MemoryType | null);
+      setServerUrls(detail.memoryType === "image" ? (detail.files ?? []).map((f: any) => f.url) : []);
     } catch (e: any) {
       const errMsg = (e?.message ?? "").toLowerCase();
       if (errMsg.includes("content_settled") || errMsg.includes("settled")) {
@@ -419,56 +457,11 @@ export function CharmDetailPage() {
           <details className="teCharmSection">
             <summary className="teCharmSectionTitle">Content</summary>
 
-            {/* Content preview — owner always sees their stored media */}
-            {charm.files && charm.files.length > 0 && charm.memoryType && (
-              <div className="tePreview" style={{ marginBottom: 14 }}>
+            {/* Video / audio preview — always shown */}
+            {charm.files && charm.files.length > 0 && charm.memoryType && charm.memoryType !== "image" && (
+              <div style={{ marginBottom: 14 }}>
                 {charm.memoryType === "video" && (
                   <video src={charm.files[0].url} controls playsInline className="tePreviewMedia" />
-                )}
-                {charm.memoryType === "image" && (
-                  <div className="teCarousel">
-                    <div className="teCarouselViewport">
-                      <img
-                        src={charm.files[carouselIdx % charm.files.length]?.url}
-                        alt={`Memory ${(carouselIdx % charm.files.length) + 1}`}
-                        className="teCarouselImg"
-                      />
-                    </div>
-                    {charm.files.length > 1 && (
-                      <>
-                        <button
-                          className="teCarouselArrow teCarouselPrev"
-                          onClick={() => setCarouselIdx((i) => (i - 1 + charm.files!.length) % charm.files!.length)}
-                          type="button"
-                          aria-label="Previous image"
-                        >
-                          &#x276E;
-                        </button>
-                        <button
-                          className="teCarouselArrow teCarouselNext"
-                          onClick={() => setCarouselIdx((i) => (i + 1) % charm.files!.length)}
-                          type="button"
-                          aria-label="Next image"
-                        >
-                          &#x276F;
-                        </button>
-                        <div className="teCarouselDots">
-                          {charm.files.map((_, i) => (
-                            <button
-                              key={i}
-                              className={"teCarouselDot " + (i === carouselIdx % charm.files!.length ? "isActive" : "")}
-                              onClick={() => setCarouselIdx(i)}
-                              type="button"
-                              aria-label={`Image ${i + 1}`}
-                            />
-                          ))}
-                        </div>
-                        <div className="teCarouselCounter">
-                          {(carouselIdx % charm.files.length) + 1} / {charm.files.length}
-                        </div>
-                      </>
-                    )}
-                  </div>
                 )}
                 {charm.memoryType === "audio" && (
                   <audio src={charm.files[0].url} controls style={{ width: "100%" }} />
@@ -477,13 +470,27 @@ export function CharmDetailPage() {
             )}
 
             {charm.isExpired ? (
-              <div className="teCharmSettledMsg">
-                This memory has faded and can no longer be changed.
-              </div>
+              <>
+                {charm.memoryType === "image" && serverUrls.length > 0 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <ImageStrip readOnly urls={serverUrls} />
+                  </div>
+                )}
+                <div className="teCharmSettledMsg">
+                  This memory has faded and can no longer be changed.
+                </div>
+              </>
             ) : charm.isSettled ? (
-              <div className="teCharmSettledMsg">
-                This memory has settled and can no longer be changed.
-              </div>
+              <>
+                {charm.memoryType === "image" && serverUrls.length > 0 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <ImageStrip readOnly urls={serverUrls} />
+                  </div>
+                )}
+                <div className="teCharmSettledMsg">
+                  This memory has settled and can no longer be changed.
+                </div>
+              </>
             ) : charm.canEditContent && charm.memoryType ? (
               <div className="teCharmUploadArea">
                 {/* Memory type selector */}
@@ -551,42 +558,39 @@ export function CharmDetailPage() {
                   )}
                 </div>
 
-                {/* File picker */}
+                {/* File picker / unified image grid */}
                 {!typeChangePending && editMemoryType && (
                   <div>
-                    <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>
-                      {editMemoryType === "image" ? "Photos to upload" : `Replace ${editMemoryType} content`}
-                    </div>
-                    {editMemoryType === "image" && files.length > 0 ? (
+                    {editMemoryType === "image" ? (
                       <ImageStrip
                         files={files}
-                        onRemove={removeImage}
+                        onRemoveFile={removeImage}
                         onAdd={addImages}
                         max={MAX_IMAGE_FILES}
                         disabled={busy}
                         accept={acceptTypes.image}
                         error={fileErr}
+                        serverUrls={serverUrls}
+                        onRemoveServer={(i) => setServerUrls(prev => prev.filter((_, idx) => idx !== i))}
                       />
                     ) : (
                       <>
+                        <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>
+                          Replace {editMemoryType} content
+                        </div>
                         <input
                           key={editMemoryType}
                           type="file"
                           accept={acceptTypes[editMemoryType] ?? "*/*"}
-                          multiple={editMemoryType === "image"}
                           disabled={busy}
                           onChange={(e) => {
                             const selected = e.target.files;
                             if (!selected || selected.length === 0) return;
-                            if (editMemoryType === "image") {
-                              addImages(Array.from(selected));
-                            } else {
-                              setFiles(Array.from(selected));
-                            }
+                            setFiles(Array.from(selected));
                           }}
                           style={{ padding: "6px 0" }}
                         />
-                        {files.length === 1 && editMemoryType !== "image" && (
+                        {files.length === 1 && (
                           <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
                             {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
                           </div>
@@ -614,7 +618,7 @@ export function CharmDetailPage() {
                   <button
                     className="teBtn teBtnPrimary"
                     onClick={handleUpload}
-                    disabled={busy || working || files.length === 0 || !!typeChangePending}
+                    disabled={busy || working || !canUpload || !!typeChangePending}
                     type="button"
                   >
                     {busy ? "Uploading\u2026" : "Upload"}

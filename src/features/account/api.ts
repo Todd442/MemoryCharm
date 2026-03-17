@@ -108,6 +108,21 @@ export async function factoryResetCharm(code: string): Promise<void> {
 }
 
 /**
+ * Trim the image content of a charm to a subset of existing photos.
+ * keepIndices are 0-based positions in the current photo set to retain.
+ * The server renumbers surviving blobs sequentially without any client-side download.
+ */
+export async function trimCharmContent(
+  code: string,
+  keepIndices: number[]
+): Promise<{ charmId: string; newFileCount: number }> {
+  return authPost(
+    `/api/charm/${encodeURIComponent(code)}/trim`,
+    { keepIndices }
+  );
+}
+
+/**
  * Update the memory name and description for a charm (lightweight patch, no status change).
  */
 export async function updateCharmMeta(

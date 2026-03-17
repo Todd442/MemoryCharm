@@ -5,6 +5,8 @@ import { InteractionStatus } from "@azure/msal-browser";
 
 import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
 import type { UserProfile } from "../api";
+import { acceptTerms, CURRENT_TERMS_VERSION, cacheUlaLocally } from "../../../app/api/profileApi";
+import { UlaContent } from "../../legal/components/UlaContent";
 import { getUserCharms, getCharmDetail } from "../../account/api";
 import { entryByCode } from "../../playback/api";
 import { checkFileAudioCodec } from "../../playback/utils/codecDetection";
@@ -85,7 +87,7 @@ export function MemoryDetailsFields({
 }
 // ---------------------------------------------------------------------------
 
-type Step = "loading" | "welcome" | "profile" | "memoryType" | "details" | "protection" | "glyphSelect" | "upload" | "done";
+type Step = "loading" | "welcome" | "ula" | "profile" | "memoryType" | "details" | "protection" | "glyphSelect" | "upload" | "done";
 type MemoryType = "video" | "image" | "audio";
 type AuthMode = "none" | "glyph";
 
@@ -96,6 +98,9 @@ type StepMeta = {
   stickyTitle: string;
   stickyDesc: string;
 };
+
+// Steps that are framing/navigation only — excluded from "Step X of N" count
+const UNNUMBERED_STEPS: Step[] = ["loading", "welcome", "done"];
 
 const STEP_META: Record<Step, StepMeta> = {
   loading: {
@@ -111,6 +116,13 @@ const STEP_META: Record<Step, StepMeta> = {
     statusSubtitle: "Sign in to become this charm’s Keeper.",
     stickyTitle: "What to expect",
     stickyDesc: "Everything you need to claim this charm and seal your memory.",
+  },
+  ula: {
+    cardTitle: "LICENCE AGREEMENT",
+    statusText: "Review Terms",
+    statusSubtitle: "A one-time acceptance before you bind your memory.",
+    stickyTitle: "Accept the Licence Agreement",
+    stickyDesc: "Read through the agreement below and accept to continue.",
   },
   details: {
     cardTitle: "MEMORY DETAILS",
@@ -176,9 +188,10 @@ export function ClaimCharmPage() {
   const emailish = useMemo(() => me?.username ?? "", [me]);
 
   const [step, setStep] = useState<Step>("welcome");
-  // needsProfile: pessimistic default so pre-auth step count is accurate for new users.
-  // Updated after API call completes.
+  // needsProfile / needsUla: pessimistic defaults so pre-auth step count is accurate for new users.
+  // Both are updated after the post-auth API call completes.
   const [needsProfile, setNeedsProfile] = useState(true);
+  const [needsUla, setNeedsUla] = useState(true);
   const [apiChecked, setApiChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -202,22 +215,29 @@ export function ClaimCharmPage() {
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: "instant" });
   }, [step]);
 
-  // Dynamic step list — always starts with welcome, then profile only if needed.
+  // Dynamic step list — always starts with welcome, then profile/ula only if needed.
   const orderedSteps = useMemo<Step[]>(() => {
     const base: Step[] = ["welcome"];
     if (needsProfile) base.push("profile");
+    if (needsUla) base.push("ula");
     base.push("memoryType", "details", "upload", "protection");
     if (authMode === "glyph") base.push("glyphSelect");
     base.push("done");
     return base;
-  }, [needsProfile, authMode]);
+  }, [needsProfile, needsUla, authMode]);
+
+  // Numbered steps exclude framing steps — so "Step 1 of N" starts at the first real work step.
+  const numberedSteps = useMemo(
+    () => orderedSteps.filter(s => !UNNUMBERED_STEPS.includes(s)),
+    [orderedSteps]
+  );
 
   const stepNumber = useMemo(() => {
-    const idx = orderedSteps.indexOf(step);
+    const idx = numberedSteps.indexOf(step);
     return idx >= 0 ? idx + 1 : null;
-  }, [orderedSteps, step]);
+  }, [numberedSteps, step]);
 
-  const totalSteps = orderedSteps.length;
+  const totalSteps = numberedSteps.length;
 
   // Create/revoke object URLs for content preview on done page
   useEffect(() => {
@@ -303,8 +323,10 @@ export function ClaimCharmPage() {
 
         // Determine what this user still needs to complete
         const profileNeeded = !profileRes.hasProfile;
+        const ulaNeeded = profileRes.termsVersion !== CURRENT_TERMS_VERSION;
 
         setNeedsProfile(profileNeeded);
+        setNeedsUla(ulaNeeded);
         setApiChecked(true);
 
         // Always land on welcome so new users see the process overview before profile.
@@ -375,9 +397,24 @@ export function ClaimCharmPage() {
     setBusy(true);
     try {
       await saveProfile(profileData);
-      advanceTo("memoryType");
+      advanceTo(needsUla ? "ula" : "memoryType");
     } catch (e: any) {
       setErr(e?.message ?? "Failed to save profile.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doAcceptUla() {
+    setErr(null);
+    setBusy(true);
+    try {
+      await acceptTerms();
+      cacheUlaLocally();
+      setNeedsUla(false);
+      advanceTo("memoryType");
+    } catch (e: any) {
+      setErr(e?.message ?? "Failed to accept terms.");
     } finally {
       setBusy(false);
     }
@@ -615,10 +652,15 @@ export function ClaimCharmPage() {
                       You're signed in. Here's what comes next:
                     </p>
 
-                    {([
+                    {(needsUla ? [
+                      { s: "STEP 1", label: "COMPLETE YOUR REGISTRATION", desc: "Your name, email, address, and phone — so this charm is linked to you." },
+                      { s: "STEP 2", label: "ACCEPT THE LICENCE AGREEMENT", desc: "A one-time acceptance. Takes about a minute to read." },
+                      { s: "STEP 3", label: "BIND YOUR MEMORY", desc: "Upload the video, photo, or audio clip to seal inside this charm." },
+                      { s: "STEP 4", label: "YOUR CHARM IS SEALED", desc: "The memory is locked in and ready to share." },
+                    ] : [
                       { s: "STEP 1", label: "COMPLETE YOUR REGISTRATION", desc: "Your name, email, address, and phone — so this charm is linked to you." },
                       { s: "STEP 2", label: "BIND YOUR MEMORY", desc: "Upload the video, photo, or audio clip to seal inside this charm." },
-                      { s: "STEP 3", label: "YOUR CHARM IS SEALED",  desc: "The memory is locked in and ready to share." },
+                      { s: "STEP 3", label: "YOUR CHARM IS SEALED", desc: "The memory is locked in and ready to share." },
                     ]).map(({ s, label, desc }) => (
                       <div key={label} className="tePill tePillLarge" style={{ cursor: "default", pointerEvents: "none" }}>
                         <span className="tePillSpec">{s}</span>
@@ -632,7 +674,7 @@ export function ClaimCharmPage() {
                     <div className="teActionsRow">
                       <button
                         className="teBtn teBtnPrimary teBtnWide"
-                        onClick={() => advanceTo(needsProfile ? "profile" : "memoryType")}
+                        onClick={() => advanceTo("profile")}
                         disabled={busy || !apiChecked}
                         type="button"
                       >
@@ -651,19 +693,33 @@ export function ClaimCharmPage() {
                       margin: "0 0 4px",
                       textAlign: "center",
                     }}>
-                      You're back. Your account is set up and ready — let's seal this memory.
+                      {needsUla
+                        ? "Almost ready — just one step before we begin."
+                        : "You're back. Your account is set up and ready — let's seal this memory."}
                     </p>
+
+                    {needsUla && ([
+                      { s: "STEP 1", label: "ACCEPT THE LICENCE AGREEMENT", desc: "A one-time acceptance. Takes about a minute to read." },
+                      { s: "STEP 2", label: "BIND YOUR MEMORY", desc: "Upload the video, photo, or audio clip to seal inside this charm." },
+                      { s: "STEP 3", label: "YOUR CHARM IS SEALED", desc: "The memory is locked in and ready to share." },
+                    ]).map(({ s, label, desc }) => (
+                      <div key={label} className="tePill tePillLarge" style={{ cursor: "default", pointerEvents: "none" }}>
+                        <span className="tePillSpec">{s}</span>
+                        <span className="tePillLabel">{label}</span>
+                        <span className="tePillDesc">{desc}</span>
+                      </div>
+                    ))}
 
                     {err && <div className="teClaimError">{err}</div>}
 
                     <div className="teActionsRow">
                       <button
                         className="teBtn teBtnPrimary teBtnWide"
-                        onClick={() => advanceTo("memoryType")}
+                        onClick={() => advanceTo(needsUla ? "ula" : "memoryType")}
                         disabled={busy}
                         type="button"
                       >
-                        Let's Continue
+                        {needsUla ? "Let's Begin" : "Let's Continue"}
                       </button>
                     </div>
                   </>
@@ -703,6 +759,26 @@ export function ClaimCharmPage() {
                       type="button"
                     >
                       {busy ? "Saving…" : "Continue"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STEP: ULA */}
+            {step === "ula" && (
+              <div className="teCardBody">
+                <div className="teGrid">
+                  <UlaContent />
+                  {err && <div className="teClaimError">{err}</div>}
+                  <div className="teActionsRow">
+                    <button
+                      className="teBtn teBtnPrimary teBtnWide"
+                      onClick={doAcceptUla}
+                      disabled={busy}
+                      type="button"
+                    >
+                      {busy ? "Saving…" : "I Accept"}
                     </button>
                   </div>
                 </div>
@@ -938,7 +1014,7 @@ export function ClaimCharmPage() {
                     <div className="teFieldLabel">Selected photos</div>
                     <ImageStrip
                       files={files}
-                      onRemove={removeImage}
+                      onRemoveFile={removeImage}
                       onAdd={addImages}
                       max={MAX_IMAGE_FILES}
                       disabled={busy}
