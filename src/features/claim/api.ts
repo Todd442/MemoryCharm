@@ -98,11 +98,12 @@ export async function configureCharm(
 export async function getUploadUrls(
   code: string,
   contentType: string,
-  fileCount: number = 1
+  fileCount: number = 1,
+  startIndex: number = 0
 ): Promise<UploadContentApiResponse> {
   return authPost<UploadContentApiResponse>(
     `/api/charm/${encodeURIComponent(code)}/content`,
-    { contentType, fileCount }
+    { contentType, fileCount, startIndex }
   );
 }
 
@@ -172,9 +173,10 @@ export async function uploadCharm(
   code: string,
   files: File[],
   contentType: string,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
+  startIndex: number = 0
 ): Promise<{ ok: true; code: string }> {
-  const urlsResponse = await getUploadUrls(code, contentType, files.length);
+  const urlsResponse = await getUploadUrls(code, contentType, files.length, startIndex);
   const isDev = !!import.meta.env.VITE_DEV_TOKEN;
   const skipR2 = !!import.meta.env.VITE_SKIP_R2;
 

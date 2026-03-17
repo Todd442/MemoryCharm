@@ -43,8 +43,12 @@ export function CharmDetailPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [fileErr, setFileErr] = useState<string | null>(null);
   const [uploadPct, setUploadPct] = useState(0);
-  // Tracks the server-side image URLs still kept by the owner (removals are local until Upload)
+  // Tracks the server-side image photos still kept by the owner (removals are local until Upload).
+  // serverUrls — display URLs (presigned, may change each load, used for rendering only)
+  // serverSlots — stable 0-based positions in the original file list (used as keepIndices for trim)
+  // Both arrays are always the same length and kept in sync.
   const [serverUrls, setServerUrls] = useState<string[]>([]);
+  const [serverSlots, setServerSlots] = useState<number[]>([]);
 
   // Memory type editing state
   const [editMemoryType, setEditMemoryType] = useState<MemoryType | null>(null);
@@ -64,7 +68,11 @@ export function CharmDetailPage() {
       try {
         const detail = await getCharmDetail(code!);
         setCharm(detail);
-        setServerUrls(detail.memoryType === "image" ? (detail.files ?? []).map((f: any) => f.url) : []);
+        {
+          const fs = detail.memoryType === "image" ? (detail.files ?? []) : [];
+          setServerUrls(fs.map((f: any) => f.url));
+          setServerSlots(fs.map((_: any, i: number) => i));
+        }
         setEditAuthMode(detail.authMode as "none" | "glyph");
         if (detail.glyphId) setEditGlyphId(detail.glyphId);
         setEditMemoryName(detail.memoryName ?? "");
@@ -162,7 +170,7 @@ export function CharmDetailPage() {
   };
 
   const originalServerCount = charm?.memoryType === "image" ? (charm.files?.length ?? 0) : 0;
-  const serverPhotosChanged = editMemoryType === "image" && serverUrls.length !== originalServerCount;
+  const serverPhotosChanged = editMemoryType === "image" && serverSlots.length !== originalServerCount;
   const canUpload = files.length > 0 || serverPhotosChanged;
 
   async function handleUpload() {
@@ -177,15 +185,16 @@ export function CharmDetailPage() {
     // Call the trim endpoint — server reorganises blobs without any client download.
     if (editMemoryType === "image" && serverPhotosChanged && files.length === 0) {
       try {
-        const keepIndices = serverUrls.map((url) =>
-          (charm.files ?? []).findIndex((f) => f.url === url)
-        ).filter((i) => i >= 0);
-        await trimCharmContent(code, keepIndices);
+        await trimCharmContent(code, serverSlots);
         setMsg("Photos updated successfully.");
         const detail = await getCharmDetail(code);
         setCharm(detail);
         setEditMemoryType(detail.memoryType as MemoryType | null);
-        setServerUrls(detail.memoryType === "image" ? (detail.files ?? []).map((f: any) => f.url) : []);
+        {
+          const fs = detail.memoryType === "image" ? (detail.files ?? []) : [];
+          setServerUrls(fs.map((f: any) => f.url));
+          setServerSlots(fs.map((_: any, i: number) => i));
+        }
       } catch (e: any) {
         const errMsg = (e?.message ?? "").toLowerCase();
         if (errMsg.includes("content_settled") || errMsg.includes("settled")) {
@@ -199,7 +208,7 @@ export function CharmDetailPage() {
       return;
     }
 
-    // Normal upload path: new files staged (replaces all existing content).
+    // Normal upload path: new files staged.
     if (files.length === 0) { setBusy(false); return; }
     const totalBytes = files.reduce((s, f) => s + f.size, 0);
     if (totalBytes > MAX_CHARM_BYTES) {
@@ -219,7 +228,22 @@ export function CharmDetailPage() {
           editMemoryDescription.trim() || undefined
         );
       }
-      await uploadCharm(code, files, files[0].type, setUploadPct);
+
+      // If keeping some server photos, figure out where new files should start.
+      let startIndex = 0;
+      if (editMemoryType === "image" && serverSlots.length > 0) {
+        if (serverPhotosChanged) {
+          // Some server photos were removed — compact survivors to 001..N, then append new files after.
+          const trimResult = await trimCharmContent(code, serverSlots);
+          startIndex = trimResult.newFileCount;
+        } else {
+          // All server photos kept in original order — no trim needed.
+          // New files go directly after the last server photo.
+          startIndex = serverSlots.length;
+        }
+      }
+
+      await uploadCharm(code, files, files[0].type, setUploadPct, startIndex);
       setMsg("Content updated successfully.");
       setFiles([]);
       setFileErr(null);
@@ -227,7 +251,11 @@ export function CharmDetailPage() {
       const detail = await getCharmDetail(code);
       setCharm(detail);
       setEditMemoryType(detail.memoryType as MemoryType | null);
-      setServerUrls(detail.memoryType === "image" ? (detail.files ?? []).map((f: any) => f.url) : []);
+      {
+        const fs = detail.memoryType === "image" ? (detail.files ?? []) : [];
+        setServerUrls(fs.map((f: any) => f.url));
+        setServerSlots(fs.map((_: any, i: number) => i));
+      }
     } catch (e: any) {
       const errMsg = (e?.message ?? "").toLowerCase();
       if (errMsg.includes("content_settled") || errMsg.includes("settled")) {
@@ -571,7 +599,10 @@ export function CharmDetailPage() {
                         accept={acceptTypes.image}
                         error={fileErr}
                         serverUrls={serverUrls}
-                        onRemoveServer={(i) => setServerUrls(prev => prev.filter((_, idx) => idx !== i))}
+                        onRemoveServer={(i) => {
+                          setServerUrls(prev => prev.filter((_, idx) => idx !== i));
+                          setServerSlots(prev => prev.filter((_, idx) => idx !== i));
+                        }}
                       />
                     ) : (
                       <>
@@ -621,7 +652,7 @@ export function CharmDetailPage() {
                     disabled={busy || working || !canUpload || !!typeChangePending}
                     type="button"
                   >
-                    {busy ? "Uploading\u2026" : "Upload"}
+                    {busy ? "Saving\u2026" : "Save"}
                   </button>
                 </div>
               </div>
