@@ -253,15 +253,14 @@ export function MemoryGallery(props: {
           const fileIdx     = card.id % n;
           const aspectRatio = aspectRatioRef.current.get(fileIdx);
           const style       = getCardStyle(card, dims, aspectRatio);
-          if (!style) return null;
           const file = files[fileIdx];
           return (
             <button
               key={card.id}
               className="mg-card"
-              style={style}
-              onClick={() => !isOpen && handleSelect(fileIdx)}
-              tabIndex={isOpen ? -1 : 0}
+              style={style ?? { position: "absolute", visibility: "hidden", pointerEvents: "none" }}
+              onClick={() => !isOpen && style && handleSelect(fileIdx)}
+              tabIndex={isOpen || !style ? -1 : 0}
               aria-label={`Memory ${fileIdx + 1} of ${n}`}
             >
               <img
