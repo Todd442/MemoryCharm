@@ -71,6 +71,16 @@ async function bootstrap() {
     window.location.hash.includes("code=") ||
     window.location.search.includes("code=");
   if (hasAuthCode) {
+    // If we're inside a hidden MSAL iframe (silent token acquisition), handle
+    // the redirect and stop — the result is posted to the parent via postMessage.
+    // Rendering the full app here or calling window.location.replace() would
+    // navigate the iframe away before MSAL can deliver the result, breaking the
+    // silent flow and triggering a full page reload in the parent window.
+    if (window.self !== window.top) {
+      await msalInstance.handleRedirectPromise().catch(() => null);
+      return;
+    }
+
     // Attempt to process the code first — only clear+reload if MSAL can't handle it.
     const preCheck = await msalInstance.handleRedirectPromise().catch(() => null);
     debugLog("bootstrap", `pre-check handleRedirectPromise: ${preCheck ? "SUCCESS" : "null"}`);

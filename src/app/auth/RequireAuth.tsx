@@ -43,8 +43,12 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
       loginTriggeredForPath.current = toStore;
 
       debugLog("RequireAuth", `Not authed. Storing path: ${toStore}`);
+      // Store in both: sessionStorage for same-session fast path, localStorage
+      // as fallback because browsers clear sessionStorage on cross-origin
+      // navigation (to ciamlogin.com and back), which loses the returnTo path.
       sessionStorage.setItem(RETURN_TO_KEY, toStore);
-      debugLog("RequireAuth", `Path stored in sessionStorage`);
+      localStorage.setItem(RETURN_TO_KEY, toStore);
+      debugLog("RequireAuth", `Path stored in sessionStorage + localStorage`);
 
       instance.loginRedirect({
         ...loginRequest,
