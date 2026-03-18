@@ -1,0 +1,620 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+.phone-stage {
+  display:flex;
+  justify-content:center;
+  padding:24px 16px 32px;
+  background:var(--color-background-secondary);
+  border-radius:var(--border-radius-lg);
+}
+
+.phone {
+  width:375px;
+  border-radius:44px;
+  overflow:hidden;
+  border:10px solid #1C1A16;
+  background:#FDFCF8;
+  position:relative;
+  box-shadow:0 0 0 1px rgba(154,123,79,0.3);
+}
+
+.notch {
+  width:120px;height:28px;
+  background:#1C1A16;
+  border-radius:0 0 18px 18px;
+  margin:0 auto;
+  position:relative;z-index:10;
+}
+
+.screen {
+  background:#FDFCF8;
+  font-family:'Jost',sans-serif;
+  overflow:hidden;
+}
+
+/* ── Top bar ── */
+.top-bar {
+  background:#1C1A16;
+  padding:8px 18px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.top-logo {
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;letter-spacing:3px;color:#C9A96E;
+}
+.top-right {
+  display:flex;align-items:center;gap:10px;
+}
+.cert-dot {
+  width:6px;height:6px;border-radius:50%;background:#9A7B4F;
+}
+.cert-text {
+  font-size:9px;letter-spacing:2px;color:rgba(245,240,232,0.45);text-transform:uppercase;
+}
+
+/* ── Rug ID strip ── */
+.rug-id-strip {
+  background:#2C2820;
+  padding:10px 18px 8px;
+  border-bottom:1px solid rgba(154,123,79,0.2);
+}
+.rug-id-label {
+  font-size:8px;letter-spacing:3px;color:#9A7B4F;text-transform:uppercase;margin-bottom:2px;
+}
+.rug-id-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:17px;font-weight:300;color:#F0EBE0;letter-spacing:0.5px;
+}
+.rug-id-sub {
+  font-size:9px;color:rgba(240,235,224,0.4);letter-spacing:1.5px;margin-top:1px;
+}
+
+/* ── Chapter pills ── */
+.chapter-scroll {
+  background:#F5F0E8;
+  padding:8px 14px;
+  display:flex;gap:6px;overflow-x:auto;
+  border-bottom:1px solid rgba(154,123,79,0.15);
+}
+.chapter-scroll::-webkit-scrollbar{display:none;}
+.ch-pill {
+  flex-shrink:0;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  padding:5px 10px;
+  border:1px solid rgba(154,123,79,0.3);
+  background:transparent;
+  color:#4A4640;
+  cursor:pointer;
+  border-radius:2px;
+  font-family:'Jost',sans-serif;
+  font-weight:400;
+  transition:background 0.15s,color 0.15s;
+}
+.ch-pill.active {
+  background:#1C1A16;
+  color:#C9A96E;
+  border-color:#1C1A16;
+}
+
+/* ── Hero photo ── */
+.hero-wrap {
+  position:relative;
+  background:#1C1A16;
+  overflow:hidden;
+}
+.hero-canvas {
+  width:100%;display:block;
+}
+.hero-step-badge {
+  position:absolute;top:10px;left:12px;
+  background:rgba(28,26,22,0.72);
+  border:1px solid rgba(154,123,79,0.4);
+  padding:3px 9px;
+  font-size:8px;letter-spacing:2.5px;color:#C9A96E;text-transform:uppercase;
+}
+.hero-expand-btn {
+  position:absolute;top:10px;right:12px;
+  width:30px;height:30px;
+  background:rgba(28,26,22,0.72);
+  border:1px solid rgba(154,123,79,0.35);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.expand-icon {
+  width:14px;height:14px;
+  position:relative;
+}
+.expand-icon::before,.expand-icon::after {
+  content:'';position:absolute;background:#C9A96E;
+}
+.expand-icon::before {width:100%;height:1px;top:50%;transform:translateY(-50%);}
+.expand-icon::after  {height:100%;width:1px;left:50%;transform:translateX(-50%);}
+
+/* swipe hint */
+.hero-swipe-hint {
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:5px;
+}
+.swipe-arrow {
+  width:18px;height:1px;background:rgba(201,169,110,0.5);
+  position:relative;
+}
+.swipe-arrow::after {
+  content:'';position:absolute;right:0;top:-3px;
+  border-top:3.5px solid transparent;
+  border-bottom:3.5px solid transparent;
+  border-left:5px solid rgba(201,169,110,0.5);
+}
+
+/* ── Progress dots + rail ── */
+.progress-area {
+  padding:10px 18px 8px;
+  background:#FDFCF8;
+  border-bottom:1px solid rgba(154,123,79,0.1);
+  display:flex;align-items:center;gap:10px;
+}
+.prog-rail {
+  flex:1;height:2px;background:rgba(154,123,79,0.15);border-radius:2px;
+  position:relative;cursor:pointer;
+}
+.prog-fill {
+  position:absolute;left:0;top:0;height:100%;
+  background:#9A7B4F;border-radius:2px;
+  transition:width 0.3s ease;
+}
+.prog-thumb {
+  position:absolute;top:50%;transform:translate(-50%,-50%);
+  width:11px;height:11px;border-radius:50%;
+  background:#9A7B4F;border:2px solid #FDFCF8;
+  transition:left 0.3s ease;
+}
+.prog-count {
+  font-size:10px;color:#888780;letter-spacing:1px;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+
+/* ── Annotation card ── */
+.annotation-card {
+  padding:14px 18px 12px;
+  background:#FDFCF8;
+}
+.ann-chapter-tag {
+  font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9A7B4F;
+  margin-bottom:3px;
+}
+.ann-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;font-weight:400;font-style:italic;
+  color:#1C1A16;line-height:1.2;margin-bottom:8px;
+}
+.ann-rule {
+  width:24px;height:1px;background:#9A7B4F;margin-bottom:9px;
+}
+.ann-caption {
+  font-size:12px;line-height:1.75;color:#4A4640;font-weight:300;
+}
+.ann-note-wrap {
+  margin-top:10px;
+  border-left:2px solid #C9A96E;
+  padding:7px 10px;
+  background:#F5F0E8;
+}
+.ann-note-label {
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#9A7B4F;margin-bottom:3px;
+}
+.ann-note-text {
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;font-style:italic;color:#1C1A16;line-height:1.6;
+}
+.ann-date-row {
+  margin-top:10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ann-date {
+  font-size:9px;letter-spacing:1.5px;color:rgba(74,70,64,0.45);text-transform:uppercase;
+}
+.nav-btns {
+  display:flex;gap:6px;
+}
+.nav-btn {
+  width:28px;height:28px;
+  background:#1C1A16;
+  border:none;
+  color:#C9A96E;font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border-radius:2px;
+}
+.nav-btn:active{opacity:0.7;}
+.nav-btn:disabled{opacity:0.25;}
+
+/* ── Filmstrip ── */
+.filmstrip-section {
+  padding:10px 0 10px 18px;
+  border-top:1px solid rgba(154,123,79,0.1);
+  background:#F5F0E8;
+}
+.filmstrip-lbl {
+  font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#9A7B4F;margin-bottom:8px;
+}
+.filmstrip {
+  display:flex;gap:6px;overflow-x:auto;padding-right:18px;padding-bottom:4px;
+}
+.filmstrip::-webkit-scrollbar{height:2px;}
+.filmstrip::-webkit-scrollbar-track{background:#E8E0D0;}
+.filmstrip::-webkit-scrollbar-thumb{background:#9A7B4F;border-radius:2px;}
+.thumb {
+  flex-shrink:0;width:52px;height:42px;
+  border:1.5px solid transparent;
+  cursor:pointer;position:relative;overflow:hidden;
+  border-radius:2px;transition:border-color 0.15s;
+}
+.thumb.active{border-color:#9A7B4F;}
+.thumb:hover:not(.active){border-color:rgba(154,123,79,0.4);}
+.thumb canvas{width:100%;height:100%;display:block;}
+.thumb-n {
+  position:absolute;bottom:1px;right:3px;
+  font-size:7px;color:rgba(255,255,255,0.55);
+}
+
+/* ── Bottom bar ── */
+.bottom-bar {
+  background:#1C1A16;
+  padding:10px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.bb-cert {
+  font-size:8px;letter-spacing:1.5px;color:rgba(245,240,232,0.3);text-transform:uppercase;
+}
+.bb-num {
+  font-size:10px;letter-spacing:1px;color:#9A7B4F;
+}
+
+/* ═══════════════════════════════
+   LIGHTBOX  (in-flow faux modal)
+   ═══════════════════════════════ */
+.lightbox-stage {
+  display:none;
+  background:#0D0C0A;
+  position:relative;
+  width:100%;
+}
+.lightbox-stage.open{display:block;}
+
+.lb-canvas {
+  width:100%;display:block;
+}
+
+.lb-top-bar {
+  position:absolute;top:0;left:0;right:0;
+  padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(13,12,10,0.6);
+}
+.lb-step {
+  font-size:9px;letter-spacing:2.5px;color:#C9A96E;text-transform:uppercase;
+}
+.lb-close-btn {
+  width:32px;height:32px;
+  background:rgba(28,26,22,0.7);
+  border:1px solid rgba(154,123,79,0.4);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.lb-close-icon {
+  width:14px;height:14px;position:relative;
+}
+.lb-close-icon::before,.lb-close-icon::after{
+  content:'';position:absolute;background:#C9A96E;height:1px;width:100%;top:50%;left:0;
+}
+.lb-close-icon::before{transform:rotate(45deg);}
+.lb-close-icon::after{transform:rotate(-45deg);}
+
+.lb-bottom {
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(13,12,10,0.75);
+  padding:10px 14px 12px;
+}
+.lb-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:15px;font-style:italic;color:#F0EBE0;font-weight:300;
+  margin-bottom:3px;
+}
+.lb-caption {
+  font-size:10px;color:rgba(240,235,224,0.55);line-height:1.6;
+}
+.lb-nav {
+  display:flex;align-items:center;justify-content:space-between;margin-top:10px;
+}
+.lb-nav-btn {
+  width:36px;height:36px;
+  background:rgba(154,123,79,0.2);
+  border:1px solid rgba(154,123,79,0.3);
+  color:#C9A96E;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border-radius:2px;
+}
+.lb-nav-btn:active{background:rgba(154,123,79,0.4);}
+.lb-dots {
+  display:flex;gap:5px;align-items:center;
+}
+.lb-dot {
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(201,169,110,0.25);
+  transition:background 0.2s,transform 0.2s;
+}
+.lb-dot.active {
+  background:#C9A96E;transform:scale(1.3);
+}
+</style>
+
+<div class="phone-stage">
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <div class="top-bar">
+      <div class="top-logo">TAPIS · DÉCOR</div>
+      <div class="top-right">
+        <div class="cert-dot"></div>
+        <div class="cert-text">Verified</div>
+      </div>
+    </div>
+
+    <div class="rug-id-strip">
+      <div class="rug-id-label">Provenance Charm</div>
+      <div class="rug-id-name">Marrakech Garden — No. 0047</div>
+      <div class="rug-id-sub">Hand-knotted · wool &amp; silk · 9×12 ft</div>
+    </div>
+
+    <div class="chapter-scroll" id="chapterScroll"></div>
+
+    <div class="hero-wrap">
+      <canvas class="hero-canvas" id="heroCanvas" width="355" height="266"></canvas>
+      <div class="hero-step-badge" id="heroBadge">Step 01</div>
+      <div class="hero-expand-btn" id="expandBtn" title="Expand image">
+        <div class="expand-icon"></div>
+      </div>
+      <div class="hero-swipe-hint">
+        <div class="swipe-arrow" style="transform:scaleX(-1);"></div>
+        <div style="font-size:8px;color:rgba(201,169,110,0.4);letter-spacing:1.5px;">SWIPE</div>
+        <div class="swipe-arrow"></div>
+      </div>
+    </div>
+
+    <div class="progress-area">
+      <div class="prog-rail" id="progRail">
+        <div class="prog-fill" id="progFill"></div>
+        <div class="prog-thumb" id="progThumb"></div>
+      </div>
+      <div class="prog-count" id="progCount">1 / 12</div>
+    </div>
+
+    <div class="annotation-card">
+      <div class="ann-chapter-tag" id="annCh"></div>
+      <div class="ann-title" id="annTitle"></div>
+      <div class="ann-rule"></div>
+      <div class="ann-caption" id="annCap"></div>
+      <div class="ann-note-wrap">
+        <div class="ann-note-label">Artisan note</div>
+        <div class="ann-note-text" id="annNote"></div>
+      </div>
+      <div class="ann-date-row">
+        <div class="ann-date" id="annDate"></div>
+        <div class="nav-btns">
+          <button class="nav-btn" id="btnPrev">&#8592;</button>
+          <button class="nav-btn" id="btnNext">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="filmstrip-section">
+      <div class="filmstrip-lbl">All moments</div>
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="bb-cert">Certificate of authenticity</div>
+      <div class="bb-num">#TD-0047-MG</div>
+    </div>
+
+    <!-- LIGHTBOX (in-flow) -->
+    <div class="lightbox-stage" id="lightbox">
+      <canvas class="lb-canvas" id="lbCanvas" width="355" height="440"></canvas>
+      <div class="lb-top-bar">
+        <div class="lb-step" id="lbStep">Step 01 · 12</div>
+        <div class="lb-close-btn" id="lbClose"><div class="lb-close-icon"></div></div>
+      </div>
+      <div class="lb-bottom">
+        <div class="lb-title" id="lbTitle"></div>
+        <div class="lb-caption" id="lbCap"></div>
+        <div class="lb-nav">
+          <div class="lb-nav-btn" id="lbPrev">&#8592;</div>
+          <div class="lb-dots" id="lbDots"></div>
+          <div class="lb-nav-btn" id="lbNext">&#8594;</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+const STEPS=[
+  {chapter:"Origin",heading:"Fleece selection, Atlas Mountains",caption:"Master craftsman Hassan Idrissi begins each commission at the highland farms above Midelt, selecting wool by hand — evaluating staple length, crimp, and lanolin content. Only 30% of fleeces pass his standard.",note:"The wool from these elevations has a memory that synthetic fibers cannot replicate. It wants to hold its knot.",date:"March 4, 2024",pal:["#3D2B1F","#7A5C3E","#C9A96E","#F5EDD6"]},
+  {chapter:"Origin",heading:"Natural dyeing, madder vat",caption:"Raw fleece enters the madder vat — a 400-year-old copper cauldron still in use at the Idrissi workshop. Pomegranate rind and alum mordant fix the base tone before overdyeing begins.",note:"The first bath is always the most honest. Everything after is conversation.",date:"March 11, 2024",pal:["#7A1C1C","#B5432A","#E8956A","#F7D9C4"]},
+  {chapter:"Origin",heading:"Dye sampling, palette confirmed",caption:"Twelve sample skeins against the approved design board. The dusty sage, antique rose, and deep indigo are approved. The client's designer signs off via video review with Tapis Décor.",note:"Your three primary colors are now set. We can begin warping the loom.",date:"March 19, 2024",pal:["#3A5740","#7B9E87","#C9D4BE","#F0EDE4"]},
+  {chapter:"Foundation",heading:"Loom construction, warp set",caption:"A traditional upright loom is built to the commission's exact dimensions — 9 ft 4 in wide to allow for draw-in. Cotton warp threads are tensioned at 180 per linear foot.",note:"The loom is the skeleton. Everything that follows lives or dies by the tension we set today.",date:"April 2, 2024",pal:["#2C2C2A","#888780","#C9A96E","#F5F0E8"]},
+  {chapter:"Foundation",heading:"Knot counting begins",caption:"The pattern cartoon is hung behind the loom. Weavers work in pairs — one reading knot codes aloud while the second ties. At 200 knots per square inch, this rug will contain approximately 2.6 million individual knots.",note:"At this density the pile will stand 8mm — the depth that gives the garden motif its dimensional shadow.",date:"April 14, 2024",pal:["#1C2A3A","#3D6080","#8FBAD4","#E0EEF7"]},
+  {chapter:"Weaving",heading:"Field ground established",caption:"The ivory field ground is laid first, covering approximately 40% of the total area. This foundational layer must be flawless — any irregularity in tension will telegraph upward into the motif.",note:"We are moving at 2 inches per day. The field is meditative work — it reveals the weaver's character.",date:"May 8, 2024",pal:["#B09060","#D4BF9A","#EDE3D0","#FAF7F0"]},
+  {chapter:"Weaving",heading:"Central medallion emerges",caption:"The eight-pointed star medallion enters the loom. Each geometric repeat requires 14 distinct yarn colors shifted in sequence. Two master weavers are assigned exclusively to this section.",note:"A medallion is a conversation between geometry and touch. You feel the math before you see it.",date:"June 3, 2024",pal:["#3A2060","#7A5BB0","#C4A8E8","#EEE4F8"]},
+  {chapter:"Weaving",heading:"Border scroll, halfway point",caption:"The classical acanthus border reaches the halfway mark. Inspection confirms consistent 220 KPSI throughout — a benchmark rarely achieved on commissions of this scale.",note:"We shaved 3mm on the outer guard stripe — it makes the field breathe better. You will feel the change before you see it.",date:"July 22, 2024",pal:["#2A4020","#5A8040","#9DC070","#D8EDBD"]},
+  {chapter:"Finishing",heading:"Loom off, first stretching",caption:"After 19 weeks on the loom, the rug is removed and laid flat on the workshop floor for the first time. Natural wool elasticity causes a 2% reduction in both dimensions — precisely anticipated in the original draft.",note:"This is always the morning I wait for. The rug becomes itself the moment it leaves the loom.",date:"August 30, 2024",pal:["#4A3820","#8A6840","#C09860","#E8D8B0"]},
+  {chapter:"Finishing",heading:"Hand washing, drying court",caption:"The rug is washed in the workshop courtyard using cold mountain water and a mild plant-soap solution. It is laid pile-down to dry in dappled light — direct sun would bleach the natural dyes.",note:"The washing reveals the true depth of color. Every commission surprises us at this stage.",date:"September 6, 2024",pal:["#1C3A4A","#3A7090","#7AB8D4","#CCE8F4"]},
+  {chapter:"Finishing",heading:"Carving and pile shaping",caption:"A master carver uses small curved scissors to sculpt the relief between motifs — opening the medallion petals and crisp-edging the border scrolls. This is the detail that distinguishes the commission from production work.",note:"The carving takes longer than most clients expect. But it is where the rug learns to cast shadow.",date:"September 18, 2024",pal:["#3A2820","#706050","#A89878","#E0D4BC"]},
+  {chapter:"Delivery",heading:"Final inspection and certificate",caption:"Hassan Idrissi signs the certificate of authenticity. The rug is wrapped in unbleached muslin, rolled on an acid-free tube, and prepared for white-glove delivery. Your charm code is registered permanently.",note:"This is the only rug in the world with this exact knot sequence. It is entirely yours.",date:"October 10, 2024",pal:["#1C1A16","#9A7B4F","#C9A96E","#F5F0E8"]},
+];
+
+const CHAPTERS=[...new Set(STEPS.map(s=>s.chapter))];
+let cur=0;
+let lbOpen=false;
+
+function drawRug(ctx,W,H,idx,small=false){
+  const s=STEPS[idx];
+  const [c1,c2,c3,c4]=s.pal;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=c1; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.globalAlpha=0.15; ctx.strokeStyle=c4; ctx.lineWidth=small?0.6:0.9;
+  const sp=small?14:22;
+  for(let x=0;x<W+sp;x+=sp) for(let y=0;y<H+sp;y+=sp){
+    ctx.beginPath(); ctx.moveTo(x,y-sp/2); ctx.lineTo(x+sp/2,y); ctx.lineTo(x,y+sp/2); ctx.lineTo(x-sp/2,y); ctx.closePath(); ctx.stroke();
+  }
+  ctx.restore();
+  const cx=W/2,cy=H/2;
+  const r1=Math.min(W,H)*0.33,r2=r1*0.6,r3=r1*0.28;
+  ctx.save(); ctx.globalAlpha=0.12; ctx.strokeStyle=c3; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cx,cy,r1,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha=0.2;
+  for(let i=0;i<8;i++){
+    const a=(i/8)*Math.PI*2-Math.PI/8;
+    const x1=cx+Math.cos(a)*r1,y1=cy+Math.sin(a)*r1;
+    const x2=cx+Math.cos(a+Math.PI/8)*r2,y2=cy+Math.sin(a+Math.PI/8)*r2;
+    ctx.strokeStyle=c3; ctx.lineWidth=0.8;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  }
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha=0.3; ctx.fillStyle=c3;
+  ctx.beginPath();
+  for(let i=0;i<8;i++){
+    const a=(i/8)*Math.PI*2-Math.PI/8;
+    const x1=cx+Math.cos(a)*r3,y1=cy+Math.sin(a)*r3;
+    if(i===0)ctx.moveTo(x1,y1); else ctx.lineTo(x1,y1);
+  }
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+  if(!small){
+    ctx.save();
+    ctx.font='700 64px serif'; ctx.fillStyle=c4; ctx.globalAlpha=0.07;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(String(idx+1).padStart(2,'0'),cx,cy+3);
+    ctx.restore();
+    ctx.save();
+    const g=ctx.createLinearGradient(0,H-50,0,H);
+    g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.45)');
+    ctx.fillStyle=g; ctx.fillRect(0,H-50,W,50);
+    ctx.restore();
+  }
+}
+
+function goTo(idx){
+  cur=Math.max(0,Math.min(STEPS.length-1,idx));
+  const s=STEPS[cur];
+  const hc=document.getElementById('heroCanvas');
+  drawRug(hc.getContext('2d'),hc.width,hc.height,cur);
+  document.getElementById('heroBadge').textContent='Step '+String(cur+1).padStart(2,'0');
+  document.getElementById('annCh').textContent=s.chapter;
+  document.getElementById('annTitle').textContent=s.heading;
+  document.getElementById('annCap').textContent=s.caption;
+  document.getElementById('annNote').textContent=s.note;
+  document.getElementById('annDate').textContent=s.date;
+  const pct=cur/(STEPS.length-1)*100;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progThumb').style.left=pct+'%';
+  document.getElementById('progCount').textContent=(cur+1)+' / '+STEPS.length;
+  document.querySelectorAll('.ch-pill').forEach(b=>b.classList.toggle('active',b.dataset.ch===s.chapter));
+  document.querySelectorAll('.thumb').forEach((t,i)=>t.classList.toggle('active',i===cur));
+  const actThumb=document.querySelector('.thumb.active');
+  if(actThumb)actThumb.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  document.getElementById('btnPrev').disabled=cur===0;
+  document.getElementById('btnNext').disabled=cur===STEPS.length-1;
+  if(lbOpen)updateLightbox();
+}
+
+function openLightbox(){
+  lbOpen=true;
+  const lb=document.getElementById('lightbox');
+  lb.classList.add('open');
+  updateLightbox();
+  lb.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function closeLightbox(){
+  lbOpen=false;
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+function updateLightbox(){
+  const s=STEPS[cur];
+  const lbc=document.getElementById('lbCanvas');
+  drawRug(lbc.getContext('2d'),lbc.width,lbc.height,cur);
+  document.getElementById('lbStep').textContent='Step '+String(cur+1).padStart(2,'0')+' · '+STEPS.length;
+  document.getElementById('lbTitle').textContent=s.heading;
+  document.getElementById('lbCap').textContent=s.caption;
+  const dotsEl=document.getElementById('lbDots');
+  dotsEl.innerHTML='';
+  const start=Math.max(0,Math.min(cur-3,STEPS.length-7));
+  const end=Math.min(start+6,STEPS.length-1);
+  for(let i=start;i<=end;i++){
+    const d=document.createElement('div');
+    d.className='lb-dot'+(i===cur?' active':'');
+    d.onclick=(()=>{const ii=i;return()=>{goTo(ii);}})();
+    dotsEl.appendChild(d);
+  }
+}
+
+document.getElementById('expandBtn').onclick=openLightbox;
+document.getElementById('lbClose').onclick=closeLightbox;
+document.getElementById('lbPrev').onclick=()=>{goTo(cur-1);};
+document.getElementById('lbNext').onclick=()=>{goTo(cur+1);};
+document.getElementById('btnPrev').onclick=()=>goTo(cur-1);
+document.getElementById('btnNext').onclick=()=>goTo(cur+1);
+
+document.getElementById('progRail').addEventListener('click',e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  goTo(Math.round((e.clientX-r.left)/r.width*(STEPS.length-1)));
+});
+
+let touchX=null;
+const heroEl=document.getElementById('heroCanvas');
+heroEl.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;},{passive:true});
+heroEl.addEventListener('touchend',e=>{
+  if(touchX===null)return;
+  const dx=e.changedTouches[0].clientX-touchX;
+  if(Math.abs(dx)>30) goTo(dx<0?cur+1:cur-1);
+  touchX=null;
+},{passive:true});
+
+const lbEl=document.getElementById('lbCanvas');
+lbEl.addEventListener('touchstart',e=>{touchX=e.touches[0].clientX;},{passive:true});
+lbEl.addEventListener('touchend',e=>{
+  if(touchX===null)return;
+  const dx=e.changedTouches[0].clientX-touchX;
+  if(Math.abs(dx)>30) goTo(dx<0?cur+1:cur-1);
+  touchX=null;
+},{passive:true});
+
+const nav=document.getElementById('chapterScroll');
+CHAPTERS.forEach(ch=>{
+  const b=document.createElement('button');
+  b.className='ch-pill'; b.textContent=ch; b.dataset.ch=ch;
+  b.onclick=()=>{const f=STEPS.findIndex(s=>s.chapter===ch);if(f>=0)goTo(f);};
+  nav.appendChild(b);
+});
+
+const strip=document.getElementById('filmstrip');
+STEPS.forEach((s,i)=>{
+  const d=document.createElement('div'); d.className='thumb';
+  const c=document.createElement('canvas'); c.width=104; c.height=84;
+  drawRug(c.getContext('2d'),104,84,i,true);
+  const n=document.createElement('div'); n.className='thumb-n'; n.textContent=String(i+1).padStart(2,'0');
+  d.appendChild(c); d.appendChild(n); d.title=s.heading;
+  d.onclick=()=>goTo(i); strip.appendChild(d);
+});
+
+goTo(0);
+</script>

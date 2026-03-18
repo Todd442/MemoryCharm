@@ -181,9 +181,12 @@ export function MemoryGallery(props: {
     else handlePrev();
   }, [handleNext, handlePrev]);
 
-  // Reset focused image fade-in whenever a new image is selected
+  // Reset focused image fade-in only for images not yet seen in the focused view
+  const focusLoadedRef = useRef<Set<number>>(new Set());
   useLayoutEffect(() => {
-    setFocusImgReady(false);
+    if (selected !== null && !focusLoadedRef.current.has(selected)) {
+      setFocusImgReady(false);
+    }
   }, [selected]);
 
   // Keyboard navigation when focused view is open
@@ -308,7 +311,7 @@ export function MemoryGallery(props: {
                 src={files[selected!].url}
                 alt={`Memory ${selected! + 1} of ${n}`}
                 className={`pb-media${focusImgReady ? " pb-media--ready" : ""}`}
-                onLoad={() => setFocusImgReady(true)}
+                onLoad={() => { focusLoadedRef.current.add(selected!); setFocusImgReady(true); }}
               />
               {n > 1 && (
                 <button className="mg-focus__arrow mg-focus__arrow--next" onClick={handleNext} aria-label="Next image">

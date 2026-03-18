@@ -38,8 +38,29 @@ async function bootstrap() {
     return;
   }
 
-  await msalInstance.initialize();
-  debugLog("bootstrap", "MSAL initialized");
+  // Race initialization against a timeout. On NFC cold-start the phone's
+  // network may not be ready yet, causing initialize() to hang on the OIDC
+  // discovery fetch and leaving a blank page forever. If the timeout fires we
+  // render the app anyway — tryGetBearerToken silently handles un-initialised
+  // MSAL, so public charm playback still works without auth.
+  let msalInitialized = false;
+  await Promise.race([
+    msalInstance.initialize().then(() => { msalInitialized = true; }),
+    new Promise<void>(resolve => setTimeout(resolve, 5000)),
+  ]);
+  debugLog("bootstrap", `MSAL initialized: ${msalInitialized}`);
+
+  if (!msalInitialized) {
+    debugLog("bootstrap", "MSAL init timed out — rendering without auth");
+    ReactDOM.createRoot(document.getElementById("root")!).render(
+      <React.StrictMode>
+        <MsalProvider instance={msalInstance}>
+          <RouterProvider router={router} />
+        </MsalProvider>
+      </React.StrictMode>
+    );
+    return;
+  }
 
   // If an auth code is in the URL but MSAL's interaction flag was lost (common
   // intermittent issue — see MEMORY.md), handleRedirectPromise returns null and

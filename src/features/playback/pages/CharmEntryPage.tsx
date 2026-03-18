@@ -231,8 +231,12 @@ export function CharmEntryPage() {
     );
   }
 
-  // Unclaimed — redirected in effect above; this satisfies TS narrowing
-  if (entry.kind === "unclaimed") return null;
+  // Unclaimed — redirected in effect above; hold while the navigation processes
+  if (entry.kind === "unclaimed") return (
+    <div className="pb-frame pb-status">
+      <div className="pb-status-title">Memory Charm</div>
+    </div>
+  );
 
   // Claimed — not configured
   if (!entry.configured) {

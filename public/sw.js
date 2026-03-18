@@ -8,11 +8,16 @@
  * everything else (API calls, cross-origin CDN assets).
  */
 
-const CACHE = 'mc-static-v1';
+const CACHE = 'mc-static-v2';
 
 // Take control immediately on install / activate.
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+self.addEventListener('activate', (e) => e.waitUntil(
+  // Delete all old cache versions, then claim clients.
+  caches.keys()
+    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    .then(() => clients.claim())
+));
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -33,7 +38,18 @@ self.addEventListener('fetch', (event) => {
       const cached = await cache.match(request);
       const fetchPromise = fetch(request)
         .then((res) => {
-          if (res.ok) cache.put(request, res.clone());
+          if (res.ok) {
+            // Never cache an HTML response for a non-navigation request.
+            // SPA servers return index.html (200 OK) for unknown paths — if a
+            // JS bundle request hits that fallback, caching HTML as JS poisons
+            // the cache and causes a permanent MIME-type blank screen.
+            const ct = res.headers.get('Content-Type') ?? '';
+            const isNavigation = request.mode === 'navigate';
+            if (!isNavigation && ct.includes('text/html')) {
+              return res; // serve but don't cache
+            }
+            cache.put(request, res.clone());
+          }
           return res;
         })
         .catch(() => cached); // offline fallback to cache
