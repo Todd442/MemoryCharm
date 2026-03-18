@@ -271,6 +271,7 @@ export function MemoryGallery(props: {
                 alt=""
                 className="mg-card__img"
                 draggable={false}
+                fetchPriority="high"
                 onLoad={(e) => handleImageLoad(fileIdx, e)}
               />
             </button>

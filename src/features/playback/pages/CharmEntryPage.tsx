@@ -73,7 +73,7 @@ export function CharmEntryPage() {
           if (cancelled) return;
 
           if (entry.kind === "claimed" || entry.kind === "unclaimed") {
-            nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true, state: { prefetchedEntry: entry } });
+            nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true, state: { prefetchedEntry: entry, isOwner: entry.isOwner === true } });
             return;
           }
         }
@@ -128,12 +128,17 @@ export function CharmEntryPage() {
 
         // Auto-play only for OPEN charms
         if (entry.configured && entry.authMode === "none") {
-          setUi({ s: "loading", detail: "Awakening memory…" });
-          const media = await getPlaybackUrls(entry.code);
-          if (cancelled) return;
-
-          setPlayback({ files: media.files, type: media.memoryType });
-          setUi({ s: "ready", entry });
+          // Files are included in the entry response — skip the second API call
+          if (entry.files && entry.files.length > 0) {
+            setPlayback({ files: entry.files, type: entry.memoryType ?? "image" });
+            setUi({ s: "ready", entry });
+          } else {
+            setUi({ s: "loading", detail: "Awakening memory…" });
+            const media = await getPlaybackUrls(entry.code);
+            if (cancelled) return;
+            setPlayback({ files: media.files, type: media.memoryType });
+            setUi({ s: "ready", entry });
+          }
         }
       } catch (err: any) {
         setUi({ s: "error", message: err?.message ?? "Something went wrong." });

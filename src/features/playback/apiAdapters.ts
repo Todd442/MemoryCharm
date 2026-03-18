@@ -83,12 +83,16 @@ export function toEntryResponse(
   }
 
   if (api.status === "ready") {
+    const files: ContentFile[] | undefined = api.files?.length
+      ? api.files.map(f => ({ url: f.url, name: f.name }))
+      : undefined;
     return {
       kind: "claimed",
       code: api.code,
       configured: true,
       authMode: "none",
       memoryType: (api.memoryType as MemoryType) ?? "video",
+      files,
       memoryName: api.memoryName || undefined,
       memoryDescription: api.memoryDescription || undefined,
       isOwner: api.isOwner || undefined,
