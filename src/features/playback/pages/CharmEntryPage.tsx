@@ -35,12 +35,7 @@ export function CharmEntryPage() {
   const nav = useNavigate();
   const { search, state: navState } = useLocation();
   const { code } = useParams<{ code?: string }>();
-  // true when the router state explicitly marks this as an owner navigation
-  // (set by CharmDetailPage and ClaimCharmPage). Also true when the API
-  // confirms ownership via the optionally-attached Bearer token (covers NFC
-  // scans and direct URL visits where the owner is already signed in).
   type NavState = { isOwner?: boolean; prefetchedEntry?: EntryResponse } | null;
-  const navIsOwner = (navState as NavState)?.isOwner === true;
   const prefetchedEntry = (navState as NavState)?.prefetchedEntry ?? null;
 
   const token = getTokenCaseInsensitive(search);
@@ -110,14 +105,6 @@ export function CharmEntryPage() {
           return;
         }
 
-        // claimed — if the current user is the owner and didn't arrive via an
-        // explicit owner navigation (e.g. preview from the admin page), send
-        // them to their charm management page instead of the playback view.
-        if (entry.kind === "claimed" && entry.isOwner === true && !navIsOwner) {
-          nav(`/account/charms/${encodeURIComponent(entry.code)}`, { replace: true });
-          return;
-        }
-
         // claimed
         setUi({ s: "ready", entry });
 
@@ -149,7 +136,7 @@ export function CharmEntryPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, code, nav, navIsOwner, prefetchedEntry]);
+  }, [token, code, nav, prefetchedEntry]);
 
   async function handleGlyphSubmit(glyph: string) {
     if (ui.s !== "ready") return;
@@ -286,7 +273,7 @@ export function CharmEntryPage() {
         code={entry.code}
         memoryName={entry.memoryName}
         memoryDescription={entry.memoryDescription}
-        isOwner={navIsOwner || entry.isOwner === true}
+        isOwner={entry.isOwner === true}
       />
     );
   }
