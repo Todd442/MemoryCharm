@@ -73,7 +73,7 @@ export function CharmEntryPage() {
           if (cancelled) return;
 
           if (entry.kind === "claimed" || entry.kind === "unclaimed") {
-            nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true, state: { prefetchedEntry: entry, isOwner: entry.isOwner === true } });
+            nav(`/c/${encodeURIComponent(entry.code)}`, { replace: true, state: { prefetchedEntry: entry, isOwner: entry.kind === "claimed" && entry.isOwner === true } });
             return;
           }
         }
