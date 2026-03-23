@@ -1139,18 +1139,6 @@ export function ClaimCharmPage() {
     </div>{/* close teClaimScrollArea */}
     </div>{/* close teClaimLayout */}
 
-    {/* Wizard back — in-page, only when inside an active authenticated step */}
-    {step !== "loading" && isAuthed && (
-      <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
-        <button
-          className="teBtn teBtnSm teBtnGhost"
-          onClick={goBack}
-          type="button"
-        >
-          &#8592; Back
-        </button>
-      </div>
-    )}
     </>
   );
 }

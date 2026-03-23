@@ -72,9 +72,6 @@ export function PurchasePage() {
               Charm not found.
             </div>
           </div>
-          <div className="tePurchaseNav">
-            <Link to="/account">Back to Account</Link>
-          </div>
         </div>
       </div>
     );
@@ -154,11 +151,6 @@ export function PurchasePage() {
             </div>
           </div>
 
-          <div className="tePurchaseNav">
-            <Link to={`/account/charms/${encodeURIComponent(charm.charmId)}`}>
-              Back to Charm Details
-            </Link>
-          </div>
         </div>
       </div>
 

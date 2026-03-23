@@ -35,7 +35,7 @@
   position: absolute;
   inset: 0;
 
-  background: url("../../assets/frame-empty2.png") center/cover no-repeat;
+  background: url("../../assets/frame-empty.png") center/cover no-repeat;
 
 
   pointer-events: none;
@@ -46,7 +46,7 @@
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: 310px 1fr 320px;
+  grid-template-rows: 310px 1fr 245px;
 }
 
 /* Top status plaque */
@@ -108,19 +108,20 @@
 
 /* Scrollable middle */
 .te-scroll {
-  padding: 47px 65px 32px 85px;
+  padding: 47px 65px 80px 85px;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   /* Fade content into the footer plate as it approaches the bottom */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 88%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 90%, transparent 98%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 4%, black 90%, transparent 98%);
 }
 
 /* Bottom command plate — houses AppNav */
+/* Not a positioning context; AppNav positions itself against .te-layout (the full stage) */
 .te-commands {
-  position: relative;
+  position: static;
 }
 
 .te-footerActions {

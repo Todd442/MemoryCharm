@@ -1,128 +1,166 @@
 /*
- * AppNav — persistent bottom navigation
+ * AppNav — Recessed Brass Tray
  *
- * Sits inside .te-commands (320px tall, full 900px wide).
+ * Positioned with exact 900×1600 stage pixel coordinates so it's
+ * fully independent of the grid row heights. To move/resize the nav
+ * just change top/bottom/left/right here — nothing else breaks.
  *
- * All five slots share the same top (20px) and height (270px) so that
- * icons and labels are absolutely positioned at a consistent y coordinate
- * across every button — independent of slot width or icon size.
- *
- * Tune --nav-icon-y and --nav-label-y to shift the two rows.
- *
- * Slot x centres (900px canvas):
- *   pos1  circle   128px   back
- *   pos2  rect     291px   my charms
- *   pos3  circle   450px   home
- *   pos4  rect     609px   store
- *   pos5  circle   772px   account
+ * Stage canvas: 900 × 1600 px
+ *   top:    y where the tray starts in the background image
+ *   bottom: distance from the bottom of the stage
+ *   left:   clears the bottom-left gear
+ *   right:  inside the right pipe frame
  */
 
 .te-nav {
-  --nav-circle-d:  88px;    /* click-target width for circle slots  */
-  --nav-rect-w:   135px;    /* click-target width for rect slots    */
-
-  --nav-icon-y:   115px;    /* icon top, from slot top (≈135px from footer top) */
-  --nav-label-y:  210px;    /* label top, from slot top (≈230px from footer top) */
-
-  --nav-color-dim:    rgba(200, 170, 110, 0.35);
-  --nav-color-idle:   rgba(255, 235, 185, 1.0);
-  --nav-color-active: #f0c96a;
-  --nav-glow:         0 0 16px rgba(240, 200, 80, 0.7);
-
   position: absolute;
-  inset: 0;
+  top:    1390px;
+  bottom:   70px;
+  left:    198px;
+  right:    65px;
+
+  display: flex;
+  align-items: stretch;
+
+  /* Recessed mahogany tray */
+  background: linear-gradient(to bottom, #3b2510 0%, #2a190c 60%, #1e1108 100%);
+  box-shadow:
+    inset 0 5px 18px rgba(0, 0, 0, 0.75),
+    inset 0 -3px 8px  rgba(0, 0, 0, 0.5),
+    inset 0 1px 0     rgba(220, 170, 60, 0.15);
+
+  border-top:    2px solid rgba(190, 145, 55, 0.7);
+  border-bottom: 1px solid rgba(120, 85, 25, 0.6);
+
   pointer-events: none;
 }
 
-/* ── base slot ──────────────────────────────────────────── */
+/* ── slots ──────────────────────────────────────────────── */
 .te-nav__slot {
-  position: absolute;
-  pointer-events: all;
-
-  /* tall enough to span arch-well → label strip */
-  top:    20px;
-  height: 270px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
   background: transparent;
   border: none;
-  padding: 0;
+  border-right: 1px solid rgba(160, 115, 35, 0.35);
+  padding: 0 0 8px 0;
   cursor: pointer;
+  pointer-events: all;
 
-  color: var(--nav-color-idle);
+  color: rgba(215, 170, 80, 0.85);
   font-family: "Cinzel", serif;
-  letter-spacing: 0.06em;
+  font-size: 20px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1;
 
-  transition: color 0.2s, text-shadow 0.2s;
-  transform: translateX(-50%);   /* centre on the x anchor */
+  transition: color 0.2s, text-shadow 0.2s, background 0.2s;
+}
+
+.te-nav__slot:last-child {
+  border-right: none;
 }
 
 .te-nav__slot:disabled,
 .te-nav__slot.is-dim {
-  color: var(--nav-color-dim);
+  color: rgba(150, 110, 40, 0.35);
   cursor: default;
 }
 
 .te-nav__slot.is-active {
-  color: var(--nav-color-active);
-  text-shadow: var(--nav-glow);
+  color: #8ee87a;
+  text-shadow: 0 0 14px rgba(100, 230, 80, 0.55);
+  background: rgba(0, 0, 0, 0.12);
 }
 
-/* ── circle variant ─────────────────────────────────────── */
-.te-nav__slot--circle {
-  width: var(--nav-circle-d);
-}
-
-/* ── rect variant ───────────────────────────────────────── */
-.te-nav__slot--rect {
-  width: var(--nav-rect-w);
-}
-
-/* ── horizontal positions ───────────────────────────────── */
-.te-nav__slot--pos1 { left: 128px; }
-.te-nav__slot--pos2 { left: 291px; }
-.te-nav__slot--pos3 { left: 450px; }
-.te-nav__slot--pos4 { left: 609px; }
-.te-nav__slot--pos5 { left: 772px; }
-
-/* ── icon — absolutely placed in the arch-well zone ─────── */
+/* ── PNG icons ───────────────────────────────────────────── */
 .te-nav__icon {
-  position: absolute;
-  top:  var(--nav-icon-y);
-  left: 50%;
-  transform: translateX(calc(-50% + 10px));
-  font-size: 78px;
-  line-height: 1;
-  /* for <img> icons */
-  width:  78px;
-  height: 78px;
+  width:  52px;
+  height: 52px;
   object-fit: contain;
+
+  /* Tint PNGs to brass/gold */
+  filter: sepia(100%) saturate(180%) hue-rotate(8deg) brightness(1.15);
+  opacity: 0.9;
+  transition: filter 0.2s, opacity 0.2s;
 }
 
-/* ── label — absolutely placed in the rect-strip zone ───── */
+.te-nav__slot.is-dim .te-nav__icon {
+  opacity: 0.28;
+}
+
+.te-nav__slot.is-active .te-nav__icon {
+  filter: sepia(60%) saturate(200%) hue-rotate(70deg) brightness(1.3);
+}
+
+/* ── unicode / text icon (used for Charms star) ─────────── */
+.te-nav__icon--glyph {
+  font-size: 48px;
+  line-height: 1;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(215, 170, 80, 0.85);
+  transition: color 0.2s;
+}
+
+.te-nav__slot.is-dim .te-nav__icon--glyph {
+  opacity: 0.28;
+}
+
+.te-nav__slot.is-active .te-nav__icon--glyph {
+  color: #8ee87a;
+}
+
+/* ── label ───────────────────────────────────────────────── */
 .te-nav__label {
-  position: absolute;
-  top:  var(--nav-label-y);
-  left: 50%;
-  transform: translateX(calc(-50% + 10px));   /* matches global icon x-offset */
-  font-size: 22px;
-  letter-spacing: 0.08em;
+  font-size: 19px;
   white-space: nowrap;
   line-height: 1;
 }
 
-/* ── center slot — bigger icon only ─────────────────────── */
-.te-nav__slot--center .te-nav__icon  { font-size: 87px; width: 87px; height: 87px; }
-.te-nav__slot--center .te-nav__label { font-size: 23px; }
+/* ── centre medallion (replaces Home icon) ───────────────── */
+.te-nav__slot--center {
+  /* Give the centre slot slightly more room visually */
+  flex: 1.1;
+}
 
-/* ── rect slots — bigger label ──────────────────────────── */
-.te-nav__slot--rect .te-nav__label { font-size: 25px; }
+.te-nav__medallion {
+  width:  76px;
+  height: 76px;
+  border-radius: 50%;
 
-/* ── per-slot icon nudges ───────────────────────────────── */
-.te-nav__slot--pos1 .te-nav__icon  { transform: translateX(calc(-50% + 10px + 5px)); }
-.te-nav__slot--pos1 .te-nav__label { transform: translateX(calc(-50% + 10px + 5px)); }
-.te-nav__slot--pos4 .te-nav__icon  { top: calc(var(--nav-icon-y) + 25px); width: 70px; height: 70px; transform: translateX(calc(-50% + 10px - 10px)); }
-.te-nav__slot--pos4 .te-nav__label { transform: translateX(calc(-50% + 10px - 10px)); }
-.te-nav__slot--pos5 .te-nav__icon  { transform: translateX(calc(-50% + 10px - 20px)); }
-.te-nav__slot--pos5 .te-nav__label { transform: translateX(calc(-50% + 10px - 20px)); }
+  background: radial-gradient(circle at 38% 32%, #2e6b2b, #163516);
+  border: 3px solid rgba(185, 145, 55, 0.85);
+  box-shadow:
+    0 0 0 2px rgba(90, 65, 15, 0.55),
+    0 0 18px rgba(70, 180, 70, 0.28),
+    inset 0  2px  5px rgba(255, 255, 255, 0.10),
+    inset 0 -2px  5px rgba(0,   0,   0,   0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Cinzel", serif;
+  font-size:   42px;
+  font-weight: 700;
+  color: #7de87a;
+  text-shadow: 0 0 12px rgba(90, 230, 80, 0.65);
+
+  transition: box-shadow 0.2s;
+}
+
+.te-nav__slot.is-active .te-nav__medallion {
+  box-shadow:
+    0 0 0 2px rgba(90, 65, 15, 0.55),
+    0 0 28px rgba(80, 230, 80, 0.55),
+    inset 0  2px  5px rgba(255, 255, 255, 0.14),
+    inset 0 -2px  5px rgba(0,   0,   0,   0.45);
+}

@@ -15,7 +15,8 @@
       "Bash(python3 /tmp/write_insert.py)",
       "Bash(node /tmp/insert.js)",
       "Bash(/tmp/test2.js:*)",
-      "Bash(node /tmp/test2.js)"
+      "Bash(node /tmp/test2.js)",
+      "Bash(gh issue:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\Downloads",

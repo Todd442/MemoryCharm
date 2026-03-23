@@ -234,9 +234,6 @@ export function AccountPage() {
             </div>
           </div>
 
-          <div className="teAcctFooter">
-            <Link to="/">Home</Link>
-          </div>
         </div>
       </div>
 

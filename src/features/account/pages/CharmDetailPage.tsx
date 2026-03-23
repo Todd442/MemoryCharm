@@ -316,9 +316,6 @@ export function CharmDetailPage() {
               Charm not found.
             </div>
           </div>
-          <div className="teCharmNav">
-            <Link to="/account">Back to Account</Link>
-          </div>
         </div>
       </div>
     );
@@ -783,9 +780,6 @@ export function CharmDetailPage() {
             )}
           </details>
 
-          <div className="teCharmNav">
-            <Link to="/account">Back to Account</Link>
-          </div>
         </div>
       </div>
 

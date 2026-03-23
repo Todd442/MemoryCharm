@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
-import homeIcon from "../../assets/Home.png";
 import accountIcon from "../../assets/account.png";
 import backIcon from "../../assets/back.png";
 import shoppingIcon from "../../assets/shopping.png";
@@ -27,9 +26,9 @@ export function AppNav() {
   return (
     <nav className="te-nav" aria-label="Main navigation">
 
-      {/* Far-left circle: Back */}
+      {/* Back */}
       <button
-        className="te-nav__slot te-nav__slot--circle te-nav__slot--pos1"
+        className="te-nav__slot"
         onClick={goBack}
         type="button"
         aria-label="Go back"
@@ -38,31 +37,32 @@ export function AppNav() {
         <span className="te-nav__label">Back</span>
       </button>
 
-      {/* Left rect: My Charms */}
+      {/* My Charms */}
       <button
-        className={`te-nav__slot te-nav__slot--rect te-nav__slot--pos2${isAccount ? " is-active" : ""}${!isAuthed ? " is-dim" : ""}`}
+        className={`te-nav__slot${isAccount ? " is-active" : ""}${!isAuthed ? " is-dim" : ""}`}
         onClick={() => nav("/account")}
         type="button"
         disabled={!isAuthed}
         aria-label="My Charms"
       >
+        <span className="te-nav__icon--glyph" aria-hidden="true">☆</span>
         <span className="te-nav__label">Charms</span>
       </button>
 
-      {/* Center circle: Home */}
+      {/* Home — centre medallion */}
       <button
-        className={`te-nav__slot te-nav__slot--circle te-nav__slot--center te-nav__slot--pos3${isHome ? " is-active" : ""}`}
+        className={`te-nav__slot te-nav__slot--center${isHome ? " is-active" : ""}`}
         onClick={() => nav("/")}
         type="button"
         aria-label="Home"
       >
-        <img className="te-nav__icon" src={homeIcon} alt="" />
+        <div className="te-nav__medallion" aria-hidden="true">M</div>
         <span className="te-nav__label">Home</span>
       </button>
 
-      {/* Right rect: Store */}
+      {/* Store */}
       <button
-        className={`te-nav__slot te-nav__slot--rect te-nav__slot--pos4${isStore ? " is-active" : ""}`}
+        className={`te-nav__slot${isStore ? " is-active" : ""}`}
         onClick={() => nav("/store")}
         type="button"
         aria-label="Store"
@@ -71,9 +71,9 @@ export function AppNav() {
         <span className="te-nav__label">Store</span>
       </button>
 
-      {/* Far-right circle: Account */}
+      {/* Account */}
       <button
-        className={`te-nav__slot te-nav__slot--circle te-nav__slot--pos5${isAccount ? " is-active" : ""}${!isAuthed ? " is-dim" : ""}`}
+        className={`te-nav__slot${isAccount ? " is-active" : ""}${!isAuthed ? " is-dim" : ""}`}
         onClick={() => nav("/account")}
         type="button"
         disabled={!isAuthed}
