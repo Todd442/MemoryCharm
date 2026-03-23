@@ -4,6 +4,7 @@ import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
 import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta, factoryResetCharm, trimCharmContent } from "../api";
+import { inspectVideoFile } from "../../playback/utils/codecDetection";
 import { configureCharm } from "../../claim/api";
 import type { UserCharmDetail } from "../api";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
@@ -43,6 +44,7 @@ export function CharmDetailPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [fileErr, setFileErr] = useState<string | null>(null);
   const [uploadPct, setUploadPct] = useState(0);
+  const [videoChecking, setVideoChecking] = useState(false);
   // Tracks the server-side image photos still kept by the owner (removals are local until Upload).
   // serverUrls — display URLs (presigned, may change each load, used for rendering only)
   // serverSlots — stable 0-based positions in the original file list (used as keepIndices for trim)
@@ -612,10 +614,40 @@ export function CharmDetailPage() {
                           type="file"
                           accept={acceptTypes[editMemoryType] ?? "*/*"}
                           disabled={busy}
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const selected = e.target.files;
                             if (!selected || selected.length === 0) return;
-                            setFiles(Array.from(selected));
+                            const picked = Array.from(selected);
+                            if (editMemoryType === "video" && picked[0]) {
+                              setFiles([]);
+                              setFileErr(null);
+                              setVideoChecking(true);
+                              try {
+                                const issues = await inspectVideoFile(picked[0]);
+                                const errors: string[] = [];
+                                if (issues.audioIssue) {
+                                  errors.push(
+                                    `Audio format not supported by web browsers (${issues.audioIssue}). ` +
+                                    "Re-export as MP4 with AAC audio."
+                                  );
+                                }
+                                if (issues.rotation) {
+                                  errors.push(
+                                    `Video has ${issues.rotation}° rotation metadata that browsers may ignore, causing sideways playback. ` +
+                                    "Re-export with the rotation baked in."
+                                  );
+                                }
+                                if (errors.length > 0) {
+                                  setFileErr(errors.join(" "));
+                                  e.target.value = "";
+                                  return;
+                                }
+                              } finally {
+                                setVideoChecking(false);
+                              }
+                            }
+                            setFileErr(null);
+                            setFiles(picked);
                           }}
                           style={{ padding: "6px 0" }}
                         />
@@ -634,6 +666,12 @@ export function CharmDetailPage() {
                   </div>
                 )}
 
+                {videoChecking && (
+                  <div style={{ fontSize: "var(--fs-xs)", opacity: 0.7, marginTop: 4 }}>
+                    Checking video compatibility…
+                  </div>
+                )}
+
                 {busy && (
                   <div className="teCharmProgress">
                     <div
@@ -647,7 +685,7 @@ export function CharmDetailPage() {
                   <button
                     className="teBtn teBtnPrimary"
                     onClick={handleUpload}
-                    disabled={busy || working || !canUpload || !!typeChangePending}
+                    disabled={busy || working || !canUpload || !!typeChangePending || videoChecking}
                     type="button"
                   >
                     {busy ? "Saving\u2026" : "Save"}

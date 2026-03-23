@@ -13,6 +13,17 @@ export type CodecCheckResult =
   | { ok: false; codec: string }
   | { ok: "unknown" }; // detection failed — fail open, never block upload
 
+/**
+ * Combined result of inspecting a video file before upload.
+ * audioIssue — FourCC of an unsupported audio codec, or undefined if fine.
+ * rotation    — non-zero degrees if rotation metadata is baked in (90/180/270),
+ *               or undefined if the video is upright / detection failed.
+ */
+export type VideoInspectResult = {
+  audioIssue?: string;
+  rotation?: 90 | 180 | 270;
+};
+
 /** Audio codec FourCCs that browsers cannot decode. */
 const PROBLEMATIC = ["samr", "sawb", "ac-3", "ec-3"];
 
@@ -151,5 +162,106 @@ export async function checkUrlAudioCodec(url: string): Promise<CodecCheckResult>
     return { ok: true };
   } catch {
     return { ok: "unknown" };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Rotation detection
+// ---------------------------------------------------------------------------
+
+/**
+ * Scan moov bytes for a tkhd (track header) box and return the rotation
+ * encoded in its transformation matrix, or 0 if the matrix is identity /
+ * not found.
+ *
+ * The tkhd matrix uses 16.16 fixed-point values (big-endian).
+ * Identity:  a=65536  b=0      c=0      d=65536
+ * 90° CW:    a=0      b=65536  c=-65536 d=0
+ * 180°:      a=-65536 b=0      c=0      d=-65536
+ * 270° CW:   a=0      b=-65536 c=65536  d=0
+ */
+function detectRotationInMoov(moov: ArrayBuffer): 0 | 90 | 180 | 270 {
+  const bytes = new Uint8Array(moov);
+  const view = new DataView(moov);
+
+  // Scan for the 'tkhd' FourCC (0x74 0x6B 0x68 0x64)
+  for (let i = 4; i < bytes.length - 8; i++) {
+    if (
+      bytes[i] === 0x74 && bytes[i + 1] === 0x6b &&
+      bytes[i + 2] === 0x68 && bytes[i + 3] === 0x64
+    ) {
+      // i is the start of the FourCC, so the box header starts at i-4
+      const boxStart = i - 4;
+      const version = bytes[boxStart + 8]; // version byte after size+type
+
+      // Offset to the matrix:
+      // +8  (size + type)
+      // +4  (version + flags)
+      // +20 (v0) or +32 (v1)  time fields
+      // +8  (2× reserved uint32)
+      // +8  (layer, alternate_group, volume, reserved)
+      const matrixStart = boxStart + 8 + 4 + (version === 1 ? 32 : 20) + 8 + 8;
+
+      if (matrixStart + 36 > bytes.length) continue;
+
+      const a = view.getInt32(matrixStart, false);
+      const b = view.getInt32(matrixStart + 4, false);
+      const c = view.getInt32(matrixStart + 12, false);
+      const d = view.getInt32(matrixStart + 16, false);
+
+      if (a === 0 && b > 0 && c < 0 && d === 0) return 90;
+      if (a < 0 && b === 0 && c === 0 && d < 0) return 180;
+      if (a === 0 && b < 0 && c > 0 && d === 0) return 270;
+      // Identity or unrecognised — keep scanning (there may be a video tkhd later)
+    }
+  }
+
+  return 0;
+}
+
+// ---------------------------------------------------------------------------
+// Combined pre-upload inspection
+// ---------------------------------------------------------------------------
+
+/**
+ * Inspect a locally-selected video File for known browser-incompatibilities.
+ * Reads only the moov atom — never loads the full media data.
+ *
+ * Inspects MP4 / QuickTime / M4V containers. WebM passes through unmodified
+ * (Vorbis/Opus are universally supported, WebM doesn't carry rotation metadata).
+ * Falls back to file extension when the browser reports an empty or generic MIME type.
+ *
+ * Fails open on any parse error — detection issues never block an upload.
+ */
+export async function inspectVideoFile(file: File): Promise<VideoInspectResult> {
+  const type = file.type.toLowerCase();
+  const ext = file.name.toLowerCase().split(".").pop() ?? "";
+  const isMp4Container =
+    type.startsWith("video/mp4") ||
+    type.startsWith("video/quicktime") ||
+    type.startsWith("video/x-m4v") ||
+    // Fallback for files where the browser reports an empty or generic MIME type
+    (!type || type === "video/mpeg") &&
+      (ext === "mp4" || ext === "mov" || ext === "m4v" || ext === "3gp");
+
+  if (!isMp4Container) {
+    return {};
+  }
+
+  try {
+    const moov = await extractMoov(file);
+    if (!moov) return {};
+
+    const result: VideoInspectResult = {};
+
+    const badCodec = scanMoov(moov);
+    if (badCodec) result.audioIssue = badCodec;
+
+    const rotation = detectRotationInMoov(moov);
+    if (rotation !== 0) result.rotation = rotation;
+
+    return result;
+  } catch {
+    return {}; // never block on detection failure
   }
 }

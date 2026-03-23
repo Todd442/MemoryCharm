@@ -9,7 +9,7 @@ import { acceptTerms, CURRENT_TERMS_VERSION, cacheUlaLocally } from "../../../ap
 import { UlaContent } from "../../legal/components/UlaContent";
 import { getUserCharms, getCharmDetail } from "../../account/api";
 import { entryByCode } from "../../playback/api";
-import { checkFileAudioCodec } from "../../playback/utils/codecDetection";
+import { inspectVideoFile } from "../../playback/utils/codecDetection";
 import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
@@ -205,6 +205,7 @@ export function ClaimCharmPage() {
   const [selectedGlyph, setSelectedGlyph] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [uploadPct, setUploadPct] = useState(0);
+  const [videoChecking, setVideoChecking] = useState(false);
   const [sealPhase, setSealPhase] = useState<"claim" | "configure" | "upload" | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [carouselIdx, setCarouselIdx] = useState(0);
@@ -444,17 +445,31 @@ export function ClaimCharmPage() {
       return;
     }
 
-    // Check audio codec for video files before committing to upload
+    // Inspect video files for known browser-incompatibilities before upload
     if (memoryType === "video" && picked[0]) {
-      const codecResult = await checkFileAudioCodec(picked[0]);
-      if (codecResult.ok === false) {
-        setFileErr(
-          "This video's audio format isn't supported by web browsers (codec: " +
-          codecResult.codec +
-          "). Please re-export or convert the video to MP4 with AAC audio and try again."
-        );
-        setFiles([]);
-        return;
+      setFiles([]);
+      setVideoChecking(true);
+      try {
+        const issues = await inspectVideoFile(picked[0]);
+        const errors: string[] = [];
+        if (issues.audioIssue) {
+          errors.push(
+            `Audio format not supported by web browsers (${issues.audioIssue}). ` +
+            "Re-export as MP4 with AAC audio."
+          );
+        }
+        if (issues.rotation) {
+          errors.push(
+            `Video has ${issues.rotation}° rotation metadata that browsers may ignore, causing sideways playback. ` +
+            "Re-export with the rotation baked in."
+          );
+        }
+        if (errors.length > 0) {
+          setFileErr(errors.join(" "));
+          return;
+        }
+      } finally {
+        setVideoChecking(false);
       }
     }
 
@@ -1033,7 +1048,10 @@ export function ClaimCharmPage() {
                     {fileErr && (
                       <div className="teClaimError" style={{ marginTop: 4 }}>{fileErr}</div>
                     )}
-                    {!fileErr && files.length === 1 && (
+                    {videoChecking && (
+                      <div className="teHint" style={{ marginTop: 4 }}>Checking video compatibility…</div>
+                    )}
+                    {!fileErr && !videoChecking && files.length === 1 && (
                       <div className="teHint" style={{ marginTop: 4 }}>
                         {files[0].name} ({(files[0].size / 1024 / 1024).toFixed(1)} MB)
                       </div>
@@ -1045,7 +1063,7 @@ export function ClaimCharmPage() {
                   <button
                     className="teBtn teBtnPrimary teBtnWide"
                     onClick={() => advanceTo("protection")}
-                    disabled={files.length === 0}
+                    disabled={files.length === 0 || videoChecking}
                     type="button"
                   >
                     Continue
