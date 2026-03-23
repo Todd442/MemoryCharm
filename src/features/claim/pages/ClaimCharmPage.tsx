@@ -264,10 +264,6 @@ export function ClaimCharmPage() {
     window.history.pushState({ step: s }, "");
   }
 
-  function goBack() {
-    window.history.back();
-  }
-
   // Sync browser back-button with step state
   useEffect(() => {
     const onPopState = (e: PopStateEvent) => {

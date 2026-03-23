@@ -66,6 +66,7 @@
 }
 
 .tePurchaseCardDesc {
+  font-family: var(--font-body);
   font-size: var(--fs-label);
   opacity: 0.75;
   margin-bottom: 12px;
@@ -88,6 +89,7 @@
 
 /* Current charm info strip */
 .tePurchaseCharmInfo {
+  font-family: var(--font-body);
   display: flex;
   gap: 16px;
   flex-wrap: wrap;

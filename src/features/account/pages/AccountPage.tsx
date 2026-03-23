@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { getUserMe, saveProfile, getUserCharms } from "../api";
 import type { UserProfile, UserCharmSummary } from "../api";

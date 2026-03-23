@@ -75,6 +75,7 @@ details.teCharmSection > summary:hover {
 }
 
 .teCharmInfoLabel {
+  font-family: var(--font-body);
   font-size: var(--fs-meta);
   letter-spacing: 0.8px;
   text-transform: uppercase;
@@ -92,6 +93,7 @@ details.teCharmSection > summary:hover {
 }
 
 .teCharmSettleLabel {
+  font-family: var(--font-body);
   font-size: var(--fs-meta);
   margin-bottom: 6px;
 }
@@ -118,6 +120,7 @@ details.teCharmSection > summary:hover {
   background: rgba(255, 180, 60, 0.10);
   border: 1px solid rgba(255, 180, 60, 0.25);
   color: #ffcc66;
+  font-family: var(--font-body);
   font-size: var(--fs-meta);
   text-align: center;
 }
@@ -146,6 +149,7 @@ details.teCharmSection > summary:hover {
   border-radius: 10px;
   background: rgba(180, 160, 140, 0.10);
   border: 1px solid rgba(180, 160, 140, 0.2);
+  font-family: var(--font-body);
   font-size: var(--fs-label);
   text-align: center;
   opacity: 0.8;

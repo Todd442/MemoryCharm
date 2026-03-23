@@ -43,6 +43,7 @@
 
 .teFieldHint {
   margin-top: 5px;
+  font-family: var(--font-body);
   font-size: var(--fs-small);
   opacity: 0.60;
 }

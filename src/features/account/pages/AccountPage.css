@@ -82,6 +82,7 @@
 }
 
 .teAcctCharmMeta {
+  font-family: var(--font-body);
   font-size: var(--fs-meta);
   opacity: 0.80;
   margin-top: 3px;
@@ -143,6 +144,7 @@
 
 /* Empty state */
 .teAcctEmpty {
+  font-family: var(--font-body);
   text-align: center;
   padding: 20px 0;
   font-size: var(--fs-label);
