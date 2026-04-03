@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
@@ -60,6 +60,7 @@ export function LandingPage() {
   const { accounts, instance, inProgress } = useMsal();
   const [dimFactor, setDimFactor] = useState(0);
   const [navVisible, setNavVisible] = useState(false);
+  const scrollRafRef = useRef<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistDone, setWaitlistDone] = useState(false);
@@ -70,15 +71,22 @@ export function LandingPage() {
 
   useEffect(() => {
     function onScroll() {
-      const vh = window.innerHeight;
-      const progress = Math.min(1, Math.max(0,
-        (window.scrollY - vh * 0.2) / (vh * 0.6)
-      ));
-      setDimFactor(progress * 0.92);
-      setNavVisible(window.scrollY > vh * 0.75);
+      if (scrollRafRef.current !== null) return;
+      scrollRafRef.current = requestAnimationFrame(() => {
+        scrollRafRef.current = null;
+        const vh = window.innerHeight;
+        const progress = Math.min(1, Math.max(0,
+          (window.scrollY - vh * 0.2) / (vh * 0.6)
+        ));
+        setDimFactor(progress * 0.92);
+        setNavVisible(window.scrollY > vh * 0.75);
+      });
     }
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollRafRef.current !== null) cancelAnimationFrame(scrollRafRef.current);
+    };
   }, []);
 
   async function handleWaitlist(e: React.FormEvent) {

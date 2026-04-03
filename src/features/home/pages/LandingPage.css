@@ -18,6 +18,8 @@
   inset: 0;
   z-index: 0;
   overflow: hidden; /* clips nebula's -40px parallax bleed */
+  transform: translateZ(0); /* GPU-promote — prevents iOS repaint flutter */
+  will-change: transform;
 }
 
 /* Scrollable layer — above canvas -------------------------------------- */
@@ -26,6 +28,7 @@
   z-index: 1;
   /* Room for the fixed footer so last section isn't permanently hidden */
   padding-bottom: 100px;
+  overscroll-behavior: none; /* suppress iOS rubber-band repaint at page ends */
 }
 
 /* ── Hero ──────────────────────────────────────────────────────────────── */
@@ -48,10 +51,11 @@
   position: fixed;
   top: calc(50% + min(9.5vw, 95px));
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateZ(0); /* GPU-promote */
   z-index: 2;
   transition: opacity 0.1s linear;
   pointer-events: none;
+  will-change: opacity;
 }
 
 .lp-hero-sub {
@@ -569,6 +573,8 @@
   background: transparent;
   border-bottom: 1px solid transparent;
   transition: background 0.45s ease, border-color 0.45s ease;
+  transform: translateZ(0); /* GPU-promote */
+  will-change: transform;
 }
 
 /* Frosted state — kicks in once hero scrolls away */
@@ -827,6 +833,8 @@
   left: 0;
   right: 0;
   z-index: 50;
+  transform: translateZ(0); /* GPU-promote */
+  will-change: transform;
   display: flex;
   align-items: flex-end;
   justify-content: center;
