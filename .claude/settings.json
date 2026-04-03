@@ -16,7 +16,10 @@
       "Bash(node /tmp/insert.js)",
       "Bash(/tmp/test2.js:*)",
       "Bash(node /tmp/test2.js)",
-      "Bash(gh issue:*)"
+      "Bash(gh issue:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh project:*)",
+      "Bash(func --version)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\Downloads",
