@@ -391,98 +391,36 @@ export function CharmDetailPage() {
             </button>
           </div>
 
-          {/* Memory Details (name + description) */}
-          <details className="teCharmSection" open>
-            <summary className="teCharmSectionTitle">Memory Details</summary>
-            <div style={{ display: "grid", gap: 12 }}>
-              <MemoryDetailsFields
-                memoryName={editMemoryName}
-                memoryDescription={editMemoryDescription}
-                onNameChange={(v) => { setEditMemoryName(v); setMetaDirty(true); }}
-                onDescChange={(v) => { setEditMemoryDescription(v); setMetaDirty(true); }}
-                disabled={busy}
-              />
-              <div>
-                <button
-                  className="teBtn teBtnPrimary"
-                  onClick={handleSaveMeta}
-                  disabled={busy || working || !metaDirty}
-                  type="button"
-                >
-                  {busy ? "Saving\u2026" : "Save Details"}
-                </button>
+          {/* Status banners — surfaced above edit sections */}
+          {charm.firstFinalizedAt && (
+            <div className="teCharmSettleBar">
+              <div className="teCharmSettleLabel">
+                {charm.isSettled
+                  ? "This memory has settled."
+                  : `Settles in ${daysUntilSettled} day${daysUntilSettled === 1 ? "" : "s"}`}
+              </div>
+              <div className="teCharmSettleTrack">
+                <div
+                  className="teCharmSettleFill"
+                  style={{ width: `${settleProgress}%` }}
+                />
               </div>
             </div>
-          </details>
-
-          {/* Glyph Management (always available) */}
-          <details className="teCharmSection">
-            <summary className="teCharmSectionTitle">Glyph Protection</summary>
-            <div style={{ display: "grid", gap: 12 }}>
-              <div>
-                <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>Playback Protection</div>
-                <div className="tePills">
-                  <button
-                    className={"tePill " + (editAuthMode === "none" ? "isActive" : "")}
-                    onClick={() => handleAuthModeChange("none")}
-                    disabled={busy}
-                    type="button"
-                  >
-                    OPEN
-                  </button>
-                  <button
-                    className={"tePill " + (editAuthMode === "glyph" ? "isActive" : "")}
-                    onClick={() => handleAuthModeChange("glyph")}
-                    disabled={busy}
-                    type="button"
-                  >
-                    GLYPH LOCK
-                  </button>
-                </div>
-              </div>
-
-              {editAuthMode === "glyph" && (
-                <div>
-                  <div className="teCharmInfoLabel" style={{ marginBottom: 8 }}>
-                    Select glyph
-                  </div>
-                  <div className="teCharmGlyphGrid">
-                    {ALL_GLYPHS.map((g) => (
-                      <button
-                        key={g.id}
-                        type="button"
-                        disabled={busy}
-                        onClick={() => handleGlyphSelect(g.id)}
-                        className={"tePill " + (editGlyphId === g.id ? "isActive" : "")}
-                        style={{ padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}
-                      >
-                        <img
-                          src={g.image}
-                          alt="Glyph"
-                          style={{ maxWidth: "100%", maxHeight: 100, objectFit: "contain" }}
-                          draggable={false}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <button
-                  className="teBtn teBtnPrimary"
-                  onClick={handleSaveGlyph}
-                  disabled={busy || working || !glyphDirty || (editAuthMode === "glyph" && !editGlyphId)}
-                  type="button"
-                >
-                  {busy ? "Saving\u2026" : "Save Protection Mode"}
-                </button>
-              </div>
+          )}
+          {charm.isFading && (
+            <div className="teCharmFadingBar">
+              This memory will begin to fade in {charm.fadingInDays} day{charm.fadingInDays === 1 ? "" : "s"}.
+              Visit the Arcane Emporium to extend its life.
             </div>
-          </details>
+          )}
+          {charm.isExpired && (
+            <div className="teCharmFadingBar teCharmFadingBar--expired">
+              This memory has faded beyond recall.
+            </div>
+          )}
 
           {/* Content Management */}
-          <details className="teCharmSection">
+          <details className="teCharmSection" open>
             <summary className="teCharmSectionTitle">Content</summary>
 
             {/* Video / audio preview — always shown */}
@@ -701,6 +639,96 @@ export function CharmDetailPage() {
             )}
           </details>
 
+          {/* Memory Details (name + description) */}
+          <details className="teCharmSection">
+            <summary className="teCharmSectionTitle">Memory Details</summary>
+            <div style={{ display: "grid", gap: 12 }}>
+              <MemoryDetailsFields
+                memoryName={editMemoryName}
+                memoryDescription={editMemoryDescription}
+                onNameChange={(v) => { setEditMemoryName(v); setMetaDirty(true); }}
+                onDescChange={(v) => { setEditMemoryDescription(v); setMetaDirty(true); }}
+                disabled={busy}
+              />
+              <div>
+                <button
+                  className="teBtn teBtnPrimary"
+                  onClick={handleSaveMeta}
+                  disabled={busy || working || !metaDirty}
+                  type="button"
+                >
+                  {busy ? "Saving\u2026" : "Save Details"}
+                </button>
+              </div>
+            </div>
+          </details>
+
+          {/* Glyph Management (always available) */}
+          <details className="teCharmSection">
+            <summary className="teCharmSectionTitle">Glyph Protection</summary>
+            <div style={{ display: "grid", gap: 12 }}>
+              <div>
+                <div className="teCharmInfoLabel" style={{ marginBottom: 6 }}>Playback Protection</div>
+                <div className="tePills">
+                  <button
+                    className={"tePill " + (editAuthMode === "none" ? "isActive" : "")}
+                    onClick={() => handleAuthModeChange("none")}
+                    disabled={busy}
+                    type="button"
+                  >
+                    OPEN
+                  </button>
+                  <button
+                    className={"tePill " + (editAuthMode === "glyph" ? "isActive" : "")}
+                    onClick={() => handleAuthModeChange("glyph")}
+                    disabled={busy}
+                    type="button"
+                  >
+                    GLYPH LOCK
+                  </button>
+                </div>
+              </div>
+
+              {editAuthMode === "glyph" && (
+                <div>
+                  <div className="teCharmInfoLabel" style={{ marginBottom: 8 }}>
+                    Select glyph
+                  </div>
+                  <div className="teCharmGlyphGrid">
+                    {ALL_GLYPHS.map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        disabled={busy}
+                        onClick={() => handleGlyphSelect(g.id)}
+                        className={"tePill " + (editGlyphId === g.id ? "isActive" : "")}
+                        style={{ padding: 6, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >
+                        <img
+                          src={g.image}
+                          alt="Glyph"
+                          style={{ maxWidth: "100%", maxHeight: 100, objectFit: "contain" }}
+                          draggable={false}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <button
+                  className="teBtn teBtnPrimary"
+                  onClick={handleSaveGlyph}
+                  disabled={busy || working || !glyphDirty || (editAuthMode === "glyph" && !editGlyphId)}
+                  type="button"
+                >
+                  {busy ? "Saving\u2026" : "Save Protection Mode"}
+                </button>
+              </div>
+            </div>
+          </details>
+
           {/* Charm Info */}
           <details className="teCharmSection">
             <summary className="teCharmSectionTitle">Charm Info</summary>
@@ -714,38 +742,6 @@ export function CharmDetailPage() {
               <ThemedInput readOnly label="Claimed" value={fmtDate(charm.claimedAt)} />
               <ThemedInput readOnly label="Configured" value={fmtDate(charm.configuredAt)} />
             </div>
-
-            {/* Settling progress */}
-            {charm.firstFinalizedAt && (
-              <div className="teCharmSettleBar">
-                <div className="teCharmSettleLabel">
-                  {charm.isSettled
-                    ? "This memory has settled."
-                    : `Settles in ${daysUntilSettled} day${daysUntilSettled === 1 ? "" : "s"}`}
-                </div>
-                <div className="teCharmSettleTrack">
-                  <div
-                    className="teCharmSettleFill"
-                    style={{ width: `${settleProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Fading warning */}
-            {charm.isFading && (
-              <div className="teCharmFadingBar">
-                This memory will begin to fade in {charm.fadingInDays} day{charm.fadingInDays === 1 ? "" : "s"}.
-                Visit the Arcane Emporium to extend its life.
-              </div>
-            )}
-
-            {/* Expired notice */}
-            {charm.isExpired && (
-              <div className="teCharmFadingBar teCharmFadingBar--expired">
-                This memory has faded beyond recall.
-              </div>
-            )}
           </details>
 
           {/* Manage / Purchase */}

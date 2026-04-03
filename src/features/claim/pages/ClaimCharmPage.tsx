@@ -221,7 +221,7 @@ export function ClaimCharmPage() {
     const base: Step[] = ["welcome"];
     if (needsProfile) base.push("profile");
     if (needsUla) base.push("ula");
-    base.push("memoryType", "details", "upload", "protection");
+    base.push("memoryType", "upload", "details", "protection");
     if (authMode === "glyph") base.push("glyphSelect");
     base.push("done");
     return base;
@@ -842,7 +842,7 @@ export function ClaimCharmPage() {
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
-                      onClick={() => advanceTo("details")}
+                      onClick={() => advanceTo("upload")}
                       disabled={busy}
                       type="button"
                     >
@@ -867,7 +867,7 @@ export function ClaimCharmPage() {
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
-                      onClick={() => advanceTo("upload")}
+                      onClick={() => advanceTo("protection")}
                       disabled={busy}
                       type="button"
                     >
@@ -1062,7 +1062,7 @@ export function ClaimCharmPage() {
                 <div className="teActionsRow">
                   <button
                     className="teBtn teBtnPrimary teBtnWide"
-                    onClick={() => advanceTo("protection")}
+                    onClick={() => advanceTo("details")}
                     disabled={files.length === 0 || videoChecking}
                     type="button"
                   >

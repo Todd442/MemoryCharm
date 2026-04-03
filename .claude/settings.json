@@ -19,7 +19,9 @@
       "Bash(gh issue:*)",
       "Bash(gh repo:*)",
       "Bash(gh project:*)",
-      "Bash(func --version)"
+      "Bash(func --version)",
+      "Bash(gh api:*)",
+      "Bash(az webapp:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\Downloads",
