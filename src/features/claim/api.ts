@@ -127,13 +127,19 @@ export function uploadToSignedUrl(
   url: string,
   file: File,
   contentType: string,
-  onProgress?: (pct: number) => void
+  onProgress?: (pct: number) => void,
+  extraHeaders?: Record<string, string>
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", url);
     xhr.setRequestHeader("Content-Type", contentType);
     xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");
+    if (extraHeaders) {
+      for (const [key, value] of Object.entries(extraHeaders)) {
+        xhr.setRequestHeader(key, value);
+      }
+    }
 
     if (onProgress) {
       xhr.upload.onprogress = (e) => {
@@ -201,7 +207,9 @@ export async function uploadCharm(
         entry.azureUploadUrl, file, contentType, reportProgress(i)
       );
       const r2Upload = (entry.r2UploadUrl && !skipR2)
-        ? uploadToSignedUrl(entry.r2UploadUrl, file, contentType)
+        ? uploadToSignedUrl(entry.r2UploadUrl, file, contentType, undefined, {
+            "Cache-Control": "public, max-age=31536000, immutable",
+          })
         : Promise.resolve();
       return Promise.all([azureUpload, r2Upload]);
     }

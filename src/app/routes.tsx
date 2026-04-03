@@ -17,6 +17,7 @@ import { PlainTermsPage } from "../features/legal/pages/PlainTermsPage";
 import { TermsAcceptPage } from "../features/legal/pages/TermsAcceptPage";
 import { FaqPage } from "../features/home/pages/FaqPage";
 import { NotFoundPage } from "../features/home/pages/NotFoundPage";
+import { StorePage } from "../features/store/pages/StorePage";
 import { StatusProvider } from "../app/providers/StatusProvider";
 
 
@@ -97,6 +98,7 @@ export const router = createBrowserRouter([
 
       // Claim flow — rendered immediately (no auth gate); ClaimCharmPage
       // handles the unauthenticated welcome screen and triggers login on user action.
+      { path: "/store", element: <StorePage /> },
       { path: "/claim/:code", element: <ClaimCharmPage /> },
       { path: "/test/scroll", element: <ScrollTestPage /> },
     ],

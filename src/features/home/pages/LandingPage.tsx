@@ -4,6 +4,7 @@ import { useMsal } from "@azure/msal-react";
 import { InteractionStatus } from "@azure/msal-browser";
 
 import { loginRequest } from "../../../app/auth/msalConfig";
+import { postWaitlist } from "../api";
 import { LandingHelix, type HelixCard } from "../components/LandingHelix";
 import { NebulaBackground } from "../../playback/components/NebulaBackground";
 
@@ -62,6 +63,7 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistWorking, setWaitlistWorking] = useState(false);
 
   const isAuthed  = accounts.length > 0;
   const working   = inProgress !== InteractionStatus.None;
@@ -79,10 +81,18 @@ export function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  function handleWaitlist(e: React.FormEvent) {
+  async function handleWaitlist(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: wire to POST /api/waitlist
-    setWaitlistDone(true);
+    setWaitlistWorking(true);
+    try {
+      await postWaitlist(waitlistEmail);
+      setWaitlistDone(true);
+    } catch {
+      // Fail silently — confirm anyway so we don't block the user
+      setWaitlistDone(true);
+    } finally {
+      setWaitlistWorking(false);
+    }
   }
 
   async function handleSignIn() {
@@ -407,8 +417,8 @@ export function LandingPage() {
                         value={waitlistEmail}
                         onChange={e => setWaitlistEmail(e.target.value)}
                       />
-                      <button className="lp-cta-btn lp-cta-btn--ghost" type="submit">
-                        Notify Me
+                      <button className="lp-cta-btn lp-cta-btn--ghost" type="submit" disabled={waitlistWorking}>
+                        {waitlistWorking ? "Saving…" : "Notify Me"}
                       </button>
                     </form>
                   )}
