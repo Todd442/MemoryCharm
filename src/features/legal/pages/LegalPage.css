@@ -279,3 +279,9 @@
 }
 
 .faq-item-body a:hover { color: rgba(210, 170, 110, 1); }
+
+.faq-item-ref {
+  font-size: var(--fs-small);
+  opacity: 0.60;
+  margin-top: 4px !important;
+}

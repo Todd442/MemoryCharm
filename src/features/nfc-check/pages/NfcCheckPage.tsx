@@ -137,6 +137,9 @@ export function NfcCheckPage() {
             {/* STEP: DETECT */}
             {step === "detect" && (
               <div className="teCardBody">
+                <div className="teNfcDesktopNote">
+                  This tool requires a mobile device. NFC is not available on desktop browsers — if you're on a desktop, the check will confirm that immediately.
+                </div>
                 <div className="teNfcDetecting">
                   <div className="teNfcSpinner" />
                   <div className="teHint">Reading your device\u2026</div>

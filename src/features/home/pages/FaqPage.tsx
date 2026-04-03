@@ -156,6 +156,11 @@ export function FaqPage() {
               The constraint is part of the design. Choosing one clip, one collection, or one recording
               — and choosing it well — is what gives a charm its meaning.
             </p>
+            <p className="faq-item-ref">
+              For full details, see our{" "}
+              <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>Terms of Service</a>
+              {" "}§6.
+            </p>
           </div>
         </details>
 
@@ -170,6 +175,11 @@ export function FaqPage() {
               After 14 days, the media seals. The title and description remain editable, but the
               underlying file does not change. That's intentional — a Memory Charm is meant to
               preserve a moment, not serve as an endlessly revised cloud folder.
+            </p>
+            <p className="faq-item-ref">
+              For full details, see our{" "}
+              <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>Terms of Service</a>
+              {" "}§8.
             </p>
           </div>
         </details>
@@ -186,6 +196,11 @@ export function FaqPage() {
               If you'd like a small layer of intentional access before the memory reveals itself,
               some charm plans allow you to enable a glyph — a brief visual step the viewer completes
               before the memory opens. It isn't a password; it's a pause.
+            </p>
+            <p className="faq-item-ref">
+              For full details, see our{" "}
+              <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>Terms of Service</a>
+              {" "}§10.
             </p>
           </div>
         </details>
@@ -213,6 +228,11 @@ export function FaqPage() {
               Throughout the hosting period, your original uploaded file is kept on hand so you're
               never locked out of what you gave us.
             </p>
+            <p className="faq-item-ref">
+              For full details, see our{" "}
+              <a href="/terms" onClick={e => { e.preventDefault(); nav("/terms"); }}>Terms of Service</a>
+              {" "}§7.
+            </p>
           </div>
         </details>
 
@@ -227,6 +247,82 @@ export function FaqPage() {
             <p>
               If you have a question that isn't answered here, reach out — we're a small operation
               and we read every message.
+            </p>
+          </div>
+        </details>
+
+        {/* ── Additional questions from beta testing ──────────────────── */}
+        <details className="faq-item">
+          <summary>How do I load a memory onto my charm?</summary>
+          <div className="faq-item-body">
+            <p>
+              The entire process happens in your browser — no app to download, no software to install.
+            </p>
+            <ol>
+              <li><strong>Tap the charm</strong> with your phone to open the activation page.</li>
+              <li><strong>Create an account</strong> and claim ownership of the charm.</li>
+              <li><strong>Upload your memory</strong> — a video, a set of photos, or an audio recording.</li>
+              <li><strong>Confirm and seal.</strong> The memory is now bound to the charm.</li>
+            </ol>
+            <p>
+              You have 14 days from activation to upload or replace the media. Upload time depends
+              on your file size and connection speed — most uploads complete in under a minute.
+            </p>
+          </div>
+        </details>
+
+        <details className="faq-item">
+          <summary>Can multiple charms share the same memory?</summary>
+          <div className="faq-item-body">
+            <p>
+              Not currently — each charm holds its own independent memory. If you're thinking of
+              an event like a wedding where many guests would tap for the same content, each person
+              would need their own charm with its own upload.
+            </p>
+            <p>
+              We're evaluating the ability to link multiple charms to a single shared memory as a
+              future capability — it's a use case we're actively thinking about.
+            </p>
+          </div>
+        </details>
+
+        <details className="faq-item">
+          <summary>What happens if my charm is lost or stolen?</summary>
+          <div className="faq-item-body">
+            <p>
+              Your memory and account are independent of the physical charm. Losing the charm doesn't
+              delete the memory or require you to cancel anything — the content remains safely in your
+              account.
+            </p>
+            <p>
+              If you're concerned about someone else accessing the memory through the lost charm,
+              contact support and we can deactivate that charm's link. The memory stays in your
+              account and remains intact.
+            </p>
+            <p>
+              In a future version, we plan to offer the ability to purchase a replacement charm and
+              reconnect it to your existing memory, so a lost charm doesn't mean a lost moment.
+            </p>
+          </div>
+        </details>
+
+        <details className="faq-item">
+          <summary>Can someone clone my charm with a Flipper Zero or NFC reader?</summary>
+          <div className="faq-item-body">
+            <p>
+              Yes — NFC tags are readable by any compatible device, by design. That's what allows
+              any phone to tap the charm without an app or pairing step.
+            </p>
+            <p>
+              Cloning the physical tag gives someone the same URL the charm opens — and nothing more.
+              The memory itself is protected on the server side: the URL contains a token that controls
+              access, and that token lives on our servers, not on the chip. Copying the chip's data
+              is the equivalent of photographing the URL — it opens exactly what a normal tap would.
+            </p>
+            <p>
+              If you'd like an extra layer of intentional friction before the memory reveals itself,
+              the glyph option provides that — a brief visual step the viewer must complete before
+              the memory opens.
             </p>
           </div>
         </details>

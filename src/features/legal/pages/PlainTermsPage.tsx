@@ -76,7 +76,7 @@ export function PlainTermsPage() {
 
         <section className="legal-section">
           <h2>Can a Frozen Memory Be Reopened?</h2>
-          <p>Possibly — but not automatically.</p>
+          <p>No — not by default. As a rare, discretionary paid option we may offer temporary reopening, but there is no built-in right to do so.</p>
           <p>At our sole discretion, we may offer a paid option to temporarily reopen editing.</p>
           <p>This is:</p>
           <ul>

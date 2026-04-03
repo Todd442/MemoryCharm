@@ -11,6 +11,16 @@
   font-family: "Cinzel", serif;
 }
 
+/* Desktop disclaimer shown during detection */
+.teNfcDesktopNote {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: rgba(243, 231, 207, 0.55);
+  text-align: center;
+  padding: 0 8px 20px;
+  line-height: 1.5;
+}
+
 /* Detection spinner */
 .teNfcDetecting {
   display: flex;
