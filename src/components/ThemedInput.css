@@ -48,6 +48,18 @@
   opacity: 0.60;
 }
 
+.teFieldError {
+  margin-top: 5px;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: #ff7070;
+}
+
+.teFieldInput--error {
+  /* subtle red glow when inside the standalone input (not bgWrap) */
+  border-color: rgba(255, 100, 100, 0.55) !important;
+}
+
 /* Background-image text input bar */
 .teField--bgWrap {
   position: relative;

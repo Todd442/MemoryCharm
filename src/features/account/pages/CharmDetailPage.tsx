@@ -9,6 +9,7 @@ import { configureCharm } from "../../claim/api";
 import type { UserCharmDetail } from "../api";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
 import { useStatus } from "../../../app/providers/StatusProvider";
+import { useCharmNav } from "../../../app/providers/CharmNavProvider";
 import { ThemedInput } from "../../../components/ThemedInput";
 import { MemoryDetailsFields } from "../../claim/pages/ClaimCharmPage";
 import { ImageStrip } from "../../../components/ImageStrip";
@@ -22,6 +23,7 @@ export function CharmDetailPage() {
   const { code } = useParams<{ code: string }>();
   const { inProgress } = useMsal();
   const { setStatus } = useStatus();
+  const { setCanOpenCharm } = useCharmNav();
   const working = inProgress !== InteractionStatus.None;
 
   const [loading, setLoading] = useState(true);
@@ -70,6 +72,7 @@ export function CharmDetailPage() {
       try {
         const detail = await getCharmDetail(code!);
         setCharm(detail);
+        setCanOpenCharm(detail.status === "active");
         {
           const fs = detail.memoryType === "image" ? (detail.files ?? []) : [];
           setServerUrls(fs.map((f: any) => f.url));
@@ -89,6 +92,7 @@ export function CharmDetailPage() {
       }
     }
     load();
+    return () => setCanOpenCharm(false);
   }, [code]);
 
   function handleAuthModeChange(mode: "none" | "glyph") {
@@ -379,17 +383,6 @@ export function CharmDetailPage() {
               {msg}
             </div>
           )}
-
-          {/* View Charm shortcut */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-            <button
-              className="teBtn teBtnSm teBtnGhost"
-              onClick={() => nav(`/c/${encodeURIComponent(charm.charmId)}`, { state: { isOwner: true } })}
-              type="button"
-            >
-              View Charm &#8594;
-            </button>
-          </div>
 
           {/* Status banners — surfaced above edit sections */}
           {charm.firstFinalizedAt && (

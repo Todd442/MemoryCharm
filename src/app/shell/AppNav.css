@@ -104,12 +104,30 @@
   transition: filter 0.2s, opacity 0.2s;
 }
 
-.te-nav__slot.is-dim .te-nav__icon {
+.te-nav__slot.is-dim .te-nav__icon,
+.te-nav__slot:disabled .te-nav__icon {
   opacity: 0.28;
 }
 
 .te-nav__slot.is-active .te-nav__icon {
   filter: sepia(100%) saturate(260%) hue-rotate(8deg) brightness(1.35) drop-shadow(0 0 6px rgba(200, 160, 64, 0.70));
+}
+
+/* ── inline SVG icon ─────────────────────────────────────── */
+.te-nav__icon--svg {
+  width: 52px;
+  height: 52px;
+  color: inherit;
+  transition: color 0.2s, filter 0.2s;
+}
+
+.te-nav__slot.is-active .te-nav__icon--svg {
+  filter: drop-shadow(0 0 6px rgba(200, 160, 64, 0.70));
+}
+
+.te-nav__slot.is-dim .te-nav__icon--svg,
+.te-nav__slot:disabled .te-nav__icon--svg {
+  opacity: 0.28;
 }
 
 /* ── unicode / text icon (used for Charms star) ─────────── */
@@ -125,7 +143,8 @@
   transition: color 0.2s;
 }
 
-.te-nav__slot.is-dim .te-nav__icon--glyph {
+.te-nav__slot.is-dim .te-nav__icon--glyph,
+.te-nav__slot:disabled .te-nav__icon--glyph {
   opacity: 0.28;
 }
 
@@ -141,6 +160,11 @@
   font-size: 19px;
   white-space: nowrap;
   line-height: 1;
+}
+
+.te-nav__slot.is-dim .te-nav__label,
+.te-nav__slot:disabled .te-nav__label {
+  opacity: 0.28;
 }
 
 /* ── centre medallion (replaces Home icon) ───────────────── */

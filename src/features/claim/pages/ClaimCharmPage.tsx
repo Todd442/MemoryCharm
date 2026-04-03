@@ -12,6 +12,8 @@ import { entryByCode } from "../../playback/api";
 import { inspectVideoFile } from "../../playback/utils/codecDetection";
 import { loginRequest } from "../../../app/auth/msalConfig";
 import { useStatus } from "../../../app/providers/StatusProvider";
+import { useCharmNav } from "../../../app/providers/CharmNavProvider";
+import { formatPhone, isValidPhone } from "../../../utils/phoneUtils";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
 
 import "./ClaimCharmPage.css";
@@ -181,6 +183,7 @@ export function ClaimCharmPage() {
 
   const { instance, accounts, inProgress } = useMsal();
   const { setStatus } = useStatus();
+  const { setCanOpenCharm } = useCharmNav();
 
   const isAuthed = accounts.length > 0;
   const me = accounts[0] ?? null;
@@ -214,6 +217,12 @@ export function ClaimCharmPage() {
   // Scroll back to top whenever the step changes
   useEffect(() => {
     scrollAreaRef.current?.scrollTo({ top: 0, behavior: "instant" });
+  }, [step]);
+
+  // Signal AppNav whether the charm is openable (only after sealing)
+  useEffect(() => {
+    setCanOpenCharm(step === "done");
+    return () => setCanOpenCharm(false);
   }, [step]);
 
   // Dynamic step list — always starts with welcome, then profile/ula only if needed.
@@ -292,6 +301,7 @@ export function ClaimCharmPage() {
     email: "",
     cellNumber: "",
   });
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // Once authed, check whether the charm is already active (redirect to playback)
   // and whether this account already has a profile (skip profile step if so).
@@ -749,16 +759,27 @@ export function ClaimCharmPage() {
                     { key: "lastName"   as const, label: "Last Name",             placeholder: "e.g., Blackthorne",         hint: "" },
                     { key: "address"    as const, label: "Mailing Address",       placeholder: "e.g., 123 Main Street",     hint: "Used for warranty fulfilment, legal notices, and ownership verification." },
                     { key: "email"      as const, label: "Email",                 placeholder: "e.g., you@email.com",       hint: "We'll send a confirmation to this address." },
-                    { key: "cellNumber" as const, label: "Phone",                 placeholder: "e.g., +1 555 012 3456",    hint: "Used for ownership verification and as a backup contact for critical service notices." },
+                    { key: "cellNumber" as const, label: "Phone",                 placeholder: "e.g., +1 555 123 4567",     hint: "Used for ownership verification and as a backup contact for critical service notices." },
                   ] as const).map(({ key, label, placeholder, hint }) => (
                     <ThemedInput
                       key={key}
                       label={label}
                       value={profileData[key]}
-                      onChange={(v) => setProfileData((prev) => ({ ...prev, [key]: v }))}
+                      onChange={(v) => {
+                        if (key === "cellNumber") {
+                          const formatted = formatPhone(v);
+                          setProfileData((prev) => ({ ...prev, cellNumber: formatted }));
+                          setPhoneError(formatted && !isValidPhone(formatted) ? "Enter a valid phone number with country code (e.g., +1 555 123 4567)" : null);
+                        } else {
+                          setProfileData((prev) => ({ ...prev, [key]: v }));
+                        }
+                      }}
                       disabled={busy}
                       placeholder={placeholder}
-                      hint={hint || undefined}
+                      hint={key === "cellNumber" ? undefined : (hint || undefined)}
+                      error={key === "cellNumber" ? (phoneError ?? undefined) : undefined}
+                      type={key === "cellNumber" ? "tel" : undefined}
+                      inputMode={key === "cellNumber" ? "tel" : undefined}
                     />
                   ))}
 
@@ -766,7 +787,7 @@ export function ClaimCharmPage() {
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
                       onClick={doSaveProfile}
-                      disabled={busy || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim()}
+                      disabled={busy || !profileData.firstName.trim() || !profileData.lastName.trim() || !profileData.email.trim() || !!phoneError || !isValidPhone(profileData.cellNumber)}
                       type="button"
                     >
                       {busy ? "Saving…" : "Continue"}
@@ -1135,15 +1156,6 @@ export function ClaimCharmPage() {
                   </div>
                 )}
 
-                <div className="tePills tePillsWrap" style={{ marginTop: 14 }}>
-                  <button
-                    className="tePill"
-                    onClick={() => nav(`/c/${encodeURIComponent(code)}`, { replace: true, state: { isOwner: true } })}
-                    type="button"
-                  >
-                    View Charm
-                  </button>
-                </div>
               </div>
             )}
         </div>

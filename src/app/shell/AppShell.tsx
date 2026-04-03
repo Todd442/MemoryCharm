@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { FixedStage } from "./FixedStage";
 import { StatusProvider } from "../providers/StatusProvider";
+import { CharmNavProvider } from "../providers/CharmNavProvider";
 import { StatusBar } from "./StatusBar";
 import { AppNav } from "./AppNav";
 import "./shell.css";
@@ -14,18 +15,20 @@ export function AppShell() {
 
         {/* Top / middle / bottom layout */}
         <StatusProvider>
-          <div className="te-layout">
-            <StatusBar />
+          <CharmNavProvider>
+            <div className="te-layout">
+              <StatusBar />
 
-            {/* This is the only scrolling area */}
-            <main className="te-scroll">
-              <Outlet />
-            </main>
+              {/* This is the only scrolling area */}
+              <main className="te-scroll">
+                <Outlet />
+              </main>
 
-            <footer className="te-commands">
-              <AppNav />
-            </footer>
-          </div>
+              <footer className="te-commands">
+                <AppNav />
+              </footer>
+            </div>
+          </CharmNavProvider>
         </StatusProvider>
       </div>
     </FixedStage>

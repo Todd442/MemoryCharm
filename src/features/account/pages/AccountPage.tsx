@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getUserMe, saveProfile, getUserCharms } from "../api";
 import type { UserProfile, UserCharmSummary } from "../api";
 import { useStatus } from "../../../app/providers/StatusProvider";
+import { formatPhone, isValidPhone } from "../../../utils/phoneUtils";
 import { ThemedInput } from "../../../components/ThemedInput";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .teBtn styles
 import "./AccountPage.css";
@@ -24,6 +25,7 @@ export function AccountPage() {
     email: "",
     cellNumber: "",
   });
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [charms, setCharms] = useState<UserCharmSummary[]>([]);
 
   useEffect(() => {
@@ -209,23 +211,34 @@ export function AccountPage() {
                 { key: "lastName"   as const, label: "Last Name",       placeholder: "e.g., Blackthorne",         hint: "" },
                 { key: "address"    as const, label: "Mailing Address", placeholder: "e.g., 123 Main Street",     hint: "Used for warranty fulfilment, legal notices, and ownership verification." },
                 { key: "email"      as const, label: "Email",           placeholder: "e.g., you@email.com",       hint: "We'll send a confirmation to this address." },
-                { key: "cellNumber" as const, label: "Phone",           placeholder: "e.g., +1 555 012 3456",    hint: "Used for ownership verification and as a backup contact for critical service notices." },
+                { key: "cellNumber" as const, label: "Phone",           placeholder: "e.g., +1 555 123 4567",     hint: "Used for ownership verification and as a backup contact for critical service notices." },
               ]).map(({ key, label, placeholder, hint }) => (
                 <ThemedInput
                   key={key}
                   label={label}
                   value={profile[key]}
-                  onChange={(v) => setProfile((p) => ({ ...p, [key]: v }))}
+                  onChange={(v) => {
+                    if (key === "cellNumber") {
+                      const formatted = formatPhone(v);
+                      setProfile((p) => ({ ...p, cellNumber: formatted }));
+                      setPhoneError(formatted && !isValidPhone(formatted) ? "Enter a valid phone number with country code (e.g., +1 555 123 4567)" : null);
+                    } else {
+                      setProfile((p) => ({ ...p, [key]: v }));
+                    }
+                  }}
                   disabled={busy}
                   placeholder={placeholder}
-                  hint={hint || undefined}
+                  hint={key === "cellNumber" ? undefined : (hint || undefined)}
+                  error={key === "cellNumber" ? (phoneError ?? undefined) : undefined}
+                  type={key === "cellNumber" ? "tel" : undefined}
+                  inputMode={key === "cellNumber" ? "tel" : undefined}
                 />
               ))}
               <div>
                 <button
                   className="teBtn teBtnPrimary"
                   onClick={handleSaveProfile}
-                  disabled={busy || !profile.firstName.trim() || !profile.lastName.trim() || !profile.email.trim()}
+                  disabled={busy || !profile.firstName.trim() || !profile.lastName.trim() || !profile.email.trim() || !!phoneError || !isValidPhone(profile.cellNumber)}
                   type="button"
                 >
                   {busy ? "Saving\u2026" : "Save Profile"}
