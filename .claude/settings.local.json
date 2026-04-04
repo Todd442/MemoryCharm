@@ -27,7 +27,13 @@
       "Bash(grep -c \"ba1dc3e7-4c7b-49c3-b526-dd06fa667a5b/Charm\" dist/assets/index-*.js)",
       "Bash(gh run list --limit 5 --repo Todd442/Mnemosyne)",
       "Bash(gh run view 22407688590 --repo Todd442/Mnemosyne)",
-      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:\\\\tmp\\\\search_all_dlls.ps1\")"
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:\\\\tmp\\\\search_all_dlls.ps1\")",
+      "Bash(npm install:*)",
+      "Read(//c/Program Files/Microsoft Visual Studio/**)",
+      "Read(//c/Users/appli/AppData/Local/**)",
+      "Bash(\"C:/Users/appli/AppData/Local/AzureFunctionsTools/Releases/4.123.0/cli_x64/func.exe\" --version)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\appli\\source\\repos\\Mnemosyne\\Mnemosyne.API"

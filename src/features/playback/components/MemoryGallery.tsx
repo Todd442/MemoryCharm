@@ -15,6 +15,10 @@ function truncateWords(text: string, max: number): string {
   return words.length <= max ? text : words.slice(0, max).join(" ") + "…";
 }
 
+function stripExt(name: string): string {
+  return name.replace(/\.[^/.]+$/, "");
+}
+
 function smoothstep(edge0: number, edge1: number, x: number) {
   const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
@@ -132,6 +136,8 @@ export function MemoryGallery(props: {
   const [selected, setSelected] = useState<number | null>(null);
   const [focusImgReady, setFocusImgReady] = useState(false);
   const [, setTick] = useState(0);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [immersive, setImmersive] = useState(false);
 
   const dimsRef        = useRef<Dims>(computeDims());
   const cardsRef       = useRef<CardState[]>(initCards(CARD_COUNT));
@@ -154,6 +160,19 @@ export function MemoryGallery(props: {
   const handleDismiss = useCallback(() => {
     setSelected(null);
     pausedRef.current = false;
+    setImmersive(false);
+    setSheetOpen(false);
+  }, []);
+
+  const toggleSheet = useCallback(() => {
+    setSheetOpen(s => !s);
+  }, []);
+
+  const toggleImmersive = useCallback(() => {
+    setImmersive(v => {
+      if (!v) setSheetOpen(false);
+      return !v;
+    });
   }, []);
 
   const handleNext = useCallback(() => {
@@ -288,7 +307,10 @@ export function MemoryGallery(props: {
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="pb-brand">
+            <div
+              className="pb-brand"
+              style={{ opacity: immersive ? 0 : 1, pointerEvents: immersive ? "none" : undefined, transition: "opacity 0.3s" }}
+            >
               <button
                 className="mg-focus__close"
                 onClick={handleDismiss}
@@ -299,7 +321,7 @@ export function MemoryGallery(props: {
               <span onClick={() => nav(isOwner && code ? `/account/charms/${encodeURIComponent(code)}` : "/")} style={{ cursor: "pointer" }}>
                 Memory Charm
               </span>
-              <FullscreenButton />
+              <FullscreenButton onToggle={toggleImmersive} />
             </div>
 
             <div className="mg-focus__media-wrap">
@@ -336,6 +358,46 @@ export function MemoryGallery(props: {
                 }
               </div>
             )}
+
+            <div
+              className="mg-info-wrap"
+              style={{
+                opacity: immersive ? 0 : 1,
+                pointerEvents: immersive ? "none" : undefined,
+                transition: "opacity 0.3s",
+              }}
+            >
+              <button
+                className="mg-info-bar"
+                onClick={memoryDescription ? toggleSheet : undefined}
+                aria-expanded={memoryDescription ? sheetOpen : undefined}
+                style={{ cursor: memoryDescription ? "pointer" : "default" }}
+              >
+                <span className="mg-info-bar__title">
+                  {memoryName ?? stripExt(files[selected!]?.name ?? "")}
+                </span>
+                {n > 1 && <span className="mg-info-bar__meta">{selected! + 1} / {n}</span>}
+                {memoryDescription && (
+                  <svg
+                    className={`mg-info-bar__chevron${sheetOpen ? " up" : ""}`}
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                )}
+              </button>
+              {memoryDescription && (
+                <div className={`mg-info-sheet${sheetOpen ? " open" : ""}`}>
+                  <p className="mg-info-sheet__desc">{memoryDescription}</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

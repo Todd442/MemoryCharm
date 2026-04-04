@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 /** Fullscreen toggle button — hidden on browsers that don't support the API (e.g. iOS Safari). */
-export function FullscreenButton() {
+export function FullscreenButton({ onToggle }: { onToggle?: () => void } = {}) {
   const [isFs, setIsFs] = useState(false);
 
   useEffect(() => {
@@ -13,6 +13,7 @@ export function FullscreenButton() {
   if (!document.fullscreenEnabled) return null;
 
   function toggle() {
+    onToggle?.();
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     } else {
