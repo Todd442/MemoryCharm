@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
