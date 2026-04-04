@@ -496,7 +496,7 @@ function PlaybackRenderer(props: {
 
   const brandDest = isOwner && code ? `/account/charms/${encodeURIComponent(code)}` : "/";
 
-  const brand = (
+  const makeBrand = (showFullscreen = true) => (
     <div
       className="pb-brand"
       style={{ opacity: immersive ? 0 : 1, pointerEvents: immersive ? "none" : undefined, transition: "opacity 0.3s" }}
@@ -511,7 +511,7 @@ function PlaybackRenderer(props: {
           <span>Memory Charm</span>
         )}
       </div>
-      <FullscreenButton onToggle={toggleImmersive} />
+      {showFullscreen && <FullscreenButton onToggle={toggleImmersive} />}
     </div>
   );
 
@@ -557,7 +557,7 @@ function PlaybackRenderer(props: {
     return (
       <>
         <div className={`pb-frame${hasBar ? " pb-frame--has-bar" : ""}`}>
-          {brand}
+          {makeBrand()}
           <VideoPlayer url={files[0].url} code={code} isOwner={isOwner} />
           {makeInfoBar()}
         </div>
@@ -567,27 +567,21 @@ function PlaybackRenderer(props: {
   }
 
   if (type === "audio") {
+    const hasBar = !!(memoryName || memoryDescription);
     return (
       <>
-        <div className="pb-frame pb-status">
-          <div
-            className={memoryName ? "pb-status-title pb-status-title--named" : "pb-status-title"}
-            onClick={() => nav(brandDest)}
-            style={{ cursor: "pointer" }}
-          >
-            {memoryName ? memoryName : "Memory Charm"}
+        <div className={`pb-frame${hasBar ? " pb-frame--has-bar" : ""}`}>
+          {makeBrand(false)}
+          <div className="pb-audio-wrap">
+            <svg viewBox="0 0 64 64" width="56" height="56" fill="none" aria-hidden="true" className="pb-audio-icon">
+              <circle cx="32" cy="32" r="31" stroke="rgba(210,170,110,0.3)" strokeWidth="1.5" />
+              <path d="M22 20h4l6 8 4-12 4 16 3-8h3" stroke="rgba(210,170,110,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="32" cy="42" r="6" stroke="rgba(210,170,110,0.5)" strokeWidth="1.5" />
+              <circle cx="32" cy="42" r="2" fill="rgba(210,170,110,0.6)" />
+            </svg>
+            <audio src={files[0].url} controls className="pb-audio-controls" />
           </div>
-          {memoryName && (
-            <div style={{ fontSize: "var(--fs-meta)", opacity: 0.5, letterSpacing: "0.15em", marginBottom: 10 }}>
-              Memory Charm
-            </div>
-          )}
-          <audio src={files[0].url} controls style={{ width: "100%", maxWidth: 400 }} />
-          {memoryDescription && (
-            <div className="pb-memory-desc pb-memory-desc--static" style={{ marginTop: 16 }}>
-              {memoryDescription}
-            </div>
-          )}
+          {makeInfoBar()}
         </div>
         <PwaInstallToast />
       </>
@@ -599,7 +593,7 @@ function PlaybackRenderer(props: {
     return (
       <>
         <div className="pb-frame">
-          {brand}
+          {makeBrand()}
           <img
             src={files[0].url}
             alt="Memory"
