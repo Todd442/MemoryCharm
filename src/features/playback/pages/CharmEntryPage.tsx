@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
@@ -376,7 +376,7 @@ function VideoPlayer({ url, code, isOwner }: { url: string; code?: string; isOwn
   const showOverlay = loading || buffering || error;
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", width: "100%" }}>
       {isOwner && code && triggerVisible && !showReport && (
         <button
           className="pb-report-trigger"
@@ -483,11 +483,24 @@ function PlaybackRenderer(props: {
   const { files, type, code, memoryName, memoryDescription, isOwner } = props;
   const nav = useNavigate();
   const [imgReady, setImgReady] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [immersive, setImmersive] = useState(false);
+
+  const toggleSheet = useCallback(() => setSheetOpen(s => !s), []);
+  const toggleImmersive = useCallback(() => {
+    setImmersive(v => {
+      if (!v) setSheetOpen(false);
+      return !v;
+    });
+  }, []);
 
   const brandDest = isOwner && code ? `/account/charms/${encodeURIComponent(code)}` : "/";
 
   const brand = (
-    <div className="pb-brand">
+    <div
+      className="pb-brand"
+      style={{ opacity: immersive ? 0 : 1, pointerEvents: immersive ? "none" : undefined, transition: "opacity 0.3s" }}
+    >
       <div className="pb-brand__title" onClick={() => nav(brandDest)} style={{ cursor: "pointer" }}>
         {memoryName ? (
           <>
@@ -498,21 +511,55 @@ function PlaybackRenderer(props: {
           <span>Memory Charm</span>
         )}
       </div>
-      <FullscreenButton />
+      <FullscreenButton onToggle={toggleImmersive} />
     </div>
   );
+
+  const makeInfoBar = () => (memoryName || memoryDescription) ? (
+    <div
+      className="mg-info-wrap"
+      style={{ opacity: immersive ? 0 : 1, pointerEvents: immersive ? "none" : undefined, transition: "opacity 0.3s" }}
+    >
+      <button
+        className="mg-info-bar"
+        onClick={memoryDescription ? toggleSheet : undefined}
+        aria-expanded={memoryDescription ? sheetOpen : undefined}
+        style={{ cursor: memoryDescription ? "pointer" : "default" }}
+      >
+        <span className="mg-info-bar__title">{memoryName ?? ""}</span>
+        {memoryDescription && (
+          <svg
+            className={`mg-info-bar__chevron${sheetOpen ? " up" : ""}`}
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        )}
+      </button>
+      {memoryDescription && (
+        <div className={`mg-info-sheet${sheetOpen ? " open" : ""}`}>
+          <p className="mg-info-sheet__desc">{memoryDescription}</p>
+        </div>
+      )}
+    </div>
+  ) : null;
 
   if (files.length === 0) return null;
 
   if (type === "video") {
+    const hasBar = !!(memoryName || memoryDescription);
     return (
       <>
-        <div className="pb-frame">
+        <div className={`pb-frame${hasBar ? " pb-frame--has-bar" : ""}`}>
           {brand}
           <VideoPlayer url={files[0].url} code={code} isOwner={isOwner} />
-          {memoryDescription && (
-            <div className="pb-memory-desc">{memoryDescription}</div>
-          )}
+          {makeInfoBar()}
         </div>
         <PwaInstallToast />
       </>
@@ -559,9 +606,7 @@ function PlaybackRenderer(props: {
             className={`pb-media${imgReady ? " pb-media--ready" : ""}`}
             onLoad={() => setImgReady(true)}
           />
-          {memoryDescription && (
-            <div className="pb-memory-desc">{memoryDescription}</div>
-          )}
+          {makeInfoBar()}
         </div>
         <PwaInstallToast />
       </>
