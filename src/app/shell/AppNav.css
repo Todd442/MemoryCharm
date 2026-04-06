@@ -106,7 +106,7 @@
 
 .te-nav__slot.is-dim .te-nav__icon,
 .te-nav__slot:disabled .te-nav__icon {
-  opacity: 0.28;
+  opacity: 0.55;
 }
 
 .te-nav__slot.is-active .te-nav__icon {
@@ -127,7 +127,7 @@
 
 .te-nav__slot.is-dim .te-nav__icon--svg,
 .te-nav__slot:disabled .te-nav__icon--svg {
-  opacity: 0.28;
+  opacity: 0.55;
 }
 
 /* ── unicode / text icon (used for Charms star) ─────────── */
@@ -164,7 +164,7 @@
 
 .te-nav__slot.is-dim .te-nav__label,
 .te-nav__slot:disabled .te-nav__label {
-  opacity: 0.28;
+  opacity: 0.55;
 }
 
 /* ── centre medallion (replaces Home icon) ───────────────── */
