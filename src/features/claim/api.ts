@@ -208,7 +208,7 @@ export async function uploadCharm(
       );
       const r2Upload = (entry.r2UploadUrl && !skipR2)
         ? uploadToSignedUrl(entry.r2UploadUrl, file, contentType, undefined, {
-            "Cache-Control": "public, max-age=31536000",
+            "Cache-Control": "public, max-age=31536000, immutable",
           })
         : Promise.resolve();
       return Promise.all([azureUpload, r2Upload]);
