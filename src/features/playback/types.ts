@@ -9,6 +9,7 @@ export type ContentFile = {
 export type EntryResponse =
   | { kind: "not_found" }
   | { kind: "expired" }
+  | { kind: "locked" }
   | { kind: "unclaimed"; code: string }
   | { kind: "claimed"; code: string; configured: boolean; authMode: EntryAuthMode; memoryType?: MemoryType; files?: ContentFile[]; attemptsLeft?: number; glyphs?: { id: string; name: string }[]; memoryName?: string; memoryDescription?: string; isOwner?: boolean };
 

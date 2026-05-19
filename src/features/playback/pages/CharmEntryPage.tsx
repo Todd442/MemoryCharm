@@ -95,7 +95,7 @@ export function CharmEntryPage() {
           return;
         }
 
-        if (entry.kind === "expired") {
+        if (entry.kind === "expired" || entry.kind === "locked") {
           setUi({ s: "ready", entry });
           return;
         }
@@ -218,6 +218,18 @@ export function CharmEntryPage() {
         <div className="pb-status-title">Memory Charm</div>
         <div className="pb-explain" style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
           This charm's memory has faded.
+        </div>
+      </div>
+    );
+  }
+
+  // Glyph lockout — temporary, not expiry
+  if (entry.kind === "locked") {
+    return (
+      <div className="pb-frame pb-status">
+        <div className="pb-status-title">Memory Charm</div>
+        <div className="pb-explain" style={{ fontSize: "var(--fs-label)", opacity: 0.9 }}>
+          Too many failed attempts. Please try again later.
         </div>
       </div>
     );

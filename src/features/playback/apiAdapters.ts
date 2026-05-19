@@ -61,8 +61,12 @@ export function toEntryResponse(
     return { kind: "not_found" };
   }
 
-  if (httpStatus === 403 || api.status === "locked" || api.status === "expired") {
+  if (api.status === "expired") {
     return { kind: "expired" };
+  }
+
+  if (httpStatus === 403 || api.status === "locked") {
+    return { kind: "locked" };
   }
 
   if (api.status === "unconfigured") {
