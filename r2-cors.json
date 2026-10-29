@@ -2,7 +2,7 @@
   "rules": [
     {
       "allowed": {
-        "origins": ["https://memorycharm.todd-ef7.workers.dev", "http://localhost:5173"],
+        "origins": ["https://memorycharm.todd-ef7.workers.dev", "http://localhost:5173", "https://localhost:5173"],
         "methods": ["GET", "PUT", "HEAD"],
         "headers": ["*"]
       },

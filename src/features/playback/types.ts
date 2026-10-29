@@ -4,6 +4,8 @@ export type EntryAuthMode = "none" | "glyph";
 export type ContentFile = {
   url: string;
   name: string;
+  /** Azure SAS URL to use if `url` (R2) fails to load. */
+  fallbackUrl?: string;
 };
 
 export type EntryResponse =

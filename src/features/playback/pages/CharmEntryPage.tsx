@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { entryByCode, entryByToken, getPlaybackUrls, verifyGlyph } from "../api";
 import type { EntryResponse, ContentFile } from "../types";
@@ -8,6 +8,7 @@ import { FullscreenButton } from "../components/FullscreenButton";
 import { ReportIssueDialog } from "../components/ReportIssueDialog";
 import { usePwaInstall } from "../../../app/hooks/usePwaInstall";
 import { track } from "../../../lib/analytics";
+import { tryFallback, fallbackOnError } from "../../../lib/mediaFallback";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill styles
 
 type UiState =
@@ -300,7 +301,7 @@ export function CharmEntryPage() {
 /** Video player with magical buffering / error overlay.
  *  While buffering, the display cycles: magical phrase (3.8 s) → twinkle out
  *  → tech phrase (2.2 s) → twinkle back. After 7 s the magical text upgrades. */
-function VideoPlayer({ url, code, isOwner }: { url: string; code?: string; isOwner?: boolean }) {
+function VideoPlayer({ url, fallbackUrl, code, isOwner }: { url: string; fallbackUrl?: string; code?: string; isOwner?: boolean }) {
   const [loading, setLoading]         = useState(true);   // initial load until canPlay
   const [buffering, setBuffering]     = useState(false);  // mid-playback stall
   const [showTech, setShowTech]       = useState(false);
@@ -370,7 +371,9 @@ function VideoPlayer({ url, code, isOwner }: { url: string; code?: string; isOwn
     setSlowNetwork(false);
   };
 
-  const handleError = () => {
+  const handleError = (e: SyntheticEvent<HTMLVideoElement>) => {
+    // Primary (R2) failed — retry from Azure before showing the error overlay
+    if (tryFallback(e.currentTarget, fallbackUrl)) return;
     cycleActive.current = false;
     clearAll();
     setLoading(false);
@@ -573,7 +576,7 @@ function PlaybackRenderer(props: {
       <>
         <div className={`pb-frame${hasBar ? " pb-frame--has-bar" : ""}`}>
           {makeBrand()}
-          <VideoPlayer url={files[0].url} code={code} isOwner={isOwner} />
+          <VideoPlayer url={files[0].url} fallbackUrl={files[0].fallbackUrl} code={code} isOwner={isOwner} />
           {makeInfoBar()}
         </div>
         <PwaInstallToast />
@@ -594,7 +597,7 @@ function PlaybackRenderer(props: {
               <circle cx="32" cy="42" r="6" stroke="rgba(210,170,110,0.5)" strokeWidth="1.5" />
               <circle cx="32" cy="42" r="2" fill="rgba(210,170,110,0.6)" />
             </svg>
-            <audio src={files[0].url} controls className="pb-audio-controls" />
+            <audio src={files[0].url} onError={fallbackOnError(files[0].fallbackUrl)} controls className="pb-audio-controls" />
           </div>
           {makeInfoBar()}
         </div>
@@ -614,6 +617,7 @@ function PlaybackRenderer(props: {
             alt="Memory"
             className={`pb-media${imgReady ? " pb-media--ready" : ""}`}
             onLoad={() => setImgReady(true)}
+            onError={fallbackOnError(files[0].fallbackUrl)}
           />
           {makeInfoBar()}
         </div>

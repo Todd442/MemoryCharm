@@ -173,7 +173,8 @@ function proxyAzuriteUrl(url: string): string {
  * Full upload flow: get signed URLs for N files, upload all in parallel,
  * then finalize the charm (sets status to "active").
  *
- * In dev mode (VITE_DEV_TOKEN set), proxies Azure through Vite and skips R2.
+ * In dev mode (VITE_DEV_TOKEN set), proxies Azure through Vite and skips R2
+ * (the local API runs with Storage:SkipR2, so it issues no R2 URLs).
  */
 export async function uploadCharm(
   code: string,
@@ -184,7 +185,6 @@ export async function uploadCharm(
 ): Promise<{ ok: true; code: string }> {
   const urlsResponse = await getUploadUrls(code, contentType, files.length, startIndex);
   const isDev = !!import.meta.env.VITE_DEV_TOKEN;
-  const skipR2 = !!import.meta.env.VITE_SKIP_R2;
 
   // Track per-file progress and aggregate
   const fileProgress = new Array(files.length).fill(0);
@@ -206,7 +206,9 @@ export async function uploadCharm(
       const azureUpload = uploadToSignedUrl(
         entry.azureUploadUrl, file, contentType, reportProgress(i)
       );
-      const r2Upload = (entry.r2UploadUrl && !skipR2)
+      // The backend only issues r2UploadUrl when R2 is configured, and finalize
+      // then requires the R2 copy — so it must never be skipped here.
+      const r2Upload = entry.r2UploadUrl
         ? uploadToSignedUrl(entry.r2UploadUrl, file, contentType, undefined, {
             "Cache-Control": "public, max-age=31536000, immutable",
           })

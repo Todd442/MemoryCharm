@@ -959,6 +959,8 @@ export function ClaimCharmPage() {
                     </div>
                   )}
 
+                  {err && <div className="teClaimError">{err}</div>}
+
                   <div className="teActionsRow">
                     <button
                       className="teBtn teBtnPrimary teBtnWide"
@@ -1023,6 +1025,8 @@ export function ClaimCharmPage() {
                       )}
                     </div>
                   )}
+
+                  {err && <div className="teClaimError">{err}</div>}
 
                   <div className="teActionsRow">
                     <button

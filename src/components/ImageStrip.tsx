@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { fallbackOnError } from "../lib/mediaFallback";
 import "./ImageStrip.css";
+
+// A server-side photo: primary (R2) URL plus optional Azure fallback
+export type StripImage = { url: string; fallbackUrl?: string };
 
 // Editable mode — shows existing server photos + newly staged files in one grid
 interface EditableProps {
@@ -13,14 +17,14 @@ interface EditableProps {
   accept?: string;
   error?: string | null;
   // Existing server-side photos shown at the front of the grid
-  serverUrls?: string[];
+  serverUrls?: StripImage[];
   onRemoveServer?: (index: number) => void;
 }
 
 // Read-only mode — settled/expired charms, no controls
 interface ReadOnlyProps {
   readOnly: true;
-  urls: string[];
+  urls: StripImage[];
 }
 
 type ImageStripProps = EditableProps | ReadOnlyProps;
@@ -45,9 +49,9 @@ export function ImageStrip(props: ImageStripProps) {
     return (
       <div className="isWrap">
         <div className="isStrip">
-          {urls.map((url, i) => (
+          {urls.map((img, i) => (
             <div key={i} className="isThumb">
-              <img src={url} alt={`Photo ${i + 1}`} className="isThumbImg" />
+              <img src={img.url} onError={fallbackOnError(img.fallbackUrl)} alt={`Photo ${i + 1}`} className="isThumbImg" />
             </div>
           ))}
         </div>
@@ -70,9 +74,9 @@ export function ImageStrip(props: ImageStripProps) {
     <div className="isWrap">
       <div className="isStrip">
         {/* Existing server photos */}
-        {serverUrls.map((url, i) => (
+        {serverUrls.map((img, i) => (
           <div key={`s-${i}`} className="isThumb">
-            <img src={url} alt={`Photo ${i + 1}`} className="isThumbImg" />
+            <img src={img.url} onError={fallbackOnError(img.fallbackUrl)} alt={`Photo ${i + 1}`} className="isThumbImg" />
             {onRemoveServer && (
               <button
                 className="isThumbRemove"

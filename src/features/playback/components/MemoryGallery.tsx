@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react
 import { useNavigate } from "react-router-dom";
 import type { ContentFile } from "../types";
 import { FullscreenButton } from "./FullscreenButton";
+import { fallbackOnError } from "../../../lib/mediaFallback";
 import "./MemoryGallery.css";
 
 // ── Helix animation constants ─────────────────────────────────────────────────
@@ -292,6 +293,7 @@ export function MemoryGallery(props: {
                 draggable={false}
                 fetchPriority="high"
                 onLoad={(e) => handleImageLoad(fileIdx, e)}
+                onError={fallbackOnError(file.fallbackUrl)}
               />
             </button>
           );
@@ -335,6 +337,7 @@ export function MemoryGallery(props: {
                 alt={`Memory ${selected! + 1} of ${n}`}
                 className={`pb-media${focusImgReady ? " pb-media--ready" : ""}`}
                 onLoad={() => { focusLoadedRef.current.add(selected!); setFocusImgReady(true); }}
+                onError={fallbackOnError(files[selected!].fallbackUrl)}
               />
               {n > 1 && (
                 <button className="mg-focus__arrow mg-focus__arrow--next" onClick={handleNext} aria-label="Next image">

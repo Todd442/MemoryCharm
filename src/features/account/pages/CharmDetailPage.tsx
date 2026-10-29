@@ -12,7 +12,8 @@ import { useStatus } from "../../../app/providers/StatusProvider";
 import { useCharmNav } from "../../../app/providers/CharmNavProvider";
 import { ThemedInput } from "../../../components/ThemedInput";
 import { MemoryDetailsFields } from "../../claim/pages/ClaimCharmPage";
-import { ImageStrip } from "../../../components/ImageStrip";
+import { ImageStrip, type StripImage } from "../../../components/ImageStrip";
+import { fallbackOnError } from "../../../lib/mediaFallback";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill, .teBtn styles + .teTextarea
 import "./CharmDetailPage.css";
 
@@ -51,7 +52,7 @@ export function CharmDetailPage() {
   // serverUrls — display URLs (presigned, may change each load, used for rendering only)
   // serverSlots — stable 0-based positions in the original file list (used as keepIndices for trim)
   // Both arrays are always the same length and kept in sync.
-  const [serverUrls, setServerUrls] = useState<string[]>([]);
+  const [serverUrls, setServerUrls] = useState<StripImage[]>([]);
   const [serverSlots, setServerSlots] = useState<number[]>([]);
 
   // Memory type editing state
@@ -75,7 +76,7 @@ export function CharmDetailPage() {
         setCanOpenCharm(detail.status === "active");
         {
           const fs = detail.memoryType === "image" ? (detail.files ?? []) : [];
-          setServerUrls(fs.map((f: any) => f.url));
+          setServerUrls(fs.map((f) => ({ url: f.url, fallbackUrl: f.fallbackUrl })));
           setServerSlots(fs.map((_: any, i: number) => i));
         }
         setEditAuthMode(detail.authMode as "none" | "glyph");
@@ -198,7 +199,7 @@ export function CharmDetailPage() {
         setEditMemoryType(detail.memoryType as MemoryType | null);
         {
           const fs = detail.memoryType === "image" ? (detail.files ?? []) : [];
-          setServerUrls(fs.map((f: any) => f.url));
+          setServerUrls(fs.map((f) => ({ url: f.url, fallbackUrl: f.fallbackUrl })));
           setServerSlots(fs.map((_: any, i: number) => i));
         }
       } catch (e: any) {
@@ -259,7 +260,7 @@ export function CharmDetailPage() {
       setEditMemoryType(detail.memoryType as MemoryType | null);
       {
         const fs = detail.memoryType === "image" ? (detail.files ?? []) : [];
-        setServerUrls(fs.map((f: any) => f.url));
+        setServerUrls(fs.map((f) => ({ url: f.url, fallbackUrl: f.fallbackUrl })));
         setServerSlots(fs.map((_: any, i: number) => i));
       }
     } catch (e: any) {
@@ -420,10 +421,10 @@ export function CharmDetailPage() {
             {charm.files && charm.files.length > 0 && charm.memoryType && charm.memoryType !== "image" && (
               <div style={{ marginBottom: 14 }}>
                 {charm.memoryType === "video" && (
-                  <video src={charm.files[0].url} controls playsInline className="tePreviewMedia" />
+                  <video src={charm.files[0].url} onError={fallbackOnError(charm.files[0].fallbackUrl)} controls playsInline className="tePreviewMedia" />
                 )}
                 {charm.memoryType === "audio" && (
-                  <audio src={charm.files[0].url} controls style={{ width: "100%" }} />
+                  <audio src={charm.files[0].url} onError={fallbackOnError(charm.files[0].fallbackUrl)} controls style={{ width: "100%" }} />
                 )}
               </div>
             )}

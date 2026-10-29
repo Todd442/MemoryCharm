@@ -27,6 +27,8 @@ export type UserCharmSummary = {
 export type ContentFile = {
   url: string;
   name: string;
+  /** Azure SAS URL to use if `url` (R2) fails to load. */
+  fallbackUrl?: string;
 };
 
 export type UserCharmDetail = {

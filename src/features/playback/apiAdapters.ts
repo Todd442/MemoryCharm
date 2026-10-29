@@ -4,7 +4,7 @@ import type { EntryResponse, PlaybackUrlResponse, MemoryType, ContentFile } from
 export type CharmStatusApiResponse = {
   status: string;
   code: string;
-  files?: { url: string; name: string }[];
+  files?: { url: string; name: string; fallbackUrl?: string }[];
   memoryType?: string;
   expiresIn?: number;
   authMode?: string;
@@ -36,7 +36,7 @@ export function normalizeApiResponse(raw: Record<string, unknown>): CharmStatusA
   // Normalize nested file objects (PascalCase → camelCase)
   if (Array.isArray(base.files)) {
     base.files = base.files.map((f: Record<string, unknown>) =>
-      camelKeys(f) as { url: string; name: string }
+      camelKeys(f) as { url: string; name: string; fallbackUrl?: string }
     );
   }
 
@@ -88,7 +88,7 @@ export function toEntryResponse(
 
   if (api.status === "ready") {
     const files: ContentFile[] | undefined = api.files?.length
-      ? api.files.map(f => ({ url: f.url, name: f.name }))
+      ? api.files.map(f => ({ url: f.url, name: f.name, fallbackUrl: f.fallbackUrl ?? undefined }))
       : undefined;
     return {
       kind: "claimed",
@@ -117,6 +117,7 @@ export function toPlaybackUrls(
   const files: ContentFile[] = api.files.map((f) => ({
     url: f.url,
     name: f.name,
+    fallbackUrl: f.fallbackUrl ?? undefined,
   }));
 
   return {
