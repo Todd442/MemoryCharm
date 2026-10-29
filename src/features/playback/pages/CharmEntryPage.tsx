@@ -45,6 +45,14 @@ export function CharmEntryPage() {
   const [ui, setUi] = useState<UiState>({ s: "loading", detail: "Starting…" });
   const [playback, setPlayback] = useState<PlaybackState>(null);
 
+  useEffect(() => {
+    if (playback) track("playback_shown", { memory_type: playback.type, file_count: playback.files.length });
+  }, [playback]);
+
+  useEffect(() => {
+    if (ui.s === "error") track("charm_entry_error", { message: ui.message });
+  }, [ui]);
+
   // Glyph UI state
   const [glyphBusy, setGlyphBusy] = useState(false);
   const [attemptsLeft, setAttemptsLeft] = useState<number>(3);
@@ -62,7 +70,8 @@ export function CharmEntryPage() {
 
         setUi({ s: "loading", detail: "Checking charm…" });
 
-        track("charm_tap_received", { source: token ? "nfc" : "url", charm_code: code });
+        // No charm code: it acts as an access key, so it never leaves the browser
+        track("charm_tap_received", { source: token ? "nfc" : "url" });
 
         let entry: EntryResponse | null = null;
 
@@ -374,6 +383,7 @@ function VideoPlayer({ url, fallbackUrl, code, isOwner }: { url: string; fallbac
   const handleError = (e: SyntheticEvent<HTMLVideoElement>) => {
     // Primary (R2) failed — retry from Azure before showing the error overlay
     if (tryFallback(e.currentTarget, fallbackUrl)) return;
+    track("media_load_failed", { element: "video" });
     cycleActive.current = false;
     clearAll();
     setLoading(false);

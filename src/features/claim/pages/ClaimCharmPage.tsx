@@ -5,6 +5,7 @@ import { InteractionStatus } from "@azure/msal-browser";
 
 import { claimCharm, configureCharm, uploadCharm, getUserMe, saveProfile } from "../api";
 import type { UserProfile } from "../api";
+import { track } from "../../../lib/analytics";
 import { acceptTerms, CURRENT_TERMS_VERSION, cacheUlaLocally } from "../../../app/api/profileApi";
 import { UlaContent } from "../../legal/components/UlaContent";
 import { getUserCharms, getCharmDetail } from "../../account/api";
@@ -191,6 +192,11 @@ export function ClaimCharmPage() {
   const emailish = useMemo(() => me?.username ?? "", [me]);
 
   const [step, setStep] = useState<Step>("welcome");
+
+  // Claim is a single-URL wizard, so pageviews alone can't show where users drop off
+  useEffect(() => {
+    if (step !== "loading") track("claim_step_viewed", { step });
+  }, [step]);
   // needsProfile / needsUla: pessimistic defaults so pre-auth step count is accurate for new users.
   // Both are updated after the post-auth API call completes.
   const [needsProfile, setNeedsProfile] = useState(true);
@@ -520,6 +526,7 @@ export function ClaimCharmPage() {
 
     setBusy(true);
     setUploadPct(0);
+    let phase: "claim" | "configure" | "upload" = "claim";
     try {
       if (!claimed) {
         setSealPhase("claim");
@@ -527,6 +534,7 @@ export function ClaimCharmPage() {
         setClaimed({ charmId: c.charmId });
       }
 
+      phase = "configure";
       setSealPhase("configure");
       await configureCharm(
         code, memoryType, authMode, selectedGlyph ?? undefined,
@@ -535,6 +543,7 @@ export function ClaimCharmPage() {
       );
 
       if (needsUpload) {
+        phase = "upload";
         setSealPhase("upload");
         await uploadCharm(code, files, files[0].type, setUploadPct);
         lastUploadedRef.current = filesKey;
@@ -542,8 +551,10 @@ export function ClaimCharmPage() {
 
       advanceTo("done");
       if (code) sessionStorage.setItem(`mc.sealed.${code}`, "true");
+      track("charm_sealed", { memory_type: memoryType, file_count: files.length, auth_mode: authMode });
     } catch (e: any) {
       setErr(e?.message ?? "Seal failed.");
+      track("seal_failed", { phase, memory_type: memoryType, file_count: files.length, message: e?.message });
     } finally {
       setBusy(false);
       setSealPhase(null);

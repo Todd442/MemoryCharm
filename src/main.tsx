@@ -7,7 +7,9 @@ import { router } from "./app/routes";
 import { msalInstance } from "./app/auth/msalInstance";
 import { msalConfig } from "./app/auth/msalConfig";
 import { debugLog } from "./app/auth/debugLog";
-import { initAnalytics } from "./lib/analytics";
+import { initAnalytics, installEarlyErrorCapture, captureError } from "./lib/analytics";
+
+installEarlyErrorCapture();
 
 import "./styles/base.css";
 import "./styles/tokens.css";
@@ -146,9 +148,11 @@ if ('serviceWorker' in navigator) {
 }
 
 bootstrap()
-  .then(() => { (window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 0)))(initAnalytics); })
+  .then(() => { (window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 0)))(() => initAnalytics()); })
   .catch((err) => {
   console.error("MSAL bootstrap failed", err);
+  captureError(err, { source: "bootstrap" });
+  void initAnalytics();
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <div style={{ padding: 24 }}>
       <h2>Startup error</h2>

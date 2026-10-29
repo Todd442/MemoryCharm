@@ -7,6 +7,7 @@ import { getCharmDetail, updateGlyph, uploadCharm, updateCharmMeta, factoryReset
 import { inspectVideoFile } from "../../playback/utils/codecDetection";
 import { configureCharm } from "../../claim/api";
 import type { UserCharmDetail } from "../api";
+import { track } from "../../../lib/analytics";
 import { ALL_GLYPHS } from "../../../app/data/glyphs";
 import { useStatus } from "../../../app/providers/StatusProvider";
 import { useCharmNav } from "../../../app/providers/CharmNavProvider";
@@ -269,6 +270,7 @@ export function CharmDetailPage() {
         setErr("This memory has settled and can no longer be changed.");
       } else {
         setErr(e?.message ?? "Upload failed.");
+        track("content_update_failed", { memory_type: editMemoryType, file_count: files.length, message: e?.message });
       }
     } finally {
       setBusy(false);
