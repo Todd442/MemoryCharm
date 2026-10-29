@@ -7,6 +7,7 @@ import { MemoryGallery } from "../components/MemoryGallery";
 import { FullscreenButton } from "../components/FullscreenButton";
 import { ReportIssueDialog } from "../components/ReportIssueDialog";
 import { usePwaInstall } from "../../../app/hooks/usePwaInstall";
+import { track } from "../../../lib/analytics";
 import "../../claim/pages/ClaimCharmPage.css"; // shared .tePill styles
 
 type UiState =
@@ -59,6 +60,8 @@ export function CharmEntryPage() {
         setAttemptsLeft(3);
 
         setUi({ s: "loading", detail: "Checking charm…" });
+
+        track("charm_tap_received", { source: token ? "nfc" : "url", charm_code: code });
 
         let entry: EntryResponse | null = null;
 

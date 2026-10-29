@@ -7,6 +7,7 @@ import { router } from "./app/routes";
 import { msalInstance } from "./app/auth/msalInstance";
 import { msalConfig } from "./app/auth/msalConfig";
 import { debugLog } from "./app/auth/debugLog";
+import { initAnalytics } from "./lib/analytics";
 
 import "./styles/base.css";
 import "./styles/tokens.css";
@@ -144,7 +145,9 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-bootstrap().catch((err) => {
+bootstrap()
+  .then(() => { (window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 0)))(initAnalytics); })
+  .catch((err) => {
   console.error("MSAL bootstrap failed", err);
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <div style={{ padding: 24 }}>
